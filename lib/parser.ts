@@ -50,6 +50,7 @@ export function parseScrapedData(placeData: any) {
   // and dramatically reduce LLM token costs.
   const reviews = (placeData.reviews || [])
     .filter((r: any) => r.text && r.text.trim().length > 0) // Only keep reviews with text
+    .filter((r: any) => !r.stars || r.stars >= 4) // Drop all reviews 3 stars or lower
     .map((review: any) => ({
       name: review.name,
       stars: review.stars,

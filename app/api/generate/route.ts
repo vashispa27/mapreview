@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createPreview } from "@/lib/preview-store"
 import { parseScrapedData } from "@/lib/parser"
-import { analyzeReviewsJTBD } from "@/lib/llm"
+import { generateBusinessContent } from "@/lib/ai"
 import { BusinessData } from "@/lib/mock-data"
 import sampleData from "../../../sample_scraped_data.json"
 
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Parser & LLM
     const parsedData = parseScrapedData(place);
-    const jtbdAnalysis = await analyzeReviewsJTBD(parsedData.reviews);
+    const aiData = await generateBusinessContent(parsedData);
 
     // 3. Adapter Layer (Map to V3 BusinessData schema)
     const businessData: BusinessData = {
@@ -83,20 +83,28 @@ export async function POST(request: NextRequest) {
         parsedData.businessInfo.openingHours.map((h: any) => ({ day: h.day, hours: h.hours })) : [],
       photos: parsedData.photos.map((p: string) => ({ url: p, caption: "Gallery Image" })),
       availablePhotos: parsedData.availablePhotos.map((p: string) => ({ url: p, caption: "Gallery Image" })),
-      reviews: parsedData.reviews.map((r: any) => ({
-        author: r.name,
-        avatar: `https://i.pravatar.cc/150?u=${r.name.replace(/\\s/g, '')}`,
-        rating: r.rating || r.stars || 5, // fallback
-        date: r.publishedAtDate || "Recent",
-        text: r.text
-      })),
-      description: jtbdAnalysis.overallVibe || "A highly rated business on Google Maps.",
-      features: jtbdAnalysis.jobsToBeDone ? jtbdAnalysis.jobsToBeDone.map((j: string | any) => typeof j === 'string' ? j : j.job) : [],
+      reviews: parsedData.reviews.map((r: any, idx: number) => {
+        let jtbd = "A great experience waiting for you"
+        if (aiData?.reviews) {
+          const match = aiData.reviews.find((aiRev: any) => aiRev.originalIndex === idx)
+          if (match && match.jtbdHeader) jtbd = match.jtbdHeader
+        }
+        return {
+          author: r.name,
+          avatar: `https://i.pravatar.cc/150?u=${r.name.replace(/\s/g, '')}`,
+          rating: r.rating || r.stars || 5, // fallback
+          date: r.publishedAtDate || "Recent",
+          text: r.text,
+          jtbdHeader: jtbd
+        }
+      }),
+      description: aiData?.description || (parsedData.businessInfo as any).description || "A highly rated business on Google Maps.",
+      features: aiData?.features || ["Quality Service", "Great Atmosphere", "Friendly Staff", "Comfortable Settings"],
       priceLevel: "$$",
     };
 
     // Cast and append AI analysis to be used freely in site customizer UI
-    (businessData as any).analysis = jtbdAnalysis;
+    (businessData as any).analysis = aiData;
 
     // 4. Create a preview session in memory
     const previewId = createPreview(businessData)

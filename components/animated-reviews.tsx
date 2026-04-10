@@ -93,7 +93,7 @@ export function AnimatedReviews({
               >
                 <div className="flex flex-col h-full">
                   <h3 className="font-bold text-lg md:text-xl mb-4 leading-tight">
-                    "Find the best experience for your family"
+                    {review.jtbdHeader || `"A great experience waiting for you"`}
                   </h3>
                   <p
                     className={cn("line-clamp-4 flex-1 mb-6", layout === "minimal" ? "text-sm" : "")}

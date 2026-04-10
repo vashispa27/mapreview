@@ -26,7 +26,8 @@ export interface BusinessData {
   availablePhotos: SitePhoto[]
   reviews: {
     author: string
-    avatar: string
+    avatar?: string
+    jtbdHeader?: string
     rating: number
     date: string
     text: string
