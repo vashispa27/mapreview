@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MapPin, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useSession, signIn, signOut } from "next-auth/react"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 const navLinks = [
   { name: "Features", href: "#features" },
@@ -11,8 +13,8 @@ const navLinks = [
   { name: "Examples", href: "#examples" },
   { name: "Pricing", href: "#pricing" },
 ]
-
 export function Navbar() {
+  const { data: session, status } = useSession()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -62,14 +64,43 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* CTA Buttons */}
-          <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
-              Log in
-            </Button>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              Get Started
-            </Button>
+          {/* User Section */}
+          <div className="hidden md:flex items-center gap-4">
+            {status === "loading" ? (
+              <div className="w-8 h-8 rounded-full bg-slate-200 animate-pulse" />
+            ) : session ? (
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-medium">{session.user?.name}</span>
+                  <button 
+                    onClick={() => signOut()}
+                    className="text-[10px] text-muted-foreground hover:text-destructive transition-colors uppercase tracking-wider font-bold"
+                  >
+                    Logout
+                  </button>
+                </div>
+                <Avatar className="w-9 h-9 border-2 border-primary/20">
+                  <AvatarImage src={session.user?.image || ""} />
+                  <AvatarFallback>{session.user?.name?.[0]}</AvatarFallback>
+                </Avatar>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => signIn("google")}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Log in
+                </Button>
+                <Button 
+                  onClick={() => signIn("google")}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  Get Started
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Mobile menu button */}

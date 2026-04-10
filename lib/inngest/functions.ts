@@ -1,16 +1,38 @@
 import { inngest } from "./client"
-import { updateJob } from "@/lib/job-store"
+import { updateJob, getJob } from "@/lib/job-store"
 import { createPreview } from "@/lib/preview-store"
 import { parseScrapedData } from "@/lib/parser"
 import { generateBusinessContent } from "@/lib/ai"
 import { BusinessData } from "@/lib/mock-data"
+import { db } from "@/lib/db"
 import sampleData from "../../sample_scraped_data.json"
 
 export const generateSiteJob = inngest.createFunction(
   {
     id: "generate-business-site",
     retries: 3,
-    triggers: [{ event: "app/generate.site" }]
+    triggers: [{ event: "app/generate.site" }],
+    // FAILURE HANDLER: This runs only after all 3 retries are exhausted.
+    onFailure: async ({ event, error }) => {
+      const jobId = event.data.event.data.jobId
+      console.error(`❌ [${jobId}] INNGEST JOB FAILED PERMANENTLY:`, error)
+      
+      // 1. Update in-memory jobStore for immediate UI polling
+      updateJob(jobId, { 
+        status: "FAILED", 
+        errorMessage: "Generation failed after multiple attempts. Please try again later." 
+      })
+
+      // 2. Update Prisma Database for persistence
+      try {
+        await db.site.update({
+          where: { id: jobId },
+          data: { status: "FAILED" }
+        })
+      } catch (e) {
+        console.error("Failed to update database on failure:", e)
+      }
+    }
   },
   async ({ event, step }) => {
     const { url, jobId } = event.data
@@ -21,7 +43,10 @@ export const generateSiteJob = inngest.createFunction(
     // Step 1: Scrape Google Maps via Apify (retryable — network errors)
     const apifyData = await step.run("scrape-google-maps", async () => {
       console.log(`\n▶️ [${jobId}] Step 1: Triggering Scraping Engine...`)
+      
+      // Update DB and Memory status
       updateJob(jobId, { status: "SCRAPING_APIFY" })
+      await db.site.update({ where: { id: jobId }, data: { status: "SCRAPING_APIFY" } })
 
       const USE_MOCK_APIFY = process.env.USE_MOCK_APIFY === 'true'
       if (USE_MOCK_APIFY) {
@@ -61,6 +86,7 @@ export const generateSiteJob = inngest.createFunction(
       parsedData = parseScrapedData(place)
     } catch (err) {
       updateJob(jobId, { status: "FAILED", errorMessage: "error occured in analysing your buisness, please contact the developer" })
+      await db.site.update({ where: { id: jobId }, data: { status: "FAILED" } })
       console.error(`\n❌ [${jobId}] Fatal Parser Error — stopping retries.`, err)
       return { success: false }
     }
@@ -74,6 +100,7 @@ export const generateSiteJob = inngest.createFunction(
     // Step 2: Save intermediate checkpoint (so Gemini retry doesn't re-scrape)
     await step.run("checkpoint-intermediate-state", async () => {
       updateJob(jobId, { status: "ANALYZING_GEMINI", intermediateData: parsedData })
+      await db.site.update({ where: { id: jobId }, data: { status: "ANALYZING_GEMINI" } })
       console.log(`\n▶️ [${jobId}] Step 2: Intermediate Checkpoint saved`)
     })
 
@@ -135,12 +162,14 @@ export const generateSiteJob = inngest.createFunction(
 
         createPreview(businessData, undefined, jobId)
         updateJob(jobId, { status: "COMPLETED" })
+        await db.site.update({ where: { id: jobId }, data: { status: "COMPLETED" } })
 
         const endTime = new Date().toISOString()
         console.log(`\n\n🏁 [${endTime}] INNGEST JOB COMPLETED SUCCESSFULLY! (${jobId})`)
       } catch (err) {
         // Catch logical errors — don't retry, just inform the user
         updateJob(jobId, { status: "FAILED", errorMessage: "error occured in analysing your buisness, please contact the developer" })
+        await db.site.update({ where: { id: jobId }, data: { status: "FAILED" } })
         console.error(`\n❌ [${jobId}] Fatal Mapping Error (no retry):`, err)
       }
     })

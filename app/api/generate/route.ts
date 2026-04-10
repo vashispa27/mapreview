@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createJob } from "@/lib/job-store"
 import { inngest } from "@/lib/inngest/client"
+import { auth } from "@/lib/auth"
+import { db } from "@/lib/db"
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+    }
+
     const { url } = await request.json()
 
     if (!url || typeof url !== "string") {
@@ -14,8 +21,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Please provide a valid Google Maps URL" }, { status: 400 })
     }
 
+    // Usage limit check (Max 3 sites)
+    const siteCount = await db.site.count({
+      where: { userId: session.user.id }
+    })
+
+    if (siteCount >= 3) {
+      return NextResponse.json({ 
+        error: "Usage limit reached. You can only generate up to 3 websites with a free account." 
+      }, { status: 403 })
+    }
+
     // Connect Memory Dictionary safely locking local variables immediately 
     const jobId = createJob(url)
+
+    // Log the site creation in the database
+    await db.site.create({
+      data: {
+        id: jobId,
+        userId: session.user.id,
+        url: url,
+        status: "QUEUED"
+      }
+    })
 
     // Execute absolute Decoupling triggering Serverless Event Webhooks via Message Brokers completely reliably.
     await inngest.send({
