@@ -1,38 +1,51 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ArrowRight, Sparkles, MapPin } from "lucide-react"
+import { ArrowRight, Sparkles, MapPin, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Mascot } from "@/components/mascot"
 import { WebsitePreviewCard } from "@/components/showcase-cards"
 
 export function HeroSection() {
+  const router = useRouter()
   const [url, setUrl] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleGenerate = async () => {
-    if (!url) return;
-    setLoading(true);
-    
-    try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
-      });
-      
-      const data = await response.json();
-      setResult(data);
-    } catch (e) {
-      console.error(e);
-      alert("Failed to generate. Check console.");
-    } finally {
-      setLoading(false);
+    if (!url.trim()) {
+      setError("Please enter a Google Maps URL")
+      return
     }
-  };
+
+    setError("")
+    setIsLoading(true)
+
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || "Failed to generate site")
+        return
+      }
+
+      // Redirect to preview page
+      router.push(`/preview/${data.previewId}`)
+    } catch (err) {
+      setError("Something went wrong. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4 py-20 overflow-hidden">
@@ -107,50 +120,72 @@ export function HeroSection() {
                   type="url"
                   placeholder="Paste your Google Maps URL..."
                   value={url}
-                  onChange={(e) => setUrl(e.target.value)}
+                  onChange={(e) => {
+                    setUrl(e.target.value)
+                    setError("")
+                  }}
+                  onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
                   className="pl-12 h-14 text-base bg-card border-border shadow-sm"
+                  disabled={isLoading}
                 />
               </div>
-              <Button 
-                onClick={handleGenerate}
-                disabled={loading || !url}
-                size="lg" 
+              <Button
+                size="lg"
                 className="h-14 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg shadow-primary/25"
+                onClick={handleGenerate}
+                disabled={isLoading}
               >
-                {loading ? "Generating Magic..." : "Generate Site"}
-                <ArrowRight className="ml-2 w-5 h-5" />
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    Generate Site
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </>
+                )}
               </Button>
             </motion.div>
 
-            {/* Trust badges & Results */}
+            {/* Error message */}
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-destructive text-sm mt-2 max-w-xl mx-auto lg:mx-0"
+              >
+                {error}
+              </motion.p>
+            )}
+
+            {/* Trust badges */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7 }}
-              className="mt-8 flex flex-col items-center justify-center lg:items-start gap-4"
+              className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-muted-foreground"
             >
-              {result && (
-                <div className="w-full max-w-xl mx-auto lg:mx-0 p-6 rounded-2xl bg-card border shadow-lg overflow-x-auto text-left">
-                   <h3 className="text-xl font-bold mb-4 text-emerald-500">🎉 Data Parsed & AI Validated!</h3>
-                   <pre className="text-xs text-muted-foreground">{JSON.stringify(result, null, 2)}</pre>
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 border-2 border-background"
+                    />
+                  ))}
                 </div>
-              )}
-              
-              {!result && (
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-muted-foreground w-full">
-                  <div className="flex items-center gap-2">
-                    <div className="flex -space-x-2">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div
-                          key={i}
-                          className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 border-2 border-background"
-                        />
-                      ))}
-                    </div>
-                    <span>2,400+ websites created flexibly with our API</span>
-                  </div>
-                </div>
-              )}
+                <span>2,400+ websites created</span>
+              </div>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <svg key={i} className="w-4 h-4 text-amber-500 fill-current" viewBox="0 0 20 20">
+                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                  </svg>
+                ))}
+                <span className="ml-1">4.9/5 rating</span>
+              </div>
             </motion.div>
           </motion.div>
 
