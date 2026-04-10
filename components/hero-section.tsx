@@ -38,8 +38,8 @@ export function HeroSection() {
         return
       }
 
-      // Redirect to preview page
-      router.push(`/preview/${data.previewId}`)
+      // Redirect onto backend polling queue mapping
+      router.push(`/preview/${data.jobId}`)
     } catch (err) {
       setError("Something went wrong. Please try again.")
     } finally {

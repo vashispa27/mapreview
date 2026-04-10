@@ -24,36 +24,51 @@ export default function PreviewPage({ params }: PreviewPageProps) {
     animations: true,
   })
   const [isPublishing, setIsPublishing] = useState(false)
+  
+  // Track queue statuses exclusively
+  const [jobStatus, setJobStatus] = useState<string>("QUEUED")
 
   useEffect(() => {
-    const fetchPreview = async () => {
+    let timeoutId: NodeJS.Timeout
+
+    const fetchPreviewStatus = async () => {
       try {
         const res = await fetch(`/api/preview/${id}`)
-        if (!res.ok) {
-          if (res.status === 404) {
-            setError("Preview not found. It may have expired.")
-          } else {
-            setError("Failed to load preview")
-          }
+        if (res.status === 404) {
+          setError("Site Queue identifier undefined or explicitly expired remotely")
+          setJobStatus("FAILED")
+          setLoading(false)
           return
         }
+        
         const data = await res.json()
-        setBusiness(data.business)
-        // Merge with defaults in case server data is missing new fields
-        setConfig({
-          colorScheme: data.config?.colorScheme || colorSchemes[0],
-          layout: data.config?.layout || "modern",
-          fontStyle: data.config?.fontStyle || "sans",
-          animations: data.config?.animations ?? true,
-        })
+        setJobStatus(data.status)
+        
+        if (data.status === "COMPLETED") {
+          setBusiness(data.business)
+          setConfig({
+            colorScheme: data.config?.colorScheme || colorSchemes[0],
+            layout: data.config?.layout || "modern",
+            fontStyle: data.config?.fontStyle || "sans",
+            animations: data.config?.animations ?? true,
+          })
+          setLoading(false)
+        } else if (data.status === "FAILED") {
+          setError(data.errorMessage || "Application compiler encountered systemic rejection securely")
+          setLoading(false)
+        } else {
+          // Continuous Loop tracking securely checking isolated states
+          timeoutId = setTimeout(fetchPreviewStatus, 2000)
+        }
       } catch (err) {
-        setError("Failed to load preview")
-      } finally {
+        setError("Network boundary disconnected temporarily checking remote status")
+        setJobStatus("FAILED")
         setLoading(false)
       }
     }
 
-    fetchPreview()
+    fetchPreviewStatus()
+    return () => clearTimeout(timeoutId)
   }, [id])
 
   const handleConfigChange = async (newConfig: SiteConfig) => {
@@ -98,23 +113,50 @@ export default function PreviewPage({ params }: PreviewPageProps) {
 
   const handlePublish = async () => {
     setIsPublishing(true)
-    // Simulate publishing delay (in real app, this would save to blob storage)
     await new Promise((resolve) => setTimeout(resolve, 2000))
-    // For now, just redirect to a "published" page
     router.push(`/site/${id}?published=true`)
   }
 
-  if (loading) {
+  // Purely Abstracted Loading Layout hiding exact API mechanical limitations
+  if (jobStatus !== "COMPLETED" && jobStatus !== "FAILED") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your preview...</p>
+      <div className="min-h-screen bg-background relative flex items-center justify-center p-8">
+        <div className="max-w-4xl w-full mx-auto space-y-12 animate-pulse opacity-50">
+          <div className="h-[400px] w-full bg-slate-200 dark:bg-slate-800 rounded-xl" />
+          <div className="space-y-4 max-w-2xl">
+            <div className="h-10 w-3/4 bg-slate-200 dark:bg-slate-800 rounded-md" />
+            <div className="h-4 w-full bg-slate-200 dark:bg-slate-800 rounded-md" />
+            <div className="h-4 w-5/6 bg-slate-200 dark:bg-slate-800 rounded-md" />
+            <div className="h-4 w-4/6 bg-slate-200 dark:bg-slate-800 rounded-md" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="h-[160px] bg-slate-200 dark:bg-slate-800 rounded-xl" />
+            <div className="h-[160px] bg-slate-200 dark:bg-slate-800 rounded-xl" />
+            <div className="h-[160px] bg-slate-200 dark:bg-slate-800 rounded-xl" />
+            <div className="h-[160px] bg-slate-200 dark:bg-slate-800 rounded-xl" />
+          </div>
+        </div>
+
+        {/* Ticker Center */}
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-900 border shadow-2xl rounded-2xl p-8 max-w-md w-full text-center z-50">
+          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-6" />
+          <h2 className="text-2xl font-bold mb-2">Building your page...</h2>
+          <p className="text-muted-foreground font-medium text-lg">
+            This usually takes a few seconds.
+          </p>
+          <div className="mt-6 h-2 w-full bg-slate-100 rounded-full overflow-hidden relative">
+            <div className="absolute inset-0 bg-primary/20 animate-pulse" />
+            <div 
+              className="h-full bg-primary transition-all duration-[3000ms] ease-out"
+              style={{ width: jobStatus === 'SCRAPING_APIFY' ? '40%' : jobStatus === 'ANALYZING_GEMINI' ? '80%' : '15%' }}
+            />
+           </div>
         </div>
       </div>
     )
   }
 
+  // Standard Failure
   if (error || !business) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -122,15 +164,15 @@ export default function PreviewPage({ params }: PreviewPageProps) {
           <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
             <span className="text-2xl">!</span>
           </div>
-          <h1 className="text-xl font-bold mb-2">Preview Not Found</h1>
+          <h1 className="text-xl font-bold mb-2">Build Process Rejections</h1>
           <p className="text-muted-foreground mb-6">
-            {error || "This preview may have expired or does not exist."}
+            {error || "Compilation architecture disconnected temporarily"}
           </p>
           <button
             onClick={() => router.push("/")}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition"
           >
-            Create New Site
+            Return System Securely
           </button>
         </div>
       </div>
@@ -139,7 +181,6 @@ export default function PreviewPage({ params }: PreviewPageProps) {
 
   return (
     <div className="relative">
-      {/* Site Preview */}
       <div className="pr-0 md:pr-[360px] transition-all duration-300">
         <SiteTemplate
           business={business}
@@ -149,7 +190,6 @@ export default function PreviewPage({ params }: PreviewPageProps) {
         />
       </div>
 
-      {/* Customization Sidebar */}
       <PreviewCustomizer
         business={business}
         config={config}

@@ -14,12 +14,12 @@ if (process.env.NODE_ENV !== 'production') {
   (globalThis as any).previewStore = previewStore
 }
 
-export function createPreview(business: BusinessData): string {
-  const previewId = business.id + "_" + Date.now().toString(36)
+export function createPreview(business: BusinessData, config?: SiteConfig, forceId?: string): string {
+  const previewId = forceId || business.id + "_" + Date.now().toString(36)
 
   previewStore.set(previewId, {
     business,
-    config: {
+    config: config || {
       colorScheme: colorSchemes[0],
       layout: "modern",
       fontStyle: "sans",
@@ -27,7 +27,6 @@ export function createPreview(business: BusinessData): string {
     },
     createdAt: new Date(),
   })
-
   return previewId
 }
 
