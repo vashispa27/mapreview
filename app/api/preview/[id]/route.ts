@@ -48,6 +48,23 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     updatePreviewConfig(id, { animations: body.animations })
   }
 
+  // Update business photos if provided
+  if (body.photos) {
+    preview.business.photos = body.photos;
+  }
+  
+  if (body.heroImage) {
+    preview.business.heroImage = body.heroImage;
+  }
+  
+  if (body.description) {
+    preview.business.description = body.description;
+  }
+  
+  if (body.features) {
+    preview.business.features = body.features;
+  }
+
   const updated = getPreview(id)
   return NextResponse.json({
     business: updated?.business,

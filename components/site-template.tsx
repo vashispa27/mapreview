@@ -1,15 +1,26 @@
 "use client"
 
 import { BusinessData, SiteConfig } from "@/lib/mock-data"
-import { Star, MapPin, Phone, Clock, Globe, Check, ChevronRight } from "lucide-react"
-import Image from "next/image"
+import { Star, MapPin, Phone, Clock, Globe, Check, ChevronRight, X, Instagram, Facebook, Twitter } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, HTMLMotionProps } from "framer-motion"
+import { PhotoManagerModal } from "./photo-manager-modal"
+import { HeroBackgroundModal } from "./hero-background-modal"
+import { AnimatedReviews } from "./animated-reviews"
+import { InlineTextArea, InlineInput } from "./inline-editor"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 interface SiteTemplateProps {
   business: BusinessData
   config: SiteConfig
   isPreview?: boolean
+  onBusinessChange?: (business: BusinessData) => void
 }
 
 // Animation wrapper that respects the animations toggle
@@ -33,9 +44,34 @@ function AnimatedDiv({
   )
 }
 
-export function SiteTemplate({ business, config, isPreview = false }: SiteTemplateProps) {
+export function SiteTemplate({ business, config, isPreview = false, onBusinessChange }: SiteTemplateProps) {
   const { colorScheme, layout, fontStyle, animations } = config
   const isDark = colorScheme.id === "midnight"
+
+  const handleRemovePhoto = (indexToRemove: number) => {
+    if (onBusinessChange) {
+      const newPhotos = business.photos.filter((_, i) => i !== indexToRemove)
+      onBusinessChange({ ...business, photos: newPhotos })
+    }
+  }
+
+  const handleUpdatePhotos = (newPhotos: any[]) => {
+    if (onBusinessChange) {
+      onBusinessChange({ ...business, photos: newPhotos })
+    }
+  }
+
+  const handleUpdateDescription = (val: string) => {
+    if (onBusinessChange) onBusinessChange({ ...business, description: val })
+  }
+
+  const handleUpdateFeature = (index: number, val: string) => {
+    if (onBusinessChange) {
+      const newFeatures = [...business.features]
+      newFeatures[index] = val
+      onBusinessChange({ ...business, features: newFeatures })
+    }
+  }
 
   const fontClass = {
     sans: "font-sans",
@@ -67,20 +103,20 @@ export function SiteTemplate({ business, config, isPreview = false }: SiteTempla
 
   const fadeInUp = animations
     ? {
-        initial: { opacity: 0, y: 30 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true, margin: "-50px" },
-        transition: { duration: 0.5 },
-      }
+      initial: { opacity: 0, y: 30 },
+      whileInView: { opacity: 1, y: 0 },
+      viewport: { once: true, margin: "-50px" },
+      transition: { duration: 0.5 },
+    }
     : {}
 
   const staggerChildren = animations
     ? {
-        initial: { opacity: 0 },
-        whileInView: { opacity: 1 },
-        viewport: { once: true },
-        transition: { staggerChildren: 0.1 },
-      }
+      initial: { opacity: 0 },
+      whileInView: { opacity: 1 },
+      viewport: { once: true },
+      transition: { staggerChildren: 0.1 },
+    }
     : {}
 
   return (
@@ -93,16 +129,23 @@ export function SiteTemplate({ business, config, isPreview = false }: SiteTempla
     >
       {/* Hero Section */}
       <header className={cn("relative overflow-hidden", layoutStyles.heroHeight)}>
-        <Image
-          src={business.photos[0]?.url || "/placeholder.jpg"}
+        {isPreview && onBusinessChange && (
+          <div className="absolute top-6 right-6 z-20">
+            <HeroBackgroundModal
+              currentHero={business.heroImage || business.photos[0]?.url || ""}
+              photos={business.photos}
+              availablePhotos={business.availablePhotos}
+              onChange={(url) => onBusinessChange({ ...business, heroImage: url })}
+            />
+          </div>
+        )}
+        <img
+          src={business.heroImage || business.photos[0]?.url || "/placeholder.jpg"}
           alt={business.name}
-          fill
           className={cn(
-            "object-cover",
+            "w-full h-full object-cover",
             animations && "transition-transform duration-700 hover:scale-105"
           )}
-          crossOrigin="anonymous"
-          priority
         />
         <div
           className={cn(
@@ -220,15 +263,16 @@ export function SiteTemplate({ business, config, isPreview = false }: SiteTempla
           <h2 className={cn("font-bold mb-6", layoutStyles.headingSize)}>
             {layout === "minimal" ? "About" : "About Us"}
           </h2>
-          <p
+          <InlineTextArea
+            value={business.description}
+            onChange={handleUpdateDescription}
+            disabled={!isPreview || !onBusinessChange}
             className={cn(
               "leading-relaxed",
               layout === "modern" ? "text-lg" : "text-base"
             )}
             style={{ color: colorScheme.muted }}
-          >
-            {business.description}
-          </p>
+          />
         </AnimatedDiv>
 
         {/* Features */}
@@ -238,86 +282,199 @@ export function SiteTemplate({ business, config, isPreview = false }: SiteTempla
           </h2>
           <div
             className={cn(
-              "grid gap-3",
-              layout === "modern" && "grid-cols-2 md:grid-cols-4",
-              layout === "classic" && "grid-cols-2 md:grid-cols-3",
+              "grid gap-4",
+              layout === "modern" && "grid-cols-2 lg:grid-cols-4",
+              layout === "classic" && "grid-cols-2 lg:grid-cols-4",
               layout === "minimal" && "grid-cols-2"
             )}
           >
-            {business.features.map((feature, index) => (
-              <AnimatedDiv
-                key={feature}
-                animate={animations}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                className={cn(
-                  "flex items-center gap-3 p-4",
-                  layoutStyles.cardStyle,
-                  animations && "hover:shadow-md transition-shadow"
-                )}
-                style={{
-                  backgroundColor: isDark ? "#1e293b" : colorScheme.accent + "20",
-                }}
-              >
-                <Check className="w-5 h-5 shrink-0" style={{ color: colorScheme.primary }} />
-                <span className={cn(layout === "minimal" ? "text-sm" : "font-medium")}>{feature}</span>
-              </AnimatedDiv>
-            ))}
+            {[...(business.features || []), "Edit Feature...", "Edit Feature...", "Edit Feature...", "Edit Feature..."]
+              .slice(0, 4)
+              .map((feature, index) => (
+                <AnimatedDiv
+                  key={index}
+                  animate={animations}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  className={cn(
+                    "flex items-start gap-3 p-6 min-h-[160px]",
+                    layoutStyles.cardStyle,
+                    animations && "hover:shadow-md transition-shadow"
+                  )}
+                  style={{
+                    backgroundColor: isDark ? "#1e293b" : colorScheme.accent + "20",
+                  }}
+                >
+                  <Check className="w-6 h-6 shrink-0 mt-1" style={{ color: colorScheme.primary }} />
+                  <div className="flex-1">
+                    <InlineTextArea
+                      value={feature}
+                      rows={3}
+                      onChange={(v) => handleUpdateFeature(index, v)}
+                      disabled={!isPreview || !onBusinessChange}
+                      className={cn("leading-relaxed w-full", layout === "minimal" ? "text-base" : "text-lg font-medium")}
+                    />
+                  </div>
+                </AnimatedDiv>
+              ))}
           </div>
         </AnimatedDiv>
 
         {/* Photo Gallery */}
         <AnimatedDiv animate={animations} {...fadeInUp} className={layoutStyles.sectionGap}>
-          <h2 className={cn("font-bold mb-6", layoutStyles.headingSize)}>Gallery</h2>
-          <div
-            className={cn(
-              "grid gap-4",
-              layout === "modern" && "grid-cols-2 md:grid-cols-3",
-              layout === "classic" && "grid-cols-2 md:grid-cols-3",
-              layout === "minimal" && "grid-cols-2"
+          <div className="flex items-center gap-4 mb-6">
+            <h2 className={cn("font-bold", layoutStyles.headingSize)}>Gallery</h2>
+            {isPreview && onBusinessChange && (
+              <PhotoManagerModal
+                photos={business.photos}
+                availablePhotos={business.availablePhotos}
+                onChange={handleUpdatePhotos}
+              />
             )}
-          >
-            {business.photos.map((photo, index) => (
-              <AnimatedDiv
-                key={index}
-                animate={animations}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className={cn(
-                  "relative overflow-hidden group",
-                  layoutStyles.cardStyle,
-                  layout === "modern" && "aspect-[4/3]",
-                  layout === "classic" && "aspect-square",
-                  layout === "minimal" && "aspect-[3/2]"
-                )}
-              >
-                <Image
-                  src={photo.url}
-                  alt={photo.caption}
-                  fill
-                  className={cn(
-                    "object-cover",
-                    animations && "transition-transform duration-500 group-hover:scale-110"
-                  )}
-                  crossOrigin="anonymous"
-                />
-                {layout !== "minimal" && (
-                  <div
-                    className={cn(
-                      "absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4",
-                      animations ? "opacity-0 group-hover:opacity-100 transition-opacity" : "opacity-100"
-                    )}
-                  >
-                    <span className="text-white font-medium text-sm">{photo.caption}</span>
-                  </div>
-                )}
-              </AnimatedDiv>
-            ))}
           </div>
+          {business.photos.length > 0 ? (
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-4">
+                {business.photos.map((photo, index) => (
+                  <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/4">
+                    <AnimatedDiv
+                      animate={animations}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      className={cn(
+                        "relative overflow-hidden group",
+                        layoutStyles.cardStyle,
+                        layout === "modern" && "aspect-[4/3]",
+                        layout === "classic" && "aspect-square",
+                        layout === "minimal" && "aspect-[3/2]"
+                      )}
+                    >
+                      <img
+                        src={photo.url}
+                        alt={photo.caption}
+                        className={cn(
+                          "w-full h-full object-cover",
+                          animations && "transition-transform duration-500 group-hover:scale-110"
+                        )}
+                      />
+                      {layout !== "minimal" && (
+                        <div
+                          className={cn(
+                            "absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4",
+                            animations ? "opacity-0 group-hover:opacity-100 transition-opacity" : "opacity-100"
+                          )}
+                        >
+                          <span className="text-white font-medium text-sm truncate">{photo.caption}</span>
+                        </div>
+                      )}
+
+                      {/* Delete Overlay */}
+                      {isPreview && onBusinessChange && (
+                        <button
+                          onClick={() => handleRemovePhoto(index)}
+                          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm"
+                          title="Remove photo"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </AnimatedDiv>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="flex items-center justify-end gap-2 mt-6">
+                <CarouselPrevious className="static translate-y-0 relative border-2" />
+                <CarouselNext className="static translate-y-0 relative border-2" />
+              </div>
+            </Carousel>
+          ) : (
+            <p style={{ color: colorScheme.muted }} className="text-sm">No photos available.</p>
+          )}
+        </AnimatedDiv>
+
+        {/* Reviews */}
+        <AnimatedDiv animate={animations} {...fadeInUp} className={layoutStyles.sectionGap}>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className={cn("font-bold", layoutStyles.headingSize)}>
+              {layout === "minimal" ? "Reviews" : "Customer Reviews"}
+            </h2>
+            <div className="flex items-center gap-2">
+              <Star className="w-6 h-6" fill="#fbbf24" stroke="#fbbf24" />
+              <span className="text-2xl font-bold">{business.rating}</span>
+              <span style={{ color: colorScheme.muted }}>({business.totalReviews})</span>
+            </div>
+          </div>
+          {animations ? (
+            <AnimatedReviews
+              reviews={business.reviews}
+              colorScheme={colorScheme}
+              layoutStyles={layoutStyles}
+              isDark={isDark}
+              layout={layout}
+            />
+          ) : (
+            <div
+              className={cn(
+                "grid gap-6",
+                layout === "modern" && "md:grid-cols-2 lg:grid-cols-3",
+                layout === "classic" && "md:grid-cols-2 lg:grid-cols-3",
+                layout === "minimal" && "grid-cols-1"
+              )}
+            >
+              {business.reviews.slice(0, 6).map((review, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "p-6 h-full flex flex-col",
+                    layoutStyles.cardStyle
+                  )}
+                  style={{
+                    backgroundColor: isDark ? "#1e293b" : "#fff",
+                    boxShadow: isDark ? "none" : "0 4px 6px -1px rgba(0,0,0,0.1)",
+                  }}
+                >
+                  <h3 className="font-bold text-lg md:text-xl mb-4 leading-tight">
+                    "Find the best experience for your family"
+                  </h3>
+                  <p
+                    className={cn("line-clamp-4 flex-1 mb-6", layout === "minimal" ? "text-sm" : "")}
+                    style={{ color: colorScheme.muted }}
+                  >
+                    "{review.text}"
+                  </p>
+
+                  <div className="mt-auto pt-4 border-t flex items-center justify-between" style={{ borderColor: isDark ? "#334155" : "#e5e7eb" }}>
+                    <div>
+                      <h4 className="font-semibold leading-none mb-1.5">{review.author}</h4>
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="w-3.5 h-3.5"
+                            fill={i < review.rating ? "#fbbf24" : "transparent"}
+                            stroke={i < review.rating ? "#fbbf24" : "#d1d5db"}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <span className="text-xs font-medium" style={{ color: colorScheme.muted }}>
+                      {review.date}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </AnimatedDiv>
 
         {/* Hours */}
@@ -348,83 +505,6 @@ export function SiteTemplate({ business, config, isPreview = false }: SiteTempla
                 </div>
               ))}
             </div>
-          </div>
-        </AnimatedDiv>
-
-        {/* Reviews */}
-        <AnimatedDiv animate={animations} {...fadeInUp} className={layoutStyles.sectionGap}>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className={cn("font-bold", layoutStyles.headingSize)}>
-              {layout === "minimal" ? "Reviews" : "Customer Reviews"}
-            </h2>
-            <div className="flex items-center gap-2">
-              <Star className="w-6 h-6" fill="#fbbf24" stroke="#fbbf24" />
-              <span className="text-2xl font-bold">{business.rating}</span>
-              <span style={{ color: colorScheme.muted }}>({business.totalReviews})</span>
-            </div>
-          </div>
-          <div
-            className={cn(
-              "grid gap-6",
-              layout === "modern" && "md:grid-cols-2",
-              layout === "classic" && "md:grid-cols-2",
-              layout === "minimal" && "grid-cols-1"
-            )}
-          >
-            {business.reviews.map((review, index) => (
-              <AnimatedDiv
-                key={index}
-                animate={animations}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className={cn(
-                  "p-6",
-                  layoutStyles.cardStyle,
-                  animations && "hover:shadow-lg transition-shadow"
-                )}
-                style={{
-                  backgroundColor: isDark ? "#1e293b" : "#fff",
-                  boxShadow: isDark ? "none" : "0 4px 6px -1px rgba(0,0,0,0.1)",
-                }}
-              >
-                <div className="flex items-start gap-4">
-                  <Image
-                    src={review.avatar}
-                    alt={review.author}
-                    width={layout === "minimal" ? 40 : 48}
-                    height={layout === "minimal" ? 40 : 48}
-                    className="rounded-full"
-                    crossOrigin="anonymous"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-semibold">{review.author}</h4>
-                      <span className="text-sm" style={{ color: colorScheme.muted }}>
-                        {review.date}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 mb-3">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className="w-4 h-4"
-                          fill={i < review.rating ? "#fbbf24" : "transparent"}
-                          stroke={i < review.rating ? "#fbbf24" : "#d1d5db"}
-                        />
-                      ))}
-                    </div>
-                    <p
-                      className={layout === "minimal" ? "text-sm" : ""}
-                      style={{ color: colorScheme.muted }}
-                    >
-                      {review.text}
-                    </p>
-                  </div>
-                </div>
-              </AnimatedDiv>
-            ))}
           </div>
         </AnimatedDiv>
 
@@ -506,6 +586,28 @@ export function SiteTemplate({ business, config, isPreview = false }: SiteTempla
               {business.website.replace(/^https?:\/\//, "")}
             </a>
           )}
+
+          {/* Socials Integration */}
+          {business.socials && (
+            <div className="flex items-center justify-center gap-4 mt-6">
+              {business.socials.instagram && (
+                <a href={business.socials.instagram} target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-75" style={{ color: colorScheme.primary }}>
+                  <Instagram className="w-5 h-5" />
+                </a>
+              )}
+              {business.socials.facebook && (
+                <a href={business.socials.facebook} target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-75" style={{ color: colorScheme.primary }}>
+                  <Facebook className="w-5 h-5" />
+                </a>
+              )}
+              {business.socials.twitter && (
+                <a href={business.socials.twitter} target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-75" style={{ color: colorScheme.primary }}>
+                  <Twitter className="w-5 h-5" />
+                </a>
+              )}
+            </div>
+          )}
+
           {!isPreview && (
             <p className="mt-6 text-sm" style={{ color: colorScheme.muted }}>
               Website created with{" "}

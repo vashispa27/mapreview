@@ -1,7 +1,7 @@
 import { BusinessData, SiteConfig, colorSchemes } from "./mock-data"
 
-// In-memory store for preview data (will be replaced with proper storage later)
-const previewStore = new Map<
+// In-memory store for preview data (persist across HMR reloads)
+const previewStore = (globalThis as any).previewStore || new Map<
   string,
   {
     business: BusinessData
@@ -9,6 +9,10 @@ const previewStore = new Map<
     createdAt: Date
   }
 >()
+
+if (process.env.NODE_ENV !== 'production') {
+  (globalThis as any).previewStore = previewStore
+}
 
 export function createPreview(business: BusinessData): string {
   const previewId = business.id + "_" + Date.now().toString(36)

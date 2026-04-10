@@ -20,6 +20,10 @@ export function parseScrapedData(placeData: any) {
   // We use a Set to automatically prevent duplicate images
   const photos = new Set<string>();
   
+  if (placeData.imageUrl) {
+    photos.add(placeData.imageUrl);
+  }
+  
   // A. Grab high-quality promotional photos from the owner's Google Maps posts
   if (placeData.ownerUpdates && Array.isArray(placeData.ownerUpdates)) {
     placeData.ownerUpdates.forEach((update: any) => {
@@ -57,7 +61,8 @@ export function parseScrapedData(placeData: any) {
 
   return {
     businessInfo,
-    photos: Array.from(photos),
+    photos: Array.from(photos).slice(0, 4),
+    availablePhotos: Array.from(photos).slice(0, 15),
     reviews
   };
 }

@@ -1,3 +1,8 @@
+export interface SitePhoto {
+  url: string
+  caption: string
+}
+
 export interface BusinessData {
   id: string
   name: string
@@ -7,14 +12,18 @@ export interface BusinessData {
   address: string
   phone: string
   website?: string
+  heroImage?: string
+  socials?: {
+    instagram?: string
+    facebook?: string
+    twitter?: string
+  }
   hours: {
     day: string
     hours: string
   }[]
-  photos: {
-    url: string
-    caption: string
-  }[]
+  photos: SitePhoto[]
+  availablePhotos: SitePhoto[]
   reviews: {
     author: string
     avatar: string
@@ -164,9 +173,14 @@ export function generateMockBusinessData(url: string): BusinessData {
     totalReviews: 342,
     address: "123 Main Street, Downtown, CA 90210",
     phone: "(555) 123-4567",
-    website: "https://goldenspoonbistro.com",
+    website: "https://example.com/fresh-bites",
+    socials: {
+      instagram: "https://instagram.com",
+      facebook: "https://facebook.com"
+    },
+    heroImage: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80",
     hours: [
-      { day: "Monday", hours: "11:00 AM - 10:00 PM" },
+      { day: "Monday - Friday", hours: "11:00 AM - 10:00 PM" },
       { day: "Tuesday", hours: "11:00 AM - 10:00 PM" },
       { day: "Wednesday", hours: "11:00 AM - 10:00 PM" },
       { day: "Thursday", hours: "11:00 AM - 11:00 PM" },
@@ -200,6 +214,7 @@ export function generateMockBusinessData(url: string): BusinessData {
         caption: "Dessert Selection",
       },
     ],
+    availablePhotos: [],
     reviews: [
       {
         author: "Sarah M.",

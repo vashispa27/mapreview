@@ -20,6 +20,7 @@ interface PreviewCustomizerProps {
   business: BusinessData
   config: SiteConfig
   onConfigChange: (config: SiteConfig) => void
+  onBusinessChange?: (business: BusinessData) => void
   onPublish: () => void
   isPublishing?: boolean
 }
@@ -28,6 +29,7 @@ export function PreviewCustomizer({
   business,
   config,
   onConfigChange,
+  onBusinessChange,
   onPublish,
   isPublishing,
 }: PreviewCustomizerProps) {

@@ -76,6 +76,26 @@ export default function PreviewPage({ params }: PreviewPageProps) {
     }
   }
 
+  const handleBusinessChange = async (newBusiness: BusinessData) => {
+    setBusiness(newBusiness)
+
+    // Persist to server
+    try {
+      await fetch(`/api/preview/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          photos: newBusiness.photos,
+          heroImage: newBusiness.heroImage,
+          description: newBusiness.description,
+          features: newBusiness.features,
+        }),
+      })
+    } catch (err) {
+      console.error("Failed to save business logic:", err)
+    }
+  }
+
   const handlePublish = async () => {
     setIsPublishing(true)
     // Simulate publishing delay (in real app, this would save to blob storage)
@@ -125,6 +145,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
           business={business}
           config={config}
           isPreview
+          onBusinessChange={handleBusinessChange}
         />
       </div>
 
@@ -133,6 +154,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
         business={business}
         config={config}
         onConfigChange={handleConfigChange}
+        onBusinessChange={handleBusinessChange}
         onPublish={handlePublish}
         isPublishing={isPublishing}
       />
