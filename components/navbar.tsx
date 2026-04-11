@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { MapPin, Menu, X } from "lucide-react"
+import { MapPin, Menu, X, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSession, signIn, signOut } from "next-auth/react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -70,6 +70,13 @@ export function Navbar() {
               <div className="w-8 h-8 rounded-full bg-slate-200 animate-pulse" />
             ) : session ? (
               <div className="flex items-center gap-4">
+                <a 
+                  href="/account"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  My Sites
+                </a>
                 <div className="flex flex-col items-end">
                   <span className="text-sm font-medium">{session.user?.name}</span>
                   <button 
@@ -144,14 +151,28 @@ export function Navbar() {
                   transition={{ delay: 0.4 }}
                 >
                   {session ? (
-                    <Button 
-                      variant="outline" 
-                      size="lg" 
-                      className="w-full text-destructive border-destructive/20 hover:bg-destructive/10"
-                      onClick={() => signOut()}
-                    >
-                      Sign out
-                    </Button>
+                    <>
+                      <Button 
+                        variant="outline" 
+                        size="lg" 
+                        className="w-full"
+                        onClick={() => {
+                          setMobileMenuOpen(false)
+                          window.location.href = "/account"
+                        }}
+                      >
+                        <LayoutDashboard className="w-4 h-4 mr-2" />
+                        My Sites
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="lg" 
+                        className="w-full text-destructive border-destructive/20 hover:bg-destructive/10"
+                        onClick={() => signOut()}
+                      >
+                        Sign out
+                      </Button>
+                    </>
                   ) : (
                     <>
                       <Button 
