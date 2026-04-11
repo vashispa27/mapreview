@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react"
 import { useRouter } from "next/navigation"
-import { BusinessData, SiteConfig, colorSchemes } from "@/lib/mock-data"
+import { BusinessData, SiteConfig, colorSchemes, generateMockBusinessData } from "@/lib/mock-data"
 import { SiteTemplate } from "@/components/site-template"
 import { PreviewCustomizer } from "@/components/preview-customizer"
 import { Loader2 } from "lucide-react"
@@ -27,8 +27,26 @@ export default function PreviewPage({ params }: PreviewPageProps) {
   
   // Track queue statuses exclusively
   const [jobStatus, setJobStatus] = useState<string>("QUEUED")
+  
+  // Check if this is admin-demo mode
+  const isAdminDemo = id === "admin-demo"
 
   useEffect(() => {
+    // For admin-demo, skip API entirely and use mock data directly
+    if (isAdminDemo) {
+      const mockBusiness = generateMockBusinessData("admin-demo")
+      setBusiness(mockBusiness)
+      setConfig({
+        colorScheme: colorSchemes[0],
+        layout: "modern",
+        fontStyle: "sans",
+        animations: true,
+      })
+      setJobStatus("COMPLETED")
+      setLoading(false)
+      return
+    }
+    
     let timeoutId: NodeJS.Timeout
 
     const fetchPreviewStatus = async () => {
@@ -77,10 +95,13 @@ export default function PreviewPage({ params }: PreviewPageProps) {
 
     fetchPreviewStatus()
     return () => clearTimeout(timeoutId)
-  }, [id])
+  }, [id, isAdminDemo])
 
   const handleConfigChange = async (newConfig: SiteConfig) => {
     setConfig(newConfig)
+
+    // Skip API for admin-demo mode
+    if (isAdminDemo) return
 
     // Persist to server
     try {
@@ -101,6 +122,9 @@ export default function PreviewPage({ params }: PreviewPageProps) {
 
   const handleBusinessChange = async (newBusiness: BusinessData) => {
     setBusiness(newBusiness)
+
+    // Skip API for admin-demo mode
+    if (isAdminDemo) return
 
     // Persist to server
     try {
