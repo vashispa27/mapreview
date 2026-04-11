@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { SiteConfig, layoutOptions } from "@/lib/mock-data"
@@ -80,9 +80,9 @@ export function TemplateSelectorModal({ config, onConfigChange }: TemplateSelect
       <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl">Choose a Template</DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <DialogDescription>
             Select a template that best represents your business. Premium templates unlock with Pro plan.
-          </p>
+          </DialogDescription>
         </DialogHeader>
         
         <div className="flex-1 overflow-y-auto py-4">
