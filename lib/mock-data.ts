@@ -3,6 +3,40 @@ export interface SitePhoto {
   caption: string
 }
 
+export interface VideoTestimonial {
+  id: string
+  name: string
+  title?: string
+  videoUrl: string
+  thumbnailUrl: string
+  duration: string
+}
+
+export interface MenuItem {
+  id: string
+  name: string
+  description: string
+  price: string
+  image?: string
+  category: string
+  featured?: boolean
+}
+
+export interface CustomDomainSettings {
+  customDomain?: string
+  status: "not_configured" | "pending" | "verified" | "failed"
+  sslEnabled: boolean
+}
+
+export interface ProFeatures {
+  videoTestimonials: VideoTestimonial[]
+  menuItems: MenuItem[]
+  menuCategories: string[]
+  customDomain: CustomDomainSettings
+  showVideoTestimonials: boolean
+  showMenu: boolean
+}
+
 export interface BusinessData {
   id: string
   name: string
@@ -36,6 +70,8 @@ export interface BusinessData {
   description: string
   features: string[]
   priceLevel: string
+  // Pro Features
+  proFeatures?: ProFeatures
 }
 
 export interface SiteConfig {
@@ -290,5 +326,98 @@ export function generateMockBusinessData(url: string): BusinessData {
       "Wheelchair Accessible",
     ],
     priceLevel: "$$",
+    // Pro Features - Mock Data for Testing
+    proFeatures: {
+      showVideoTestimonials: true,
+      showMenu: true,
+      videoTestimonials: [
+        {
+          id: "vt1",
+          name: "Maria Santos",
+          title: "Regular Customer",
+          videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+          thumbnailUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+          duration: "0:45",
+        },
+        {
+          id: "vt2",
+          name: "James Wilson",
+          title: "Food Blogger",
+          videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+          thumbnailUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+          duration: "1:20",
+        },
+        {
+          id: "vt3",
+          name: "Sophie Chen",
+          title: "Local Influencer",
+          videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+          thumbnailUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80",
+          duration: "0:58",
+        },
+      ],
+      menuCategories: ["Appetizers", "Main Course", "Pasta", "Desserts", "Beverages"],
+      menuItems: [
+        {
+          id: "m1",
+          name: "Bruschetta Classica",
+          description: "Toasted bread topped with fresh tomatoes, basil, garlic, and extra virgin olive oil",
+          price: "$12",
+          image: "https://images.unsplash.com/photo-1572695157366-5e585ab2b69f?w=400&q=80",
+          category: "Appetizers",
+          featured: true,
+        },
+        {
+          id: "m2",
+          name: "Truffle Risotto",
+          description: "Creamy Arborio rice with black truffle shavings and aged Parmesan",
+          price: "$28",
+          image: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&q=80",
+          category: "Main Course",
+          featured: true,
+        },
+        {
+          id: "m3",
+          name: "Spaghetti Carbonara",
+          description: "Classic Roman pasta with guanciale, egg yolk, Pecorino Romano, and black pepper",
+          price: "$22",
+          image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&q=80",
+          category: "Pasta",
+          featured: false,
+        },
+        {
+          id: "m4",
+          name: "Osso Buco",
+          description: "Braised veal shanks with vegetables, white wine, and gremolata",
+          price: "$38",
+          image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80",
+          category: "Main Course",
+          featured: true,
+        },
+        {
+          id: "m5",
+          name: "Tiramisu",
+          description: "Classic Italian dessert with espresso-soaked ladyfingers and mascarpone cream",
+          price: "$14",
+          image: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80",
+          category: "Desserts",
+          featured: true,
+        },
+        {
+          id: "m6",
+          name: "Panna Cotta",
+          description: "Silky vanilla cream with mixed berry compote",
+          price: "$12",
+          image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&q=80",
+          category: "Desserts",
+          featured: false,
+        },
+      ],
+      customDomain: {
+        customDomain: "goldenspoobistro.com",
+        status: "pending",
+        sslEnabled: true,
+      },
+    },
   }
 }

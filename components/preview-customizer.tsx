@@ -90,7 +90,12 @@ export function PreviewCustomizer({
           </div>
 
           {/* Customization Options */}
-          <CustomizationOptions config={config} onConfigChange={onConfigChange} />
+          <CustomizationOptions 
+            config={config} 
+            onConfigChange={onConfigChange} 
+            business={business}
+            onBusinessChange={onBusinessChange}
+          />
 
           {/* Actions */}
           <div className="space-y-3 pt-4 border-t">

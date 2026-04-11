@@ -1,14 +1,17 @@
 "use client"
 
-import { ColorScheme, SiteConfig, colorSchemes, layoutOptions, fontOptions } from "@/lib/mock-data"
+import { ColorScheme, SiteConfig, colorSchemes, layoutOptions, fontOptions, BusinessData } from "@/lib/mock-data"
 import { Check, LayoutGrid, LayoutList, LayoutTemplate, Sparkles, Zap, Palette } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 import { TemplateSelectorModal } from "./template-selector-modal"
+import { ProFeaturesPanel } from "./pro-features-panel"
 
 interface CustomizationOptionsProps {
   config: SiteConfig
   onConfigChange: (config: SiteConfig) => void
+  business?: BusinessData
+  onBusinessChange?: (business: BusinessData) => void
 }
 
 const layoutIcons = {
@@ -20,7 +23,7 @@ const layoutIcons = {
   "palette": Palette,
 }
 
-export function CustomizationOptions({ config, onConfigChange }: CustomizationOptionsProps) {
+export function CustomizationOptions({ config, onConfigChange, business, onBusinessChange }: CustomizationOptionsProps) {
   return (
     <div className="space-y-6">
       {/* Color Scheme */}
@@ -146,6 +149,13 @@ export function CustomizationOptions({ config, onConfigChange }: CustomizationOp
           />
         </div>
       </div>
+
+      {/* Pro Features */}
+      {business && onBusinessChange && (
+        <div className="space-y-3 pt-4 border-t">
+          <ProFeaturesPanel business={business} onBusinessChange={onBusinessChange} />
+        </div>
+      )}
     </div>
   )
 }

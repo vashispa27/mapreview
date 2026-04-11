@@ -8,6 +8,8 @@ import { PhotoManagerModal } from "./photo-manager-modal"
 import { HeroBackgroundModal } from "./hero-background-modal"
 import { AnimatedReviews } from "./animated-reviews"
 import { InlineTextArea, InlineInput } from "./inline-editor"
+import { VideoTestimonialsSection } from "./video-testimonials-section"
+import { MenuCatalogSection } from "./menu-catalog-section"
 import {
   Carousel,
   CarouselContent,
@@ -486,6 +488,21 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
           </div>
         </AnimatedDiv>
 
+        {/* Menu / Catalog Section (Pro Feature) */}
+        {business.proFeatures?.showMenu && business.proFeatures.menuItems && (
+          <AnimatedDiv animate={animations} {...fadeInUp}>
+            <MenuCatalogSection
+              items={business.proFeatures.menuItems}
+              categories={business.proFeatures.menuCategories || []}
+              colorScheme={colorScheme}
+              layout={layout}
+              animations={animations}
+              isDark={isDark}
+              layoutStyles={layoutStyles}
+            />
+          </AnimatedDiv>
+        )}
+
         {/* Photo Gallery */}
         <AnimatedDiv animate={animations} {...fadeInUp} className={layoutStyles.sectionGap}>
           {layout === "elegant" && (
@@ -586,6 +603,20 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
             <p style={{ color: colorScheme.muted }} className="text-sm">No photos available.</p>
           )}
         </AnimatedDiv>
+
+        {/* Video Testimonials Section (Pro Feature) */}
+        {business.proFeatures?.showVideoTestimonials && business.proFeatures.videoTestimonials && (
+          <AnimatedDiv animate={animations} {...fadeInUp}>
+            <VideoTestimonialsSection
+              videos={business.proFeatures.videoTestimonials}
+              colorScheme={colorScheme}
+              layout={layout}
+              animations={animations}
+              isDark={isDark}
+              layoutStyles={layoutStyles}
+            />
+          </AnimatedDiv>
+        )}
 
         {/* Reviews */}
         <AnimatedDiv animate={animations} {...fadeInUp} className={layoutStyles.sectionGap}>
