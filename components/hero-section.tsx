@@ -8,15 +8,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Mascot } from "@/components/mascot"
 import { WebsitePreviewCard } from "@/components/showcase-cards"
-import { useSession, signIn } from "next-auth/react"
+import { useSession } from "next-auth/react"
+import { LoginModal } from "@/components/login-modal"
+import { useAdminMode } from "@/components/providers/admin-provider"
 
 export function HeroSection() {
   const { data: session } = useSession()
+  const { isAdminMode, setAdminMode } = useAdminMode()
   const router = useRouter()
   const [url, setUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [loginModalOpen, setLoginModalOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Combine real session with admin mode
+  const isLoggedIn = !!session || isAdminMode
 
   useEffect(() => {
     const handleFocusEvent = () => {
@@ -28,8 +35,18 @@ export function HeroSection() {
   }, [])
 
   const handleGenerate = async () => {
-    if (!session) {
-      signIn("google")
+    // Check for admin bypass - use mock data
+    if (url.trim().toLowerCase() === "admin") {
+      setIsLoading(true)
+      // Small delay to show loading state
+      await new Promise(resolve => setTimeout(resolve, 500))
+      // Redirect to a special admin preview route
+      router.push("/preview/admin-demo")
+      return
+    }
+
+    if (!isLoggedIn) {
+      setLoginModalOpen(true)
       return
     }
 
@@ -246,6 +263,13 @@ export function HeroSection() {
           </motion.div>
         </div>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal 
+        open={loginModalOpen} 
+        onOpenChange={setLoginModalOpen}
+        onAdminLogin={() => setAdminMode(true)}
+      />
     </section>
   )
 }

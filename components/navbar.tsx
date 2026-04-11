@@ -2,10 +2,21 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { MapPin, Menu, X } from "lucide-react"
+import { MapPin, Menu, X, LayoutGrid, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useSession, signIn, signOut } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { LoginModal } from "@/components/login-modal"
+import { useAdminMode } from "@/components/providers/admin-provider"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import Link from "next/link"
 
 const navLinks = [
   { name: "Features", href: "#features" },
@@ -15,8 +26,13 @@ const navLinks = [
 ]
 export function Navbar() {
   const { data: session, status } = useSession()
+  const { isAdminMode, setAdminMode } = useAdminMode()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [loginModalOpen, setLoginModalOpen] = useState(false)
+
+  // Combine real session with admin mode
+  const isLoggedIn = !!session || isAdminMode
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,27 +84,65 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {status === "loading" ? (
               <div className="w-8 h-8 rounded-full bg-slate-200 animate-pulse" />
-            ) : session ? (
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-medium">{session.user?.name}</span>
-                  <button 
-                    onClick={() => signOut()}
-                    className="text-xs text-muted-foreground hover:text-destructive transition-colors font-semibold"
-                  >
-                    Sign out
+            ) : isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-3 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <span className="text-sm font-medium hidden sm:block">
+                      {isAdminMode ? "Admin Mode" : session?.user?.name}
+                    </span>
+                    <Avatar className="w-9 h-9 border-2 border-primary/20 cursor-pointer hover:border-primary/40 transition-colors">
+                      {isAdminMode ? (
+                        <AvatarFallback className="bg-amber-100 text-amber-700">A</AvatarFallback>
+                      ) : (
+                        <>
+                          <AvatarImage src={session?.user?.image || ""} />
+                          <AvatarFallback>{session?.user?.name?.[0]}</AvatarFallback>
+                        </>
+                      )}
+                    </Avatar>
                   </button>
-                </div>
-                <Avatar className="w-9 h-9 border-2 border-primary/20">
-                  <AvatarImage src={session.user?.image || ""} />
-                  <AvatarFallback>{session.user?.name?.[0]}</AvatarFallback>
-                </Avatar>
-              </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col">
+                      <span>{isAdminMode ? "Admin Mode" : session?.user?.name}</span>
+                      {!isAdminMode && session?.user?.email && (
+                        <span className="text-xs font-normal text-muted-foreground">
+                          {session.user.email}
+                        </span>
+                      )}
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/my-sites" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutGrid className="w-4 h-4" />
+                      My Sites
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => {
+                      if (isAdminMode) {
+                        setAdminMode(false)
+                      } else {
+                        signOut()
+                      }
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 
-                  onClick={() => signIn("google")}
+                  onClick={() => setLoginModalOpen(true)}
                   className="text-muted-foreground hover:text-foreground"
                 >
                   Log in
@@ -143,22 +197,44 @@ export function Navbar() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
                 >
-                  {session ? (
-                    <Button 
-                      variant="outline" 
-                      size="lg" 
-                      className="w-full text-destructive border-destructive/20 hover:bg-destructive/10"
-                      onClick={() => signOut()}
-                    >
-                      Sign out
-                    </Button>
+                  {isLoggedIn ? (
+                    <>
+                      <Button 
+                        variant="outline" 
+                        size="lg" 
+                        className="w-full"
+                        asChild
+                      >
+                        <Link href="/my-sites" onClick={() => setMobileMenuOpen(false)}>
+                          <LayoutGrid className="w-4 h-4 mr-2" />
+                          My Sites
+                        </Link>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="lg" 
+                        className="w-full text-destructive border-destructive/20 hover:bg-destructive/10"
+                        onClick={() => {
+                          if (isAdminMode) {
+                            setAdminMode(false)
+                          } else {
+                            signOut()
+                          }
+                        }}
+                      >
+                        Sign out
+                      </Button>
+                    </>
                   ) : (
                     <>
                       <Button 
                         variant="outline" 
                         size="lg" 
                         className="w-full"
-                        onClick={() => signIn("google")}
+                        onClick={() => {
+                          setMobileMenuOpen(false)
+                          setLoginModalOpen(true)
+                        }}
                       >
                         Log in
                       </Button>
@@ -180,6 +256,13 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Login Modal */}
+      <LoginModal 
+        open={loginModalOpen} 
+        onOpenChange={setLoginModalOpen}
+        onAdminLogin={() => setAdminMode(true)}
+      />
     </>
   )
 }

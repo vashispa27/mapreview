@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react"
 import { useRouter } from "next/navigation"
-import { BusinessData, SiteConfig, colorSchemes } from "@/lib/mock-data"
+import { BusinessData, SiteConfig, colorSchemes, generateMockBusinessData } from "@/lib/mock-data"
 import { SiteTemplate } from "@/components/site-template"
 import { PreviewCustomizer } from "@/components/preview-customizer"
 import { Loader2 } from "lucide-react"
@@ -27,8 +27,26 @@ export default function PreviewPage({ params }: PreviewPageProps) {
   
   // Track queue statuses exclusively
   const [jobStatus, setJobStatus] = useState<string>("QUEUED")
+  
+  // Check if this is admin-demo mode
+  const isAdminDemo = id === "admin-demo"
 
   useEffect(() => {
+    // For admin-demo, skip API entirely and use mock data directly
+    if (isAdminDemo) {
+      const mockBusiness = generateMockBusinessData("admin-demo")
+      setBusiness(mockBusiness)
+      setConfig({
+        colorScheme: colorSchemes[0],
+        layout: "modern",
+        fontStyle: "sans",
+        animations: true,
+      })
+      setJobStatus("COMPLETED")
+      setLoading(false)
+      return
+    }
+    
     let timeoutId: NodeJS.Timeout
 
     const fetchPreviewStatus = async () => {
@@ -77,10 +95,13 @@ export default function PreviewPage({ params }: PreviewPageProps) {
 
     fetchPreviewStatus()
     return () => clearTimeout(timeoutId)
-  }, [id])
+  }, [id, isAdminDemo])
 
   const handleConfigChange = async (newConfig: SiteConfig) => {
     setConfig(newConfig)
+
+    // Skip API for admin-demo mode
+    if (isAdminDemo) return
 
     // Persist to server
     try {
@@ -101,6 +122,9 @@ export default function PreviewPage({ params }: PreviewPageProps) {
 
   const handleBusinessChange = async (newBusiness: BusinessData) => {
     setBusiness(newBusiness)
+
+    // Skip API for admin-demo mode
+    if (isAdminDemo) return
 
     // Persist to server
     try {
@@ -189,6 +213,13 @@ export default function PreviewPage({ params }: PreviewPageProps) {
 
   return (
     <div className="relative">
+      {/* Admin Demo Indicator */}
+      {id === "admin-demo" && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-medium shadow-lg border border-amber-200">
+          Demo Mode - Using mock data for testing
+        </div>
+      )}
+      
       <div className="pr-0 md:pr-[360px] transition-all duration-300">
         <SiteTemplate
           business={business}

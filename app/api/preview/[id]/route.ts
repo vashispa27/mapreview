@@ -1,14 +1,30 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getPreview, updatePreviewConfig } from "@/lib/preview-store"
-import { colorSchemes, ColorScheme } from "@/lib/mock-data"
+import { colorSchemes, ColorScheme, generateMockBusinessData } from "@/lib/mock-data"
 import { getJob } from "@/lib/job-store"
-import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
-
 import { auth } from "@/lib/auth"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  
+  // Handle admin-demo case - return mock data without auth or db access
+  if (id === "admin-demo") {
+    const mockBusiness = generateMockBusinessData("admin-demo")
+    return NextResponse.json({
+      status: "COMPLETED",
+      business: mockBusiness,
+      config: {
+        colorScheme: colorSchemes[0],
+        layout: "modern",
+        fontStyle: "sans",
+        animations: true
+      },
+    })
+  }
+  
+  // Only import db when needed (for non-admin-demo requests)
+  const { db } = await import("@/lib/db")
   
   // 1. Get the current user session
   const session = await auth()
@@ -59,6 +75,24 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const { id } = await params
   const body = await request.json()
 
+  // Handle admin-demo case - just return success without persisting
+  if (id === "admin-demo") {
+    const mockBusiness = generateMockBusinessData("admin-demo")
+    // Merge body changes with mock data for response
+    return NextResponse.json({
+      business: { ...mockBusiness, ...body },
+      config: {
+        colorScheme: body.colorSchemeId ? colorSchemes.find(c => c.id === body.colorSchemeId) || colorSchemes[0] : colorSchemes[0],
+        layout: body.layout || "modern",
+        fontStyle: body.fontStyle || "sans",
+        animations: body.animations ?? true
+      },
+    })
+  }
+
+  // Only import db when needed (for non-admin-demo requests)
+  const { db } = await import("@/lib/db")
+  
   // 1. Get the current user session
   const session = await auth()
   if (!session?.user?.id) {
