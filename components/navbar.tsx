@@ -4,8 +4,10 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MapPin, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useSession, signIn, signOut } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { LoginModal } from "@/components/login-modal"
+import { useAdminMode } from "@/components/providers/admin-provider"
 
 const navLinks = [
   { name: "Features", href: "#features" },
@@ -15,8 +17,13 @@ const navLinks = [
 ]
 export function Navbar() {
   const { data: session, status } = useSession()
+  const { isAdminMode, setAdminMode } = useAdminMode()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [loginModalOpen, setLoginModalOpen] = useState(false)
+
+  // Combine real session with admin mode
+  const isLoggedIn = !!session || isAdminMode
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,27 +75,41 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {status === "loading" ? (
               <div className="w-8 h-8 rounded-full bg-slate-200 animate-pulse" />
-            ) : session ? (
+            ) : isLoggedIn ? (
               <div className="flex items-center gap-4">
                 <div className="flex flex-col items-end">
-                  <span className="text-sm font-medium">{session.user?.name}</span>
+                  <span className="text-sm font-medium">
+                    {isAdminMode ? "Admin Mode" : session?.user?.name}
+                  </span>
                   <button 
-                    onClick={() => signOut()}
+                    onClick={() => {
+                      if (isAdminMode) {
+                        setAdminMode(false)
+                      } else {
+                        signOut()
+                      }
+                    }}
                     className="text-xs text-muted-foreground hover:text-destructive transition-colors font-semibold"
                   >
                     Sign out
                   </button>
                 </div>
                 <Avatar className="w-9 h-9 border-2 border-primary/20">
-                  <AvatarImage src={session.user?.image || ""} />
-                  <AvatarFallback>{session.user?.name?.[0]}</AvatarFallback>
+                  {isAdminMode ? (
+                    <AvatarFallback className="bg-amber-100 text-amber-700">A</AvatarFallback>
+                  ) : (
+                    <>
+                      <AvatarImage src={session?.user?.image || ""} />
+                      <AvatarFallback>{session?.user?.name?.[0]}</AvatarFallback>
+                    </>
+                  )}
                 </Avatar>
               </div>
             ) : (
               <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 
-                  onClick={() => signIn("google")}
+                  onClick={() => setLoginModalOpen(true)}
                   className="text-muted-foreground hover:text-foreground"
                 >
                   Log in
@@ -143,12 +164,18 @@ export function Navbar() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
                 >
-                  {session ? (
+                  {isLoggedIn ? (
                     <Button 
                       variant="outline" 
                       size="lg" 
                       className="w-full text-destructive border-destructive/20 hover:bg-destructive/10"
-                      onClick={() => signOut()}
+                      onClick={() => {
+                        if (isAdminMode) {
+                          setAdminMode(false)
+                        } else {
+                          signOut()
+                        }
+                      }}
                     >
                       Sign out
                     </Button>
@@ -158,7 +185,10 @@ export function Navbar() {
                         variant="outline" 
                         size="lg" 
                         className="w-full"
-                        onClick={() => signIn("google")}
+                        onClick={() => {
+                          setMobileMenuOpen(false)
+                          setLoginModalOpen(true)
+                        }}
                       >
                         Log in
                       </Button>
@@ -180,6 +210,13 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Login Modal */}
+      <LoginModal 
+        open={loginModalOpen} 
+        onOpenChange={setLoginModalOpen}
+        onAdminLogin={() => setAdminMode(true)}
+      />
     </>
   )
 }
