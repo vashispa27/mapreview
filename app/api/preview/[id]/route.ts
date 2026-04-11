@@ -2,15 +2,13 @@ import { NextRequest, NextResponse } from "next/server"
 import { getPreview, updatePreviewConfig } from "@/lib/preview-store"
 import { colorSchemes, ColorScheme, generateMockBusinessData } from "@/lib/mock-data"
 import { getJob } from "@/lib/job-store"
-import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
-
 import { auth } from "@/lib/auth"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   
-  // Handle admin-demo case - return mock data without auth
+  // Handle admin-demo case - return mock data without auth or db access
   if (id === "admin-demo") {
     const mockBusiness = generateMockBusinessData("admin-demo")
     return NextResponse.json({
@@ -24,6 +22,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       },
     })
   }
+  
+  // Only import db when needed (for non-admin-demo requests)
+  const { db } = await import("@/lib/db")
   
   // 1. Get the current user session
   const session = await auth()
@@ -89,6 +90,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     })
   }
 
+  // Only import db when needed (for non-admin-demo requests)
+  const { db } = await import("@/lib/db")
+  
   // 1. Get the current user session
   const session = await auth()
   if (!session?.user?.id) {
