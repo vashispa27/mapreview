@@ -1,43 +1,66 @@
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
-import { isOfflineMode } from '@/lib/offline-mode'
 
-const globalForPrisma = globalThis as unknown as { 
-  prisma: PrismaClient | undefined 
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
 }
 
-// Create db connection only if not in offline mode
-let db: PrismaClient
+// Check offline mode directly - no imports to avoid module load issues
+const isOffline = process.env.NEXT_PUBLIC_OFFLINE_MODE === "true"
 
-if (isOfflineMode) {
-  // In offline mode, create a mock Prisma client
-  // API routes check isOfflineMode and return mock data before hitting db
-  db = {} as PrismaClient
-} else {
+// Lazy-initialized database client
+let _db: PrismaClient | null = null
+
+function getDb(): PrismaClient {
+  if (isOffline) {
+    return {} as PrismaClient
+  }
+
+  if (_db) return _db
+  if (globalForPrisma.prisma) {
+    _db = globalForPrisma.prisma
+    return _db
+  }
+
   const connectionString = process.env.DATABASE_URL
 
   if (!connectionString) {
     throw new Error("DATABASE_URL is not defined")
   }
 
-  // Optimized for Vercel Serverless + Supabase Pooler
-  const pool = new Pool({ 
+  const pool = new Pool({
     connectionString,
-    max: 1, 
+    max: 1,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
-    // This handles the JS-side of the SSL connection
     ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false }
   })
 
   const adapter = new PrismaPg(pool)
+  const client = new PrismaClient({ adapter })
 
-  db = globalForPrisma.prisma || new PrismaClient({ 
-    adapter,
-  })
+  if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.prisma = client
+  }
 
-  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db
+  _db = client
+  return _db
 }
 
-export { db }
+// Export a proxy that lazily initializes the db on first access
+// This prevents the error from being thrown at module load time
+export const db = new Proxy({} as PrismaClient, {
+  get(_, prop) {
+    if (isOffline) {
+      // Return a no-op for offline mode
+      return () => Promise.resolve(null)
+    }
+    const client = getDb()
+    const value = (client as any)[prop]
+    if (typeof value === 'function') {
+      return value.bind(client)
+    }
+    return value
+  }
+})

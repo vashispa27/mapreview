@@ -1,42 +1,48 @@
-import NextAuth from "next-auth"
-import Google from "next-auth/providers/google"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { isOfflineMode, mockSession } from "@/lib/offline-mode"
+import { mockSession } from "@/lib/offline-mode"
 import { NextRequest } from "next/server"
+
+// Check offline mode directly here
+const isOffline = process.env.NEXT_PUBLIC_OFFLINE_MODE === "true"
 
 // Create mock handlers for offline mode
 const mockHandlers = {
   GET: async (request: NextRequest) => {
-    // Return the mock session for session endpoint
-    if (request.url.includes('/session')) {
+    const url = request.url
+    if (url.includes('/session')) {
       return Response.json(mockSession)
     }
+    if (url.includes('/providers')) {
+      return Response.json({})
+    }
+    if (url.includes('/csrf')) {
+      return Response.json({ csrfToken: "offline-csrf-token" })
+    }
+    // Handle all other auth endpoints
     return Response.json({})
   },
-  POST: async () => Response.json({})
+  POST: async () => Response.json({ url: "/" })
 }
 
 const mockAuth = async () => mockSession
-const mockSignIn = async () => {}
-const mockSignOut = async () => {}
+const mockSignIn = async () => ({ url: "/" })
+const mockSignOut = async () => ({ url: "/" })
 
-// In offline mode, export mock functions
-// Otherwise, export real NextAuth functions
-let handlers: typeof mockHandlers
-let signIn: typeof mockSignIn
-let signOut: typeof mockSignOut
-let auth: typeof mockAuth
+// Type for handlers
+type HandlersType = typeof mockHandlers
 
-if (isOfflineMode) {
-  handlers = mockHandlers
-  signIn = mockSignIn
-  signOut = mockSignOut
-  auth = mockAuth
-} else {
-  // Only import db when not in offline mode to prevent DATABASE_URL errors
-  const { db } = require("@/lib/db")
+// Lazy-loaded real NextAuth instance
+let _realNextAuth: any = null
+
+async function getRealNextAuth() {
+  if (_realNextAuth) return _realNextAuth
   
-  const nextAuth = NextAuth({
+  // Dynamic imports to avoid loading db/NextAuth in offline mode
+  const NextAuth = (await import("next-auth")).default
+  const Google = (await import("next-auth/providers/google")).default
+  const { PrismaAdapter } = await import("@auth/prisma-adapter")
+  const { db } = await import("@/lib/db")
+  
+  _realNextAuth = NextAuth({
     adapter: PrismaAdapter(db),
     secret: process.env.AUTH_SECRET,
     providers: [
@@ -55,11 +61,41 @@ if (isOfflineMode) {
       },
     },
   })
-
-  handlers = nextAuth.handlers
-  signIn = nextAuth.signIn
-  signOut = nextAuth.signOut
-  auth = nextAuth.auth
+  
+  return _realNextAuth
 }
 
-export { handlers, signIn, signOut, auth }
+// Export handlers that work in both modes
+export const handlers: HandlersType = isOffline 
+  ? mockHandlers 
+  : {
+      GET: async (request: NextRequest) => {
+        const nextAuth = await getRealNextAuth()
+        return nextAuth.handlers.GET(request)
+      },
+      POST: async (request: NextRequest) => {
+        const nextAuth = await getRealNextAuth()
+        return nextAuth.handlers.POST(request)
+      }
+    }
+
+export const auth = isOffline
+  ? mockAuth
+  : async () => {
+      const nextAuth = await getRealNextAuth()
+      return nextAuth.auth()
+    }
+
+export const signIn = isOffline
+  ? mockSignIn
+  : async (...args: any[]) => {
+      const nextAuth = await getRealNextAuth()
+      return nextAuth.signIn(...args)
+    }
+
+export const signOut = isOffline
+  ? mockSignOut
+  : async (...args: any[]) => {
+      const nextAuth = await getRealNextAuth()
+      return nextAuth.signOut(...args)
+    }
