@@ -66,7 +66,10 @@ export function AnimatedReviews({
     <div
       className={cn(
         "grid gap-6",
-        layout === "minimal" ? "grid-cols-1" : "md:grid-cols-2 lg:grid-cols-3"
+        layout === "minimal" && "grid-cols-1",
+        (layout === "modern" || layout === "classic" || layout === "studio") && "md:grid-cols-2 lg:grid-cols-3",
+        layout === "elegant" && "md:grid-cols-2 lg:grid-cols-3",
+        layout === "bold" && "md:grid-cols-2 lg:grid-cols-3 gap-8"
       )}
     >
       {activeIndices.map((reviewIndex, slotPosition) => {
@@ -84,27 +87,43 @@ export function AnimatedReviews({
                 transition={{ duration: 0.6, ease: "easeInOut" }}
                 className={cn(
                   "p-6 h-full",
-                  layoutStyles.cardStyle
+                  layoutStyles.cardStyle,
+                  layout === "elegant" && "border",
+                  layout === "bold" && "hover:scale-[1.02] transition-transform"
                 )}
                 style={{
                   backgroundColor: isDark ? "#1e293b" : "#fff",
-                  boxShadow: isDark ? "none" : "0 4px 6px -1px rgba(0,0,0,0.1)",
+                  boxShadow: isDark ? "none" : layout === "bold" ? "0 8px 30px -5px rgba(0,0,0,0.15)" : "0 4px 6px -1px rgba(0,0,0,0.1)",
                 }}
               >
                 <div className="flex flex-col h-full">
-                  <h3 className="font-bold text-lg md:text-xl mb-4 leading-tight">
+                  <h3 className={cn(
+                    "font-bold text-lg md:text-xl mb-4 leading-tight",
+                    layout === "elegant" && "font-serif",
+                    layout === "bold" && "text-xl md:text-2xl"
+                  )}>
                     {review.jtbdHeader || `"A great experience waiting for you"`}
                   </h3>
                   <p
-                    className={cn("line-clamp-4 flex-1 mb-6", layout === "minimal" ? "text-sm" : "")}
+                    className={cn(
+                      "line-clamp-4 flex-1 mb-6", 
+                      layout === "minimal" ? "text-sm" : "",
+                      layout === "elegant" && "font-serif italic"
+                    )}
                     style={{ color: colorScheme.muted }}
                   >
                     "{review.text}"
                   </p>
                   
-                  <div className="mt-auto pt-4 border-t flex items-center justify-between" style={{ borderColor: isDark ? "#334155" : "#e5e7eb" }}>
+                  <div className={cn(
+                    "mt-auto pt-4 border-t flex items-center justify-between",
+                    layout === "elegant" && "border-dashed"
+                  )} style={{ borderColor: isDark ? "#334155" : "#e5e7eb" }}>
                     <div>
-                      <h4 className="font-semibold leading-none mb-1.5">{review.author}</h4>
+                      <h4 className={cn(
+                        "font-semibold leading-none mb-1.5",
+                        layout === "elegant" && "font-serif"
+                      )}>{review.author}</h4>
                       <div className="flex items-center gap-1">
                         {[...Array(5)].map((_, i) => (
                           <Star

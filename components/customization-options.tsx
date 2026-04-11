@@ -1,9 +1,10 @@
 "use client"
 
 import { ColorScheme, SiteConfig, colorSchemes, layoutOptions, fontOptions } from "@/lib/mock-data"
-import { Check, LayoutGrid, LayoutList, LayoutTemplate, Sparkles } from "lucide-react"
+import { Check, LayoutGrid, LayoutList, LayoutTemplate, Sparkles, Zap, Palette } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
+import { TemplateSelectorModal } from "./template-selector-modal"
 
 interface CustomizationOptionsProps {
   config: SiteConfig
@@ -14,6 +15,9 @@ const layoutIcons = {
   "layout-grid": LayoutGrid,
   "layout-list": LayoutList,
   "layout-template": LayoutTemplate,
+  "sparkles": Sparkles,
+  "zap": Zap,
+  "palette": Palette,
 }
 
 export function CustomizationOptions({ config, onConfigChange }: CustomizationOptionsProps) {
@@ -59,41 +63,27 @@ export function CustomizationOptions({ config, onConfigChange }: CustomizationOp
         </div>
       </div>
 
-      {/* Layout Style */}
+      {/* Template Selection */}
       <div className="space-y-3">
-        <h3 className="font-semibold text-sm text-foreground/80">Layout Style</h3>
-        <div className="space-y-2">
-          {layoutOptions.map((layout) => {
-            const Icon = layoutIcons[layout.icon as keyof typeof layoutIcons]
+        <h3 className="font-semibold text-sm text-foreground/80">Template</h3>
+        <TemplateSelectorModal config={config} onConfigChange={onConfigChange} />
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+          {(() => {
+            const currentLayout = layoutOptions.find(l => l.id === config.layout)
+            const Icon = currentLayout ? layoutIcons[currentLayout.icon as keyof typeof layoutIcons] : LayoutGrid
             return (
-              <button
-                key={layout.id}
-                onClick={() => onConfigChange({ ...config, layout: layout.id })}
-                className={cn(
-                  "w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left",
-                  config.layout === layout.id
-                    ? "border-primary bg-primary/5"
-                    : "border-transparent hover:border-border bg-muted/50"
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-10 h-10 rounded-lg flex items-center justify-center",
-                    config.layout === layout.id ? "bg-primary text-primary-foreground" : "bg-muted"
-                  )}
-                >
+              <>
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary text-primary-foreground">
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-sm">{layout.name}</p>
-                  <p className="text-xs text-muted-foreground">{layout.description}</p>
+                  <p className="font-medium text-sm">{currentLayout?.name || "Modern"}</p>
+                  <p className="text-xs text-muted-foreground">{currentLayout?.description || "Clean lines, bold sections"}</p>
                 </div>
-                {config.layout === layout.id && (
-                  <Check className="w-5 h-5 text-primary" />
-                )}
-              </button>
+                <Check className="w-5 h-5 text-primary" />
+              </>
             )
-          })}
+          })()}
         </div>
       </div>
 

@@ -6,6 +6,7 @@ import { FeaturesSection } from "@/components/features-section"
 import { HowItWorksSection } from "@/components/how-it-works-section"
 import { ShowcaseSection } from "@/components/showcase-section"
 import { TestimonialsSection } from "@/components/testimonials-section"
+import { PricingSection } from "@/components/pricing-section"
 import { CTASection } from "@/components/cta-section"
 import { Footer } from "@/components/footer"
 import { FloatingElements } from "@/components/floating-elements"
@@ -39,6 +40,11 @@ export default function LandingPage() {
         
         {/* Testimonials Section */}
         <TestimonialsSection />
+        
+        {/* Pricing Section */}
+        <section id="pricing">
+          <PricingSection />
+        </section>
         
         {/* CTA Section */}
         <CTASection />

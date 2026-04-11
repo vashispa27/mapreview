@@ -40,7 +40,7 @@ export interface BusinessData {
 
 export interface SiteConfig {
   colorScheme: ColorScheme
-  layout: "modern" | "classic" | "minimal"
+  layout: "modern" | "classic" | "minimal" | "elegant" | "bold" | "studio"
   fontStyle: "sans" | "serif" | "rounded"
   animations: boolean
 }
@@ -51,18 +51,42 @@ export const layoutOptions = [
     name: "Modern",
     description: "Clean lines, bold sections",
     icon: "layout-grid",
+    isPremium: false,
   },
   {
     id: "classic" as const,
     name: "Classic",
     description: "Traditional, elegant feel",
     icon: "layout-list",
+    isPremium: false,
   },
   {
     id: "minimal" as const,
     name: "Minimal",
     description: "Simple, content-focused",
     icon: "layout-template",
+    isPremium: false,
+  },
+  {
+    id: "elegant" as const,
+    name: "Elegant",
+    description: "Luxury, refined aesthetic",
+    icon: "sparkles",
+    isPremium: true,
+  },
+  {
+    id: "bold" as const,
+    name: "Bold",
+    description: "Dynamic, eye-catching design",
+    icon: "zap",
+    isPremium: true,
+  },
+  {
+    id: "studio" as const,
+    name: "Studio",
+    description: "Creative, portfolio style",
+    icon: "palette",
+    isPremium: true,
   },
 ]
 
