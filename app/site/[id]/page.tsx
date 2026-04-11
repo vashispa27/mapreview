@@ -1,7 +1,8 @@
 import { SiteTemplate } from "@/components/site-template"
 import { notFound } from "next/navigation"
 import { db } from "@/lib/db"
-import { BusinessData, SiteConfig, colorSchemes } from "@/lib/mock-data"
+import { BusinessData, SiteConfig, colorSchemes, generateMockBusinessData } from "@/lib/mock-data"
+import { isOfflineMode } from "@/lib/offline-mode"
 
 interface PublicSitePageProps {
   params: Promise<{ id: string }>
@@ -9,6 +10,27 @@ interface PublicSitePageProps {
 
 export default async function PublicSitePage({ params }: PublicSitePageProps) {
   const { id } = await params
+
+  // In offline mode, return mock data
+  if (isOfflineMode) {
+    const mockBusiness = generateMockBusinessData()
+    const mockConfig: SiteConfig = {
+      colorScheme: colorSchemes[0],
+      layout: "modern",
+      fontStyle: "sans",
+      animations: true
+    }
+
+    return (
+      <main className="min-h-screen bg-background">
+        <SiteTemplate
+          business={mockBusiness}
+          config={mockConfig}
+          isPreview={false}
+        />
+      </main>
+    )
+  }
 
   // 1. Fetch the site from Supabase (Prisma)
   const site = await db.site.findUnique({

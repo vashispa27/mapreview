@@ -1,15 +1,36 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getPreview, updatePreviewConfig } from "@/lib/preview-store"
-import { colorSchemes, ColorScheme } from "@/lib/mock-data"
+import { colorSchemes, ColorScheme, generateMockBusinessData, OFFLINE_MOCK_SITE_ID } from "@/lib/mock-data"
 import { getJob } from "@/lib/job-store"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
-
 import { auth } from "@/lib/auth"
+import { isOfflineMode, mockUser } from "@/lib/offline-mode"
+
+// In-memory store for offline mode config changes
+const offlineConfigStore: Record<string, any> = {}
+const offlineBusinessStore: Record<string, any> = {}
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   
+  // In offline mode, return mock data immediately
+  if (isOfflineMode) {
+    const mockBusiness = offlineBusinessStore[id] || generateMockBusinessData()
+    const mockConfig = offlineConfigStore[id] || {
+      colorSchemeId: "forest",
+      layout: "modern",
+      fontStyle: "sans",
+      animations: true
+    }
+
+    return NextResponse.json({
+      status: "COMPLETED",
+      business: mockBusiness,
+      config: mockConfig,
+    })
+  }
+
   // 1. Get the current user session
   const session = await auth()
   if (!session?.user?.id) {
@@ -58,6 +79,37 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const body = await request.json()
+
+  // In offline mode, store changes in memory
+  if (isOfflineMode) {
+    const currentBusiness = offlineBusinessStore[id] || generateMockBusinessData()
+    const currentConfig = offlineConfigStore[id] || {
+      colorSchemeId: "forest",
+      layout: "modern",
+      fontStyle: "sans",
+      animations: true
+    }
+
+    // Update config
+    if (body.colorSchemeId) currentConfig.colorSchemeId = body.colorSchemeId
+    if (body.layout) currentConfig.layout = body.layout
+    if (body.fontStyle) currentConfig.fontStyle = body.fontStyle
+    if (typeof body.animations === "boolean") currentConfig.animations = body.animations
+
+    // Update business data
+    if (body.photos) currentBusiness.photos = body.photos
+    if (body.heroImage) currentBusiness.heroImage = body.heroImage
+    if (body.description) currentBusiness.description = body.description
+    if (body.features) currentBusiness.features = body.features
+
+    offlineConfigStore[id] = currentConfig
+    offlineBusinessStore[id] = currentBusiness
+
+    return NextResponse.json({
+      business: currentBusiness,
+      config: currentConfig,
+    })
+  }
 
   // 1. Get the current user session
   const session = await auth()

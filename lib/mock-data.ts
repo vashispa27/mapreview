@@ -161,9 +161,14 @@ export const colorSchemes: ColorScheme[] = [
   },
 ]
 
-export function generateMockBusinessData(url: string): BusinessData {
-  // Generate a consistent ID from the URL
-  const id = btoa(url).slice(0, 12).replace(/[^a-zA-Z0-9]/g, "x")
+// Generate a consistent mock site ID for offline mode
+export const OFFLINE_MOCK_SITE_ID = "offline-demo-site"
+
+export function generateMockBusinessData(url?: string): BusinessData {
+  // Generate a consistent ID from the URL or use offline ID
+  const id = url 
+    ? btoa(url).slice(0, 12).replace(/[^a-zA-Z0-9]/g, "x")
+    : OFFLINE_MOCK_SITE_ID
 
   // Mock data for demonstration
   return {

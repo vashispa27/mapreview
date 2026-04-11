@@ -3,9 +3,23 @@ import { createJob } from "@/lib/job-store"
 import { inngest } from "@/lib/inngest/client"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { isOfflineMode, mockUser } from "@/lib/offline-mode"
+import { OFFLINE_MOCK_SITE_ID } from "@/lib/mock-data"
 
 export async function POST(request: NextRequest) {
   try {
+    // In offline mode, bypass auth and return mock job ID immediately
+    if (isOfflineMode) {
+      const { url } = await request.json()
+      
+      if (!url || typeof url !== "string") {
+        return NextResponse.json({ error: "URL is required" }, { status: 400 })
+      }
+
+      // Return the offline mock site ID - no actual job is created
+      return NextResponse.json({ success: true, jobId: OFFLINE_MOCK_SITE_ID })
+    }
+
     const session = await auth()
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })

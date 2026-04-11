@@ -3,15 +3,17 @@
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ArrowRight, Sparkles, MapPin, Loader2 } from "lucide-react"
+import { ArrowRight, Sparkles, MapPin, Loader2, WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Mascot } from "@/components/mascot"
 import { WebsitePreviewCard } from "@/components/showcase-cards"
 import { useSession, signIn } from "next-auth/react"
+import { useOfflineMode } from "@/components/providers/auth-provider"
 
 export function HeroSection() {
   const { data: session } = useSession()
+  const isOffline = useOfflineMode()
   const router = useRouter()
   const [url, setUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -28,12 +30,14 @@ export function HeroSection() {
   }, [])
 
   const handleGenerate = async () => {
-    if (!session) {
+    // In offline mode, skip auth check - session is already mocked
+    if (!isOffline && !session) {
       signIn("google")
       return
     }
 
-    if (!url.trim()) {
+    // In offline mode, allow any URL or even empty URL for testing
+    if (!isOffline && !url.trim()) {
       setError("Please enter a Google Maps URL")
       return
     }
@@ -45,7 +49,7 @@ export function HeroSection() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: url || "https://maps.google.com/mock" }),
       })
 
       const data = await res.json()

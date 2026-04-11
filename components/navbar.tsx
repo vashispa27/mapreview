@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { MapPin, Menu, X } from "lucide-react"
+import { MapPin, Menu, X, WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSession, signIn, signOut } from "next-auth/react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { useOfflineMode } from "@/components/providers/auth-provider"
 
 const navLinks = [
   { name: "Features", href: "#features" },
@@ -15,6 +16,7 @@ const navLinks = [
 ]
 export function Navbar() {
   const { data: session, status } = useSession()
+  const isOffline = useOfflineMode()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -52,6 +54,12 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
+            {isOffline && (
+              <div className="flex items-center gap-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-full text-xs font-semibold">
+                <WifiOff className="w-3.5 h-3.5" />
+                <span>Offline Mode</span>
+              </div>
+            )}
             {navLinks.map((link) => (
               <motion.a
                 key={link.name}
