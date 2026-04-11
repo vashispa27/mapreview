@@ -34,8 +34,16 @@ export default function PreviewPage({ params }: PreviewPageProps) {
     const fetchPreviewStatus = async () => {
       try {
         const res = await fetch(`/api/preview/${id}`)
+        
+        if (res.status === 401 || res.status === 403) {
+          setError("Unauthorized: You do not have permission to edit this site preview.")
+          setJobStatus("FAILED")
+          setLoading(false)
+          return
+        }
+
         if (res.status === 404) {
-          setError("Site Queue identifier undefined or explicitly expired remotely")
+          setError("Site preview not found or has expired.")
           setJobStatus("FAILED")
           setLoading(false)
           return
@@ -58,7 +66,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
           setLoading(false)
         } else {
           // Continuous Loop tracking securely checking isolated states
-          timeoutId = setTimeout(fetchPreviewStatus, 2000)
+          timeoutId = setTimeout(fetchPreviewStatus, 10000)
         }
       } catch (err) {
         setError("Network boundary disconnected temporarily checking remote status")

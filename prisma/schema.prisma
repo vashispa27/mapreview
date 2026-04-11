@@ -65,5 +65,9 @@ model Site {
   status       String   @default("QUEUED") // QUEUED | COMPLETED | FAILED
   createdAt    DateTime @default(now())
 
+  // Store the full generated site data and config as JSON
+  businessData Json?
+  config       Json?
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

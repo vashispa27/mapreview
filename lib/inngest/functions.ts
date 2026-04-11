@@ -160,10 +160,23 @@ export const generateSiteJob = inngest.createFunction(
 
           ; (businessData as any).analysis = aiData
 
-        createPreview(businessData, undefined, jobId)
-        updateJob(jobId, { status: "COMPLETED" })
-        await db.site.update({ where: { id: jobId }, data: { status: "COMPLETED" } })
+        // Store the final business data to Prisma for persistence!
+        await db.site.update({
+          where: { id: jobId },
+          data: {
+            status: "COMPLETED",
+            businessName: businessData.name,
+            businessData: businessData as any,
+            config: {
+              colorSchemeId: "default",
+              layout: "modern",
+              fontStyle: "sans",
+              animations: true
+            } as any
+          }
+        })
 
+        updateJob(jobId, { status: "COMPLETED" })
         const endTime = new Date().toISOString()
         console.log(`\n\n🏁 [${endTime}] INNGEST JOB COMPLETED SUCCESSFULLY! (${jobId})`)
       } catch (err) {

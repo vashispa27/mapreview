@@ -1,29 +1,40 @@
-import { getPreview } from "@/lib/preview-store"
 import { SiteTemplate } from "@/components/site-template"
 import { notFound } from "next/navigation"
+import { db } from "@/lib/db"
+import { BusinessData, SiteConfig, colorSchemes } from "@/lib/mock-data"
 
 interface PublicSitePageProps {
   params: Promise<{ id: string }>
 }
 
 export default async function PublicSitePage({ params }: PublicSitePageProps) {
-  // Await the params to resolve the dynamic route identifier
   const { id } = await params
 
-  // In a real application, this would be a database fetch.
-  // For the local dev server, we read from the globally persisted memory store!
-  const preview = getPreview(id)
+  // 1. Fetch the site from Supabase (Prisma)
+  const site = await db.site.findUnique({
+    where: { id }
+  })
 
-  if (!preview) {
-    // Return a 404 block organically if the memory map is lost
+  // 2. Return 404 if the site doesn't exist or is not completed
+  if (!site || site.status !== "COMPLETED" || !site.businessData) {
     notFound()
+  }
+
+  // 3. Cast the stored JSON back to our types
+  const business = site.businessData as unknown as BusinessData
+  const rawConfig = site.config as any
+  const config: SiteConfig = {
+    colorScheme: colorSchemes.find(c => c.id === rawConfig?.colorSchemeId) || colorSchemes[0],
+    layout: rawConfig?.layout || "modern",
+    fontStyle: rawConfig?.fontStyle || "sans",
+    animations: rawConfig?.animations ?? true
   }
 
   return (
     <main className="min-h-screen bg-background">
       <SiteTemplate
-        business={preview.business}
-        config={preview.config}
+        business={business}
+        config={config}
         isPreview={false}
       />
     </main>
