@@ -107,38 +107,6 @@ export function TestimonialsSection() {
           ))}
         </div>
 
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8"
-        >
-          {[
-            { value: "2,400+", label: "Websites Created" },
-            { value: "50K+", label: "Reviews Imported" },
-            { value: "30 sec", label: "Average Setup Time" },
-            { value: "4.9/5", label: "User Rating" },
-          ].map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              className="text-center"
-              whileHover={{ scale: 1.05 }}
-            >
-              <motion.div
-                className="text-3xl md:text-4xl font-bold text-primary mb-2"
-                initial={{ opacity: 0, scale: 0.5 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.5 + index * 0.1, type: "spring" }}
-              >
-                {stat.value}
-              </motion.div>
-              <div className="text-muted-foreground">{stat.label}</div>
-            </motion.div>
-          ))}
-        </motion.div>
       </div>
     </section>
   )

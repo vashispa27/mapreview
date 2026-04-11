@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { ArrowRight, Sparkles, MapPin, Loader2 } from "lucide-react"
@@ -8,14 +8,31 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Mascot } from "@/components/mascot"
 import { WebsitePreviewCard } from "@/components/showcase-cards"
+import { useSession, signIn } from "next-auth/react"
 
 export function HeroSection() {
+  const { data: session } = useSession()
   const router = useRouter()
   const [url, setUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const handleFocusEvent = () => {
+      inputRef.current?.focus()
+      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+    }
+    window.addEventListener("focus-input", handleFocusEvent)
+    return () => window.removeEventListener("focus-input", handleFocusEvent)
+  }, [])
 
   const handleGenerate = async () => {
+    if (!session) {
+      signIn("google")
+      return
+    }
+
     if (!url.trim()) {
       setError("Please enter a Google Maps URL")
       return
@@ -117,6 +134,7 @@ export function HeroSection() {
               <div className="relative flex-1">
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
+                  ref={inputRef}
                   type="url"
                   placeholder="Paste your Google Maps URL..."
                   value={url}
@@ -160,34 +178,9 @@ export function HeroSection() {
               </motion.p>
             )}
 
-            {/* Trust badges */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
-              className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-muted-foreground"
-            >
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 border-2 border-background"
-                    />
-                  ))}
-                </div>
-                <span>2,400+ websites created</span>
-              </div>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <svg key={i} className="w-4 h-4 text-amber-500 fill-current" viewBox="0 0 20 20">
-                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                  </svg>
-                ))}
-                <span className="ml-1">4.9/5 rating</span>
-              </div>
-            </motion.div>
+            {/* Removed fake stats */}
           </motion.div>
+
 
           {/* Right side - Visual */}
           <motion.div

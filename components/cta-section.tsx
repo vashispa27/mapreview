@@ -61,7 +61,7 @@ export function CTASection() {
           </h2>
 
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
-            {"Join 2,400+ businesses who've created their dream website in under a minute. Start with your Google Maps link."}
+            {"Start with your Google Maps link and watch as we transform your reviews into a beautiful one-page website."}
           </p>
 
           {/* CTA Form */}
@@ -85,6 +85,7 @@ export function CTASection() {
             <Button
               size="lg"
               className="h-14 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg shadow-primary/25"
+              onClick={() => window.dispatchEvent(new CustomEvent("focus-input"))}
             >
               Create My Site
               <ArrowRight className="ml-2 w-5 h-5" />
@@ -99,7 +100,7 @@ export function CTASection() {
             transition={{ delay: 0.4 }}
             className="mt-6 text-sm text-muted-foreground"
           >
-            Takes 30 seconds • No signup needed • Free forever plan available
+            Takes 30 seconds • Free forever plan available
           </motion.p>
         </motion.div>
       </div>

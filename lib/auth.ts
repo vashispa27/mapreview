@@ -10,6 +10,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      checks: ["none"], // Disables PKCE/State checks to prevent the 'pkceCodeVerifier' error in some environments
     }),
   ],
   callbacks: {

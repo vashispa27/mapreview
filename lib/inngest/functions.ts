@@ -85,7 +85,7 @@ export const generateSiteJob = inngest.createFunction(
     try {
       parsedData = parseScrapedData(place)
     } catch (err) {
-      updateJob(jobId, { status: "FAILED", errorMessage: "error occured in analysing your buisness, please contact the developer" })
+      updateJob(jobId, { status: "FAILED", errorMessage: "error occurred in analysing your business, please contact the developer" })
       await db.site.update({ where: { id: jobId }, data: { status: "FAILED" } })
       console.error(`\n❌ [${jobId}] Fatal Parser Error — stopping retries.`, err)
       return { success: false }
@@ -181,7 +181,7 @@ export const generateSiteJob = inngest.createFunction(
         console.log(`\n\n🏁 [${endTime}] INNGEST JOB COMPLETED SUCCESSFULLY! (${jobId})`)
       } catch (err) {
         // Catch logical errors — don't retry, just inform the user
-        updateJob(jobId, { status: "FAILED", errorMessage: "error occured in analysing your buisness, please contact the developer" })
+        updateJob(jobId, { status: "FAILED", errorMessage: "error occurred in analysing your business, please contact the developer" })
         await db.site.update({ where: { id: jobId }, data: { status: "FAILED" } })
         console.error(`\n❌ [${jobId}] Fatal Mapping Error (no retry):`, err)
       }

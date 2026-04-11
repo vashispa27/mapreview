@@ -74,9 +74,9 @@ export function Navbar() {
                   <span className="text-sm font-medium">{session.user?.name}</span>
                   <button 
                     onClick={() => signOut()}
-                    className="text-[10px] text-muted-foreground hover:text-destructive transition-colors uppercase tracking-wider font-bold"
+                    className="text-xs text-muted-foreground hover:text-destructive transition-colors font-semibold"
                   >
-                    Logout
+                    Sign out
                   </button>
                 </div>
                 <Avatar className="w-9 h-9 border-2 border-primary/20">
@@ -94,8 +94,8 @@ export function Navbar() {
                   Log in
                 </Button>
                 <Button 
-                  onClick={() => signIn("google")}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  onClick={() => window.dispatchEvent(new CustomEvent("focus-input"))}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
                 >
                   Get Started
                 </Button>
@@ -143,12 +143,37 @@ export function Navbar() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <Button variant="outline" size="lg" className="w-full">
-                    Log in
-                  </Button>
-                  <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                    Get Started
-                  </Button>
+                  {session ? (
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="w-full text-destructive border-destructive/20 hover:bg-destructive/10"
+                      onClick={() => signOut()}
+                    >
+                      Sign out
+                    </Button>
+                  ) : (
+                    <>
+                      <Button 
+                        variant="outline" 
+                        size="lg" 
+                        className="w-full"
+                        onClick={() => signIn("google")}
+                      >
+                        Log in
+                      </Button>
+                      <Button 
+                        size="lg" 
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                        onClick={() => {
+                          setMobileMenuOpen(false)
+                          window.dispatchEvent(new CustomEvent("focus-input"))
+                        }}
+                      >
+                        Get Started
+                      </Button>
+                    </>
+                  )}
                 </motion.div>
               </nav>
             </div>
