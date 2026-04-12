@@ -67,7 +67,7 @@ export const generateSiteJob = inngest.createFunction(
           maxReviews: 50,
           reviewsSort: "newest",
           reviewsStartDate: "1 year",
-          scrapeReviewsPersonalData: false,
+          scrapeReviewsPersonalData: true,
           scrapePlaceDetailPage: true,
           language: "en"
         })

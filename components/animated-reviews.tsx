@@ -120,7 +120,18 @@ export function AnimatedReviews({
                     "{review.text}"
                   </p>
                   
-                  <div className="mt-auto pt-4 border-t flex items-center justify-between" style={{ borderColor: customStyles?.border || (isDark ? "#334155" : "#e5e7eb") }}>
+                  <div className="flex items-center gap-4 mt-auto pt-4 border-t" style={{ borderColor: customStyles?.border || (isDark ? "#334155" : "#e5e7eb") }}>
+                    {review.avatar ? (
+                      <img 
+                        src={review.avatar} 
+                        alt={review.author} 
+                        className="w-10 h-10 rounded-full object-cover border border-border/50"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold">
+                        {review.author[0]}
+                      </div>
+                    )}
                     <div>
                       <h4 className="font-semibold leading-none mb-1.5">{review.author}</h4>
                       <div className="flex items-center gap-1">
