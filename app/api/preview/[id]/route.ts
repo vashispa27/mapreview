@@ -132,7 +132,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     where: { id },
     data: {
       businessData: currentBusiness,
-      config: currentConfig
+      config: currentConfig,
+      slug: body.slug || site.slug // Save the custom slug if provided
     }
   })
 

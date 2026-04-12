@@ -11,9 +11,16 @@ export default async function PublicSitePage({ params }: PublicSitePageProps) {
   const { id } = await params
 
   // 1. Fetch the site from Supabase (Prisma)
-  const site = await db.site.findUnique({
-    where: { id }
+  // Search by slug first, then fallback to ID
+  let site = await db.site.findUnique({
+    where: { slug: id }
   })
+
+  if (!site) {
+    site = await db.site.findUnique({
+      where: { id }
+    })
+  }
 
   // 2. Return 404 if the site doesn't exist or is not completed
   if (!site || site.status !== "COMPLETED" || !site.businessData) {

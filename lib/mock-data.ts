@@ -40,7 +40,7 @@ export interface BusinessData {
 
 export interface SiteConfig {
   colorScheme: ColorScheme
-  layout: "modern" | "classic" | "minimal"
+  layout: "modern" | "classic" | "minimal" | "luxury" | "bold" | "executive"
   fontStyle: "sans" | "serif" | "rounded"
   animations: boolean
 }
@@ -51,18 +51,42 @@ export const layoutOptions = [
     name: "Modern",
     description: "Clean lines, bold sections",
     icon: "layout-grid",
+    isPro: false,
   },
   {
     id: "classic" as const,
     name: "Classic",
     description: "Traditional, elegant feel",
     icon: "layout-list",
+    isPro: false,
   },
   {
     id: "minimal" as const,
     name: "Minimal",
     description: "Simple, content-focused",
     icon: "layout-template",
+    isPro: false,
+  },
+  {
+    id: "luxury" as const,
+    name: "Luxury",
+    description: "Dark elegance, premium feel",
+    icon: "crown",
+    isPro: true,
+  },
+  {
+    id: "bold" as const,
+    name: "Bold",
+    description: "High-impact, vibrant energy",
+    icon: "zap",
+    isPro: true,
+  },
+  {
+    id: "executive" as const,
+    name: "Executive",
+    description: "Split-screen, corporate clean",
+    icon: "briefcase",
+    isPro: true,
   },
 ]
 
@@ -252,6 +276,27 @@ export function generateMockBusinessData(url: string): BusinessData {
         date: "2 months ago",
         text: "As someone who lived in Italy for 3 years, I can say this is the real deal. Authentic flavors, fresh ingredients, and genuine hospitality. A gem!",
       },
+      {
+        author: "Robert P.",
+        avatar: "https://i.pravatar.cc/100?u=robert",
+        rating: 5,
+        date: "3 months ago",
+        text: "The atmosphere here is just magical. It feels like a private escape from the city. The cocktails are inventive and perfectly balanced.",
+      },
+      {
+        author: "Sophia L.",
+        avatar: "https://i.pravatar.cc/100?u=sophia",
+        rating: 4,
+        date: "3 months ago",
+        text: "Great place for a late night bite. The sliders were delicious and the service was surprisingly fast for how busy they were.",
+      },
+      {
+        author: "James W.",
+        avatar: "https://i.pravatar.cc/100?u=james",
+        rating: 5,
+        date: "4 months ago",
+        text: "Found this place by accident and what a find! The attention to detail in the decor and the menu is outstanding. 10/10.",
+      }
     ],
     description:
       "The Golden Spoon Bistro brings authentic Italian cuisine to the heart of downtown. Our chef, trained in Naples, uses only the freshest ingredients and traditional techniques passed down through generations. From our hand-rolled pasta to our wood-fired pizzas, every dish tells a story of passion and craftsmanship.",

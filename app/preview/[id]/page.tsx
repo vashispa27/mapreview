@@ -143,10 +143,26 @@ export default function PreviewPage({ params }: PreviewPageProps) {
     }
   }
 
-  const handlePublish = async () => {
+  const handlePublish = async (slug: string) => {
     setIsPublishing(true)
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    router.push(`/site/${id}?published=true`)
+    try {
+      // 1. Save the slug to the database via PATCH
+      const res = await fetch(`/api/preview/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug }),
+      })
+
+      if (!res.ok) throw new Error("Failed to save custom URL")
+
+      // 2. Redirect to the new custom public URL
+      router.push(`/site/${slug}?published=true`)
+    } catch (err) {
+      console.error(err)
+      alert("Something went wrong while publishing. Please try again.")
+    } finally {
+      setIsPublishing(false)
+    }
   }
 
   // Purely Abstracted Loading Layout hiding exact API mechanical limitations

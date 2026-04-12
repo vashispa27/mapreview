@@ -1,7 +1,7 @@
 "use client"
 
 import { ColorScheme, SiteConfig, colorSchemes, layoutOptions, fontOptions } from "@/lib/mock-data"
-import { Check, LayoutGrid, LayoutList, LayoutTemplate, Sparkles } from "lucide-react"
+import { Check, LayoutGrid, LayoutList, LayoutTemplate, Sparkles, Crown, Zap, Briefcase } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 
@@ -14,6 +14,9 @@ const layoutIcons = {
   "layout-grid": LayoutGrid,
   "layout-list": LayoutList,
   "layout-template": LayoutTemplate,
+  "crown": Crown,
+  "zap": Zap,
+  "briefcase": Briefcase,
 }
 
 export function CustomizationOptions({ config, onConfigChange }: CustomizationOptionsProps) {
@@ -88,6 +91,11 @@ export function CustomizationOptions({ config, onConfigChange }: CustomizationOp
                   <p className="font-medium text-sm">{layout.name}</p>
                   <p className="text-xs text-muted-foreground">{layout.description}</p>
                 </div>
+                {layout.isPro && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-orange-500 text-white tracking-wide">
+                    PRO
+                  </span>
+                )}
                 {config.layout === layout.id && (
                   <Check className="w-5 h-5 text-primary" />
                 )}

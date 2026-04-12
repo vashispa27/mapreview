@@ -60,6 +60,7 @@ model User {
 model Site {
   id           String   @id  // This will be the jobId
   userId       String
+  slug         String?  @unique // Custom URL chosen by user
   url          String           // The original Google Maps URL
   businessName String?
   status       String   @default("QUEUED") // QUEUED | COMPLETED | FAILED

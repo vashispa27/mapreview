@@ -8,9 +8,17 @@ import { cn } from "@/lib/utils"
 interface AnimatedReviewsProps {
   reviews: any[]
   colorScheme: any
-  layoutStyles: any
+  layoutStyles?: any
   isDark: boolean
-  layout: string
+  layout?: string
+  customStyles?: {
+    cardBg?: string
+    border?: string
+    muted?: string
+    boxShadow?: string
+    padding?: string
+    rounded?: string
+  }
 }
 
 export function AnimatedReviews({
@@ -18,10 +26,11 @@ export function AnimatedReviews({
   colorScheme,
   layoutStyles,
   isDark,
-  layout
+  layout,
+  customStyles
 }: AnimatedReviewsProps) {
-  // Always restrict to maximum 6 active cards, or fewer if the scrape was small
-  const MAX_CARDS = Math.min(6, reviews.length)
+  // Show 3 cards if we have 4-9 reviews, otherwise show 6
+  const MAX_CARDS = reviews.length > 3 && reviews.length < 10 ? 3 : Math.min(6, reviews.length)
   
   // State holds the actual array indexes from the original `reviews` prop
   const [activeIndices, setActiveIndices] = useState<number[]>([])
@@ -29,7 +38,7 @@ export function AnimatedReviews({
   // Initialize with the first N reviews
   useEffect(() => {
     setActiveIndices(Array.from({ length: MAX_CARDS }, (_, i) => i))
-  }, [MAX_CARDS])
+  }, [MAX_CARDS, reviews.length])
 
   // Interval logic to randomly swap one out
   useEffect(() => {
@@ -62,6 +71,13 @@ export function AnimatedReviews({
 
   if (activeIndices.length === 0) return null;
 
+  const cardStyle = customStyles?.rounded || layoutStyles?.cardStyle || "rounded-2xl"
+  const cardBg = customStyles?.cardBg || (isDark ? "#1e293b" : "#fff")
+  const cardBorder = customStyles?.border ? `1px solid ${customStyles.border}` : "none"
+  const boxShadow = customStyles?.boxShadow || (isDark ? "none" : "0 4px 6px -1px rgba(0,0,0,0.1)")
+  const textColorMuted = customStyles?.muted || colorScheme.muted
+  const padding = customStyles?.padding || "p-6"
+
   return (
     <div
       className={cn(
@@ -83,12 +99,14 @@ export function AnimatedReviews({
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.6, ease: "easeInOut" }}
                 className={cn(
-                  "p-6 h-full",
-                  layoutStyles.cardStyle
+                  "h-full flex flex-col",
+                  padding,
+                  cardStyle
                 )}
                 style={{
-                  backgroundColor: isDark ? "#1e293b" : "#fff",
-                  boxShadow: isDark ? "none" : "0 4px 6px -1px rgba(0,0,0,0.1)",
+                  backgroundColor: cardBg,
+                  border: cardBorder,
+                  boxShadow: boxShadow,
                 }}
               >
                 <div className="flex flex-col h-full">
@@ -97,12 +115,12 @@ export function AnimatedReviews({
                   </h3>
                   <p
                     className={cn("line-clamp-4 flex-1 mb-6", layout === "minimal" ? "text-sm" : "")}
-                    style={{ color: colorScheme.muted }}
+                    style={{ color: textColorMuted }}
                   >
                     "{review.text}"
                   </p>
                   
-                  <div className="mt-auto pt-4 border-t flex items-center justify-between" style={{ borderColor: isDark ? "#334155" : "#e5e7eb" }}>
+                  <div className="mt-auto pt-4 border-t flex items-center justify-between" style={{ borderColor: customStyles?.border || (isDark ? "#334155" : "#e5e7eb") }}>
                     <div>
                       <h4 className="font-semibold leading-none mb-1.5">{review.author}</h4>
                       <div className="flex items-center gap-1">
@@ -116,7 +134,7 @@ export function AnimatedReviews({
                         ))}
                       </div>
                     </div>
-                    <span className="text-xs font-medium" style={{ color: colorScheme.muted }}>
+                    <span className="text-xs font-medium" style={{ color: textColorMuted }}>
                       {review.date}
                     </span>
                   </div>
