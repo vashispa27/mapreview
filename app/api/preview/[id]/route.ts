@@ -1,30 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getPreview, updatePreviewConfig } from "@/lib/preview-store"
-import { colorSchemes, ColorScheme, generateMockBusinessData } from "@/lib/mock-data"
+import { colorSchemes, ColorScheme } from "@/lib/mock-data"
 import { getJob } from "@/lib/job-store"
+import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/lib/auth"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  
-  // Handle admin-demo case - return mock data without auth or db access
-  if (id === "admin-demo") {
-    const mockBusiness = generateMockBusinessData("admin-demo")
-    return NextResponse.json({
-      status: "COMPLETED",
-      business: mockBusiness,
-      config: {
-        colorScheme: colorSchemes[0],
-        layout: "modern",
-        fontStyle: "sans",
-        animations: true
-      },
-    })
-  }
-  
-  // Only import db when needed (for non-admin-demo requests)
-  const { db } = await import("@/lib/db")
   
   // 1. Get the current user session
   const session = await auth()
@@ -33,8 +16,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   // 2. Fetch from DB and verify ownership
-  const dbSite = await db.site.findUnique({
-    where: { id }
+  // We search for either ID or Slug that matches the parameter
+  const dbSite = await db.site.findFirst({
+    where: {
+      OR: [
+        { id: id },
+        { slug: id }
+      ]
+    }
   })
 
   if (!dbSite) {
@@ -50,6 +39,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({
       status: "COMPLETED",
       business: dbSite.businessData,
+      isPublished: !!dbSite.slug,
+      slug: dbSite.slug,
       config: dbSite.config || {
         colorSchemeId: "default",
         layout: "modern",
@@ -59,7 +50,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     })
   }
 
-  // 3. Fallback to in-memory job status (also verify ownership)
+  // 3. Fallback to in-memory job status (for brand new generation)
   const job = getJob(id)
   if (job) {
     return NextResponse.json({
@@ -68,40 +59,27 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     })
   }
 
-  return NextResponse.json({ error: "Preview not initialized on background queue engine limits natively" }, { status: 404 })
+  return NextResponse.json({ error: "Preview not initialized" }, { status: 404 })
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const body = await request.json()
 
-  // Handle admin-demo case - just return success without persisting
-  if (id === "admin-demo") {
-    const mockBusiness = generateMockBusinessData("admin-demo")
-    // Merge body changes with mock data for response
-    return NextResponse.json({
-      business: { ...mockBusiness, ...body },
-      config: {
-        colorScheme: body.colorSchemeId ? colorSchemes.find(c => c.id === body.colorSchemeId) || colorSchemes[0] : colorSchemes[0],
-        layout: body.layout || "modern",
-        fontStyle: body.fontStyle || "sans",
-        animations: body.animations ?? true
-      },
-    })
-  }
-
-  // Only import db when needed (for non-admin-demo requests)
-  const { db } = await import("@/lib/db")
-  
   // 1. Get the current user session
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Authentication required" }, { status: 401 })
   }
 
-  // 2. Fetch current data from DB and verify ownership
-  const site = await db.site.findUnique({
-    where: { id }
+  // 2. Fetch current data from DB (Search by slug or ID)
+  const site = await db.site.findFirst({
+    where: {
+      OR: [
+        { id: id },
+        { slug: id }
+      ]
+    }
   })
 
   if (!site) {
@@ -116,7 +94,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const currentBusiness = (site.businessData as any) || {}
   const currentConfig = (site.config as any) || {}
 
-  // 2. Update Business and Config based on body
+  // Update Business and Config based on body
   if (body.colorSchemeId) currentConfig.colorSchemeId = body.colorSchemeId
   if (body.layout) currentConfig.layout = body.layout
   if (body.fontStyle) currentConfig.fontStyle = body.fontStyle
@@ -129,16 +107,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   // 3. Save to Prisma
   const updated = await db.site.update({
-    where: { id },
+    where: { id: site.id }, // Use the internal primary ID for the update
     data: {
       businessData: currentBusiness,
       config: currentConfig,
-      slug: body.slug || site.slug // Save the custom slug if provided
+      slug: body.slug || site.slug
     }
   })
 
-  // Purge the ISR cache so the public site updates immediately after an edit!
-  revalidatePath(`/site/${id}`)
+  // Purge the ISR cache
+  if (updated.slug) revalidatePath(`/site/${updated.slug}`)
+  revalidatePath(`/site/${updated.id}`)
 
   return NextResponse.json({
     business: updated.businessData,
