@@ -1,5 +1,5 @@
 "use client"
-//hello
+//hello;
 import { BusinessData, SiteConfig } from "@/lib/mock-data"
 import { Star, MapPin, Phone, Clock, Globe, Check, ChevronRight, ChevronDown, X, Instagram, Facebook, Twitter } from "lucide-react"
 import { cn } from "@/lib/utils"
