@@ -296,21 +296,13 @@ export default function MySitesPage() {
                             className="flex-1"
                             asChild
                           >
-                            <Link href={`/preview/${site.id}`}>
+                            <Link href={`/preview/${site.slug || site.id}`}>
                               <Pencil className="w-4 h-4 mr-1" />
                               Edit
                             </Link>
                           </Button>
                         </>
                       )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => setDeleteId(site.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
                     </div>
                   </div>
                 </motion.div>

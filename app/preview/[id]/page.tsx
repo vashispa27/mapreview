@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react"
 import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
 import { BusinessData, SiteConfig, colorSchemes, generateMockBusinessData } from "@/lib/mock-data"
 import { SiteTemplate } from "@/components/site-template"
 import { PreviewCustomizer } from "@/components/preview-customizer"
@@ -24,6 +25,8 @@ export default function PreviewPage({ params }: PreviewPageProps) {
     animations: true,
   })
   const [isPublishing, setIsPublishing] = useState(false)
+  const [isPublished, setIsPublished] = useState(false)
+  const [siteSlug, setSiteSlug] = useState<string | null>(null)
   
   // Track queue statuses exclusively
   const [jobStatus, setJobStatus] = useState<string>("QUEUED")
@@ -72,6 +75,8 @@ export default function PreviewPage({ params }: PreviewPageProps) {
         
         if (data.status === "COMPLETED") {
           setBusiness(data.business)
+          setIsPublished(!!data.isPublished)
+          setSiteSlug(data.slug)
           setConfig({
             colorScheme: data.config?.colorScheme || colorSchemes[0],
             layout: data.config?.layout || "modern",
@@ -156,7 +161,8 @@ export default function PreviewPage({ params }: PreviewPageProps) {
       if (!res.ok) throw new Error("Failed to save custom URL")
 
       // 2. Redirect to the new custom public URL
-      router.push(`/site/${slug}?published=true`)
+      const finalSlug = slug || siteSlug || id
+      router.push(`/site/${finalSlug}?published=true`)
     } catch (err) {
       console.error(err)
       alert("Something went wrong while publishing. Please try again.")
@@ -252,6 +258,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
         onBusinessChange={handleBusinessChange}
         onPublish={handlePublish}
         isPublishing={isPublishing}
+        isPublished={isPublished}
       />
     </div>
   )
