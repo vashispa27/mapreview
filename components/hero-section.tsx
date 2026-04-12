@@ -3,27 +3,30 @@
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ArrowRight, Sparkles, MapPin, Loader2 } from "lucide-react"
+import { ArrowRight, Sparkles, MapPin, Loader2, HelpCircle, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Mascot } from "@/components/mascot"
 import { WebsitePreviewCard } from "@/components/showcase-cards"
-import { useSession } from "next-auth/react"
-import { LoginModal } from "@/components/login-modal"
-import { useAdminMode } from "@/components/providers/admin-provider"
+import { useSession, signIn } from "next-auth/react"
+import { useToast } from "@/hooks/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 
 export function HeroSection() {
   const { data: session } = useSession()
-  const { isAdminMode, setAdminMode } = useAdminMode()
   const router = useRouter()
+  const { toast } = useToast()
   const [url, setUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [loginModalOpen, setLoginModalOpen] = useState(false)
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  // Combine real session with admin mode
-  const isLoggedIn = !!session || isAdminMode
 
   useEffect(() => {
     const handleFocusEvent = () => {
@@ -34,24 +37,49 @@ export function HeroSection() {
     return () => window.removeEventListener("focus-input", handleFocusEvent)
   }, [])
 
+  const validateUrl = (testUrl: string) => {
+    // Restore ADMIN bypass
+    if (testUrl.trim().toLowerCase() === "admin") return null
+
+    if (!testUrl.includes("maps.app.goo.gl") && !testUrl.includes("goo.gl/maps")) {
+      return "invalid"
+    }
+    return null
+  }
+
   const handleGenerate = async () => {
-    // Check for admin bypass - use mock data
-    if (url.trim().toLowerCase() === "admin") {
+    const finalUrl = url.trim()
+
+    // ADMIN BYPASS
+    if (finalUrl.toLowerCase() === "admin") {
       setIsLoading(true)
-      // Small delay to show loading state
       await new Promise(resolve => setTimeout(resolve, 500))
-      // Redirect to a special admin preview route
-      router.push("/preview/admin-demo")
+      router.push(`/preview/admin-demo`)
       return
     }
 
-    if (!isLoggedIn) {
-      setLoginModalOpen(true)
+    // OFFLINE MODE BYPASS
+    if (process.env.NEXT_PUBLIC_OFFLINE_MODE === "true") {
+      setIsLoading(true)
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      router.push(`/preview/mock-site-id`)
+      setIsLoading(false)
       return
     }
 
-    if (!url.trim()) {
+    if (!session) {
+      signIn("google")
+      return
+    }
+
+    if (!finalUrl) {
       setError("Please enter a Google Maps URL")
+      return
+    }
+
+    const validationResult = validateUrl(finalUrl)
+    if (validationResult === "invalid") {
+      setIsTutorialOpen(true)
       return
     }
 
@@ -62,7 +90,7 @@ export function HeroSection() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: finalUrl }),
       })
 
       const data = await res.json()
@@ -72,8 +100,12 @@ export function HeroSection() {
         return
       }
 
-      // Redirect onto backend polling queue mapping
-      router.push(`/preview/${data.jobId}`)
+      toast({
+        title: "Site Generation Started!",
+        description: "Your page is being built. Check the status in your My Sites dashboard.",
+      })
+      
+      router.push("/my-sites")
     } catch (err) {
       setError("Something went wrong. Please try again.")
     } finally {
@@ -83,6 +115,40 @@ export function HeroSection() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4 py-20 overflow-hidden">
+      {/* URL Tutorial Modal */}
+      <Dialog open={isTutorialOpen} onOpenChange={setIsTutorialOpen}>
+        <DialogContent className="sm:max-w-xl p-0 overflow-hidden border-none bg-transparent shadow-none">
+          <div className="bg-card rounded-3xl overflow-hidden shadow-2xl border border-border">
+            <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center text-destructive">
+                  <HelpCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-bold">Wrong Link Format</DialogTitle>
+                  <DialogDescription>The link you pasted isn't a Google Maps "Share" link.</DialogDescription>
+                </div>
+              </div>
+              <button onClick={() => setIsTutorialOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-2 bg-black">
+              <img 
+                src="/url-tutorial.gif" 
+                alt="How to copy Google Maps URL" 
+                className="w-full h-auto rounded-xl shadow-inner"
+              />
+            </div>
+            <div className="p-6 bg-muted/30 text-center">
+              <Button className="w-full h-12 text-base font-bold" onClick={() => setIsTutorialOpen(false)}>
+                Got it, I'll copy the right link!
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left side - Content */}
@@ -138,50 +204,52 @@ export function HeroSection() {
               transition={{ delay: 0.4 }}
               className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 text-pretty"
             >
-              Paste your Google Maps link and watch as we create a stunning one-pager with your real reviews, photos, and business info. No coding required.
+              Paste your Google Maps "Share" link and watch as we transform your reviews into a beautiful one-page website.
             </motion.p>
 
-            {/* URL Input */}
+            {/* URL Input Area */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto lg:mx-0"
+              className="flex flex-col gap-4 max-w-xl mx-auto lg:mx-0"
             >
-              <div className="relative flex-1">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  ref={inputRef}
-                  type="url"
-                  placeholder="Paste your Google Maps URL..."
-                  value={url}
-                  onChange={(e) => {
-                    setUrl(e.target.value)
-                    setError("")
-                  }}
-                  onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-                  className="pl-12 h-14 text-base bg-card border-border shadow-sm"
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    ref={inputRef}
+                    type="url"
+                    placeholder="Paste Google Maps link..."
+                    value={url}
+                    onChange={(e) => {
+                      setUrl(e.target.value)
+                      setError("")
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+                    className="pl-12 h-14 text-base bg-card border-border shadow-sm"
+                    disabled={isLoading}
+                  />
+                </div>
+                <Button
+                  size="lg"
+                  className="h-14 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg shadow-primary/25"
+                  onClick={handleGenerate}
                   disabled={isLoading}
-                />
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      Generate Site
+                      <ArrowRight className="ml-2 w-5 h-5" />
+                    </>
+                  )}
+                </Button>
               </div>
-              <Button
-                size="lg"
-                className="h-14 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg shadow-primary/25"
-                onClick={handleGenerate}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 w-5 h-5 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    Generate Site
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </>
-                )}
-              </Button>
             </motion.div>
 
             {/* Error message */}
@@ -194,10 +262,7 @@ export function HeroSection() {
                 {error}
               </motion.p>
             )}
-
-            {/* Removed fake stats */}
           </motion.div>
-
 
           {/* Right side - Visual */}
           <motion.div
@@ -206,7 +271,6 @@ export function HeroSection() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="relative hidden lg:block"
           >
-            {/* Main preview card */}
             <motion.div
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -214,7 +278,6 @@ export function HeroSection() {
               <WebsitePreviewCard className="w-full max-w-md mx-auto" />
             </motion.div>
 
-            {/* Mascot */}
             <motion.div
               className="absolute -left-16 bottom-0"
               initial={{ opacity: 0, scale: 0 }}
@@ -223,53 +286,9 @@ export function HeroSection() {
             >
               <Mascot className="w-32 h-40" />
             </motion.div>
-
-            {/* Floating elements */}
-            <motion.div
-              className="absolute -top-4 right-8 bg-card rounded-xl shadow-lg p-3 border border-border"
-              animate={{ y: [0, -8, 0], rotate: [0, 3, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-card-foreground">New Review!</p>
-                  <p className="text-xs text-muted-foreground">Best pizza ever!</p>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="absolute -bottom-4 right-4 bg-card rounded-xl shadow-lg p-3 border border-border"
-              animate={{ y: [0, 8, 0], rotate: [0, -3, 0] }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-card-foreground">Site Generated!</p>
-                  <p className="text-xs text-muted-foreground">Ready in 30 seconds</p>
-                </div>
-              </div>
-            </motion.div>
           </motion.div>
         </div>
       </div>
-
-      {/* Login Modal */}
-      <LoginModal 
-        open={loginModalOpen} 
-        onOpenChange={setLoginModalOpen}
-        onAdminLogin={() => setAdminMode(true)}
-      />
     </section>
   )
 }

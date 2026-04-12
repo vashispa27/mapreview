@@ -69,6 +69,7 @@ model Site {
   // Store the full generated site data and config as JSON
   businessData Json?
   config       Json?
+  deleted      Boolean  @default(false)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

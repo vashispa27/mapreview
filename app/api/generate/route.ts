@@ -17,8 +17,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 })
     }
 
-    if (!url.includes("google.com/maps") && !url.includes("goo.gl") && !url.includes("maps.app")) {
-      return NextResponse.json({ error: "Please provide a valid Google Maps URL" }, { status: 400 })
+    // Strict URL check for short links as requested
+    const isGoogleMapsUrl = url.includes("maps.app.goo.gl") || url.includes("goo.gl/maps")
+    
+    if (!isGoogleMapsUrl) {
+      return NextResponse.json({ 
+        error: "Please provide a valid Google Maps short URL (e.g., https://maps.app.goo.gl/...)" 
+      }, { status: 400 })
     }
 
     // Usage limit check (Max 3 sites)
@@ -51,8 +56,8 @@ export async function POST(request: NextRequest) {
       data: { url, jobId }
     })
 
-    // Reply instantaneously disconnecting underlying computation streams shielding frontend timeouts dynamically!
-    return NextResponse.json({ success: true, jobId })
+    // Reply with current count so frontend knows limits
+    return NextResponse.json({ success: true, jobId, siteCount: siteCount + 1 })
     
   } catch (error) {
     console.error("Error creating job payload tracking:", error)

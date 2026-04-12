@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+import { db } from "@/lib/db"
+import { revalidatePath } from "next/cache"
 
 export async function DELETE(
   request: NextRequest,
@@ -14,24 +16,22 @@ export async function DELETE(
   const { id } = await params
 
   try {
-    const { db } = await import("@/lib/db")
-    
-    // Verify the site belongs to the user
-    const site = await db.site.findFirst({
+    // Soft delete: keep the record for usage tracking but hide it from the user
+    const site = await db.site.update({
       where: {
         id,
         userId: session.user.id,
       },
+      data: {
+        deleted: true
+      }
     })
 
-    if (!site) {
-      return NextResponse.json({ error: "Site not found" }, { status: 404 })
+    // Purge the public cache if it was published
+    if (site.slug) {
+      revalidatePath(`/site/${site.slug}`)
     }
-
-    // Delete the site
-    await db.site.delete({
-      where: { id },
-    })
+    revalidatePath(`/site/${id}`)
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -31,6 +31,7 @@ import {
 
 interface Site {
   id: string
+  slug: string | null
   url: string
   businessName: string | null
   status: string
@@ -45,6 +46,7 @@ interface Site {
 const mockSites: Site[] = [
   {
     id: "admin-demo",
+    slug: "golden-spoon",
     url: "https://maps.google.com/mock-restaurant",
     businessName: "The Golden Spoon Bistro",
     status: "COMPLETED",
@@ -56,6 +58,7 @@ const mockSites: Site[] = [
   },
   {
     id: "admin-demo-2",
+    slug: "sunrise-coffee",
     url: "https://maps.google.com/mock-cafe",
     businessName: "Sunrise Coffee House",
     status: "COMPLETED",
@@ -167,11 +170,27 @@ export default function MySitesPage() {
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">My Sites</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage all your generated websites in one place.
-          </p>
+        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">My Sites</h1>
+            <p className="text-muted-foreground mt-2">
+              Manage all your generated websites in one place.
+            </p>
+          </div>
+          <div className="bg-muted/50 px-4 py-2 rounded-lg border border-border flex items-center gap-3">
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground leading-none mb-1">Usage Limit</span>
+              <span className="text-sm font-bold">
+                {sites.length} / 3 <span className="text-muted-foreground font-medium">sites created</span>
+              </span>
+            </div>
+            <div className="w-12 h-1.5 bg-border rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-500" 
+                style={{ width: `${Math.min((sites.length / 3) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Admin Mode Indicator */}
@@ -266,7 +285,7 @@ export default function MySitesPage() {
                             className="flex-1"
                             asChild
                           >
-                            <Link href={`/s/${site.id}`} target="_blank">
+                            <Link href={`/site/${site.slug || site.id}`} target="_blank">
                               <ExternalLink className="w-4 h-4 mr-1" />
                               View
                             </Link>

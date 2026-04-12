@@ -19,6 +19,9 @@ interface LoginModalProps {
   onAdminLogin?: () => void
 }
 
+// List of authorized admin emails for email login
+const ADMIN_EMAILS = ["abhinav@maptosite.com", "admin@maptosite.com"]
+
 export function LoginModal({ open, onOpenChange, onAdminLogin }: LoginModalProps) {
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -27,28 +30,25 @@ export function LoginModal({ open, onOpenChange, onAdminLogin }: LoginModalProps
   const handleEmailSubmit = async () => {
     const trimmedEmail = email.trim().toLowerCase()
     
-    // Admin bypass for testing
+    // Admin bypass for local testing word
     if (trimmedEmail === "admin") {
       onOpenChange(false)
       onAdminLogin?.()
       return
     }
 
-    // Check if it's a Gmail address
     if (!trimmedEmail.includes("@")) {
       setError("Please enter a valid email address")
       return
     }
 
-    if (trimmedEmail.endsWith("@gmail.com")) {
-      // Gmail users go through Google auth
-      setIsLoading(true)
-      signIn("google", { callbackUrl: window.location.href })
+    // Check if the email is in the admin list
+    if (!ADMIN_EMAILS.includes(trimmedEmail)) {
+      setError("Unauthorized: Please continue with Google")
       return
     }
 
-    // For non-Gmail addresses, also route to Google auth
-    // (they can use any Google workspace account)
+    // Authorized admins continue with Google (or we could use email provider if configured)
     setIsLoading(true)
     signIn("google", { callbackUrl: window.location.href })
   }

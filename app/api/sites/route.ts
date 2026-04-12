@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+import { db } from "@/lib/db"
 
 export async function GET() {
   const session = await auth()
@@ -9,17 +10,17 @@ export async function GET() {
   }
 
   try {
-    const { db } = await import("@/lib/db")
-    
     const sites = await db.site.findMany({
       where: {
         userId: session.user.id,
+        deleted: false // Only return non-deleted sites to the UI
       },
       orderBy: {
         createdAt: "desc",
       },
       select: {
         id: true,
+        slug: true,
         url: true,
         businessName: true,
         status: true,
@@ -28,7 +29,12 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json({ sites })
+    // Also get the total count (including deleted) for the usage limit
+    const totalGenerated = await db.site.count({
+      where: { userId: session.user.id }
+    })
+
+    return NextResponse.json({ sites, totalGenerated })
   } catch (error) {
     console.error("Failed to fetch sites:", error)
     return NextResponse.json({ error: "Failed to fetch sites" }, { status: 500 })
