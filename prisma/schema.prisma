@@ -52,9 +52,24 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
 
+  // Payment Fields
+  plan          String    @default("base") // base | pro | lifetime
+  isLifetime    Boolean   @default(false)
+  payments      Payment[]
+
   accounts Account[]
   sessions Session[]
   sites    Site[]
+}
+
+model Payment {
+  id            String   @id
+  amount        Int      // In lowest denomination
+  currency      String
+  status        String   // succeeded | failed | pending
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
 }
 
 model Site {

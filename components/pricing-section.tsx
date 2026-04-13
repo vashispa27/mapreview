@@ -1,11 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import { motion } from "framer-motion"
-import { Check, Sparkles, Zap } from "lucide-react"
+import { Check, Sparkles, Zap, Infinity, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSession, signIn } from "next-auth/react"
+import { cn } from "@/lib/utils"
 
 export function PricingSection() {
+  const { data: session } = useSession()
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+
   const fadeInUp = {
     initial: { opacity: 0, y: 30 },
     whileInView: { opacity: 1, y: 0 },
@@ -13,8 +19,40 @@ export function PricingSection() {
     transition: { duration: 0.6 }
   }
 
+  const handleCheckout = async (plan: string) => {
+    if (plan === "base") {
+      window.dispatchEvent(new CustomEvent("focus-input"))
+      return
+    }
+
+    if (!session) {
+      signIn("google")
+      return
+    }
+
+    setLoadingPlan(plan)
+    try {
+      const res = await fetch("/api/payments/create-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert("Failed to initiate checkout. Please try again.")
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoadingPlan(null)
+    }
+  }
+
   const tiers = [
     {
+      id: "base",
       name: "Base",
       description: "Perfect for getting started",
       price: "$0",
@@ -25,13 +63,13 @@ export function PricingSection() {
         "Free 24/7 Hosting Support",
         "Unlimited Content Edits",
         "Standard Templates",
-        "Basic SEO Ready",
       ],
       buttonText: "Start for Free",
       popular: false,
       icon: Zap
     },
     {
+      id: "pro",
       name: "Pro",
       description: "For growing businesses",
       price: "$19",
@@ -42,11 +80,27 @@ export function PricingSection() {
         "24/7 Priority Live Support",
         "Remove MapToSite Branding",
         "Advanced Elite Templates",
-        "Unlimited AI Site Generations",
       ],
       buttonText: "Upgrade to Pro",
       popular: true,
       icon: Sparkles
+    },
+    {
+      id: "lifetime",
+      name: "Lifetime",
+      description: "The ultimate deal",
+      price: "$99",
+      priceSuffix: "one-time",
+      features: [
+        "UNLIMITED Website Creations",
+        "Free Custom Domain (.com)",
+        "All current & future Elite features",
+        "VIP Concierge Support",
+        "Zero Recurring Fees",
+      ],
+      buttonText: "Get Lifetime Access",
+      popular: false,
+      icon: Infinity
     }
   ]
 
@@ -62,7 +116,7 @@ export function PricingSection() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {tiers.map((tier, index) => (
             <motion.div 
               key={tier.name}
@@ -91,7 +145,7 @@ export function PricingSection() {
                     </div>
                     <CardTitle className="text-2xl font-black uppercase italic tracking-tight">{tier.name}</CardTitle>
                   </div>
-                  <CardDescription className="text-base">{tier.description}</CardDescription>
+                  <CardDescription className="text-base h-10 line-clamp-2">{tier.description}</CardDescription>
                   <div className="mt-6 flex items-baseline gap-1">
                     <span className="text-5xl font-black tracking-tighter">{tier.price}</span>
                     <span className="text-muted-foreground font-bold text-sm">{tier.priceSuffix}</span>
@@ -122,9 +176,10 @@ export function PricingSection() {
                     className="w-full h-14 text-base font-black uppercase tracking-widest shadow-lg"
                     variant={tier.popular ? "default" : "outline"}
                     size="lg"
-                    onClick={() => window.dispatchEvent(new CustomEvent("focus-input"))}
+                    disabled={loadingPlan !== null}
+                    onClick={() => handleCheckout(tier.id)}
                   >
-                    {tier.buttonText}
+                    {loadingPlan === tier.id ? <Loader2 className="w-5 h-5 animate-spin" /> : tier.buttonText}
                   </Button>
                 </CardFooter>
               </Card>
@@ -134,9 +189,4 @@ export function PricingSection() {
       </div>
     </section>
   )
-}
-
-// Utility function if not globally available
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ")
 }
