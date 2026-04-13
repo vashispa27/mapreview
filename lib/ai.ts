@@ -1,18 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai"
 
+/**
+ * AI Content Generator with Fallback Logic
+ * Tries models in order of preference to handle 503 (Throttling) and 429 (Rate Limits)
+ */
 export async function generateBusinessContent(parsedData: any) {
   const apiKey = process.env.GEMINI_API_KEY
 
-  // If the user hasn't mounted their API key, we fail gracefully 
-  // so the site generation doesn't completely crash for local testing.
   if (!apiKey) {
     console.warn("No GEMINI_API_KEY found! Returning fallback analysis.")
     return null
   }
 
   const ai = new GoogleGenAI({ apiKey })
-
-  // Slice to 30 to avoid overwhelming output token limits while getting enough mass.
   const topReviews = parsedData.reviews.slice(0, 30)
 
   const prompt = `
@@ -21,55 +21,80 @@ Your task is to generate marketing copy strictly following these rules:
 
 1. About Us (description): Enhance the existing description if it exists, or create a nice-sounding, compelling summary. Never include negative sentiments.
 2. What We Offer (features): Return EXACTLY 4 short feature strings. 
-   - The first two MUST describe core jobs/offerings (e.g., in case of restaurants the food they offer, and in case of other businesses what they offer).
-   - The last two MUST be derived from positive ambient/experiential things users said in reviews (e.g., "Cozy Lighting", "Friendly Staff"). 
-   - Never have any negative reviews or statements.
-3. Customer Reviews (jtbdHeader): For each review provided below, generate a short Jobs-To-Be-Done header that the review proves. For example, "Find the best experience for your family". Ensure there are no negative statements.
+   - The first two MUST describe core jobs/offerings.
+   - The last two MUST be derived from positive ambient/experiential things users said in reviews.
+3. Customer Reviews (jtbdHeader): For each review provided below, generate a short Jobs-To-Be-Done header that the review proves.
 
 Original Description: ${(parsedData.businessInfo as any)?.description || "Not provided."}
 Reviews to Analyze:
 ${topReviews.map((r: any, idx: number) => `[ID: ${idx}] ${r.text}`).join("\n\n")}`;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            description: { type: Type.STRING },
-            features: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-              description: "Exactly 4 strings."
-            },
-            reviews: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  originalIndex: { type: Type.INTEGER },
-                  jtbdHeader: { type: Type.STRING }
-                },
-                required: ["originalIndex", "jtbdHeader"]
+  // MODELS TO TRY IN ORDER (High Performance -> Fast Fallback -> Lite Fallback)
+  // Note: Updated names to match current Google AI Studio stable IDs
+  const modelsToTry = [
+    "gemini-2.0-flash", 
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b"
+  ]
+
+  let lastError = null
+
+  for (const modelName of modelsToTry) {
+    try {
+      console.log(`🤖 Attempting generation with model: ${modelName}...`)
+      
+      const model = ai.getGenerativeModel({ model: modelName })
+      
+      const response = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              description: { type: Type.STRING },
+              features: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+                description: "Exactly 4 strings."
+              },
+              reviews: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    originalIndex: { type: Type.INTEGER },
+                    jtbdHeader: { type: Type.STRING }
+                  },
+                  required: ["originalIndex", "jtbdHeader"]
+                }
               }
-            }
-          },
-          required: ["description", "features", "reviews"]
+            },
+            required: ["description", "features", "reviews"]
+          }
         }
+      })
+
+      const resultText = response.response.text()
+      if (!resultText) continue // Try next model if empty
+
+      console.log(`✅ Success with ${modelName}`)
+      return JSON.parse(resultText)
+
+    } catch (err: any) {
+      lastError = err
+      console.warn(`⚠️ Model ${modelName} failed or throttled. Error: ${err.message || "Unknown"}`)
+      
+      // If it's a "Safety" block, don't fallback, just fail (it will likely fail on all models)
+      if (err.message?.includes("SAFETY")) {
+        console.error("❌ Generation blocked by Safety Filters")
+        break
       }
-    })
-
-    const resultText = response.text
-    if (!resultText) return null
-    console.log("response from AI")
-    console.log(response)
-
-    return JSON.parse(resultText)
-  } catch (err) {
-    console.error("Gemini AI failed to generate payload:", err)
-    return null
+      
+      // Continue to next model in the loop...
+    }
   }
+
+  console.error("💥 All Gemini models failed to generate payload:", lastError)
+  return null
 }
