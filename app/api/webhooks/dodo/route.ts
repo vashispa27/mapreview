@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { DodoPayments } from "dodopayments"
+import {
+  sendPaymentSuccessEmail,
+  sendPaymentFailedEmail,
+  sendPaymentCancelledEmail,
+} from "@/lib/email"
 
 const client = new DodoPayments({
   bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
@@ -20,34 +25,35 @@ export async function POST(req: NextRequest) {
       const amount = paymentData.total_amount
       const currency = paymentData.currency
       const userId = (paymentData.metadata as any)?.userId
-      const plan = (paymentData.metadata as any)?.plan
+      const plan = (paymentData.metadata as any)?.plan as "base" | "pro"
 
       if (userId) {
-        // 1 year validity from now
         const planExpiresAt = new Date()
         planExpiresAt.setFullYear(planExpiresAt.getFullYear() + 1)
 
         await db.payment.upsert({
           where: { id: paymentId },
           update: { status: "succeeded", amount },
-          create: {
-            id: paymentId,
-            amount,
-            currency,
-            status: "succeeded",
-            userId,
-          },
+          create: { id: paymentId, amount, currency, status: "succeeded", userId },
         })
 
         await db.user.update({
           where: { id: userId },
-          data: {
-            plan: plan || "base",
-            planExpiresAt,
-          },
+          data: { plan: plan || "base", planExpiresAt },
         })
 
-        console.log(`✅ Webhook: User ${userId} upgraded to ${plan} (Amount: ${amount} ${currency}). Valid until ${planExpiresAt.toISOString()}`)
+        const user = await db.user.findUnique({ where: { id: userId } })
+        if (user?.email) {
+          await sendPaymentSuccessEmail(
+            user.email,
+            user.name || "",
+            plan || "base",
+            amount,
+            planExpiresAt
+          )
+        }
+
+        console.log(`✅ Payment succeeded: user ${userId} → ${plan}. Valid until ${planExpiresAt.toISOString()}`)
       }
     }
 
@@ -55,6 +61,7 @@ export async function POST(req: NextRequest) {
       const paymentData = event.data
       const paymentId = paymentData.payment_id
       const userId = (paymentData.metadata as any)?.userId
+      const plan = (paymentData.metadata as any)?.plan ?? "base"
 
       await db.payment.upsert({
         where: { id: paymentId },
@@ -68,20 +75,19 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      // SEND FAILURE EMAIL
       const user = await db.user.findUnique({ where: { id: userId || "" } })
       if (user?.email) {
-        const { sendPaymentEmail } = await import("@/lib/email")
-        await sendPaymentEmail(user.email, "Pro", paymentData.total_amount ?? 0, "FAILED")
+        await sendPaymentFailedEmail(user.email, user.name || "", plan)
       }
 
-      console.log(`❌ Webhook: Payment ${paymentId} failed for user ${userId}`)
+      console.log(`❌ Payment failed: ${paymentId} for user ${userId}`)
     }
 
     if (event.type === "payment.cancelled") {
       const paymentData = event.data
       const paymentId = paymentData.payment_id
       const userId = (paymentData.metadata as any)?.userId
+      const plan = (paymentData.metadata as any)?.plan ?? "base"
 
       await db.payment.upsert({
         where: { id: paymentId },
@@ -95,7 +101,12 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      console.log(`🚫 Webhook: Payment ${paymentId} cancelled for user ${userId}`)
+      const user = await db.user.findUnique({ where: { id: userId || "" } })
+      if (user?.email) {
+        await sendPaymentCancelledEmail(user.email, user.name || "", plan)
+      }
+
+      console.log(`🚫 Payment cancelled: ${paymentId} for user ${userId}`)
     }
 
     if (event.type === "payment.processing") {
@@ -115,7 +126,7 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      console.log(`⏳ Webhook: Payment ${paymentId} processing for user ${userId}`)
+      console.log(`⏳ Payment processing: ${paymentId} for user ${userId}`)
     }
 
     return NextResponse.json({ received: true })

@@ -2,6 +2,7 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { db } from "@/lib/db"
+import { sendWelcomeEmail } from "@/lib/email"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -14,7 +15,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    // Expose user ID on the session so we can use it in API routes
+    // Expose user ID, plan, and planExpiresAt on the session
     session({ session, user }) {
       if (session.user) {
         session.user.id = user.id
@@ -22,6 +23,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.planExpiresAt = (user as any).planExpiresAt ?? null
       }
       return session
+    },
+  },
+  events: {
+    // Fire welcome email the first time a user account is created
+    async createUser({ user }) {
+      if (user.email) {
+        await sendWelcomeEmail(user.email, user.name || "").catch((err) =>
+          console.error("Welcome email failed:", err)
+        )
+      }
     },
   },
 })
