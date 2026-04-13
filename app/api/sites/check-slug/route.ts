@@ -20,6 +20,12 @@ export async function GET(request: NextRequest) {
       where: { slug }
     })
 
+    // If the slug belongs to the requesting site itself, it's fine to reuse
+    const siteId = searchParams.get("siteId")
+    if (existing && siteId && existing.id === siteId) {
+      return NextResponse.json({ available: true })
+    }
+
     return NextResponse.json({ available: !existing })
   } catch (error) {
     console.error("Check slug error:", error)

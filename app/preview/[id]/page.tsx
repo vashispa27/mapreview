@@ -274,6 +274,8 @@ export default function PreviewPage({ params }: PreviewPageProps) {
         onPublish={handlePublish}
         isPublishing={isPublishing}
         isPublished={isPublished}
+        siteSlug={siteSlug}
+        siteId={id}
       />
 
       <PurchaseModal

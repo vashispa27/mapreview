@@ -28,6 +28,9 @@ interface PreviewCustomizerProps {
   onBusinessChange?: (business: BusinessData) => void
   onPublish: (slug: string) => void
   isPublishing?: boolean
+  isPublished?: boolean
+  siteSlug?: string | null
+  siteId?: string
 }
 
 export function PreviewCustomizer({
@@ -37,10 +40,13 @@ export function PreviewCustomizer({
   onBusinessChange,
   onPublish,
   isPublishing,
+  isPublished,
+  siteSlug,
+  siteId,
 }: PreviewCustomizerProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [copied, setCopied] = useState(false)
-  
+
   // Slug Selection State
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [slug, setSlug] = useState("")
@@ -48,12 +54,15 @@ export function PreviewCustomizer({
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null)
   const [slugError, setSlugError] = useState("")
 
-  // Auto-generate initial slug from business name
+  // Pre-fill from existing published slug, otherwise derive from business name
   useEffect(() => {
-    if (business.name && !slug) {
+    if (siteSlug) {
+      setSlug(siteSlug)
+      setIsAvailable(true) // own slug is always available to reuse
+    } else if (business.name && !slug) {
       setSlug(business.name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, ""))
     }
-  }, [business.name])
+  }, [siteSlug, business.name])
 
   // Check slug availability as user types
   useEffect(() => {
@@ -62,12 +71,20 @@ export function PreviewCustomizer({
       return
     }
 
+    // If the slug matches the site's own published slug, no check needed
+    if (siteSlug && slug === siteSlug) {
+      setIsAvailable(true)
+      setSlugError("")
+      return
+    }
+
     const timer = setTimeout(async () => {
       setIsChecking(true)
       try {
-        const res = await fetch(`/api/sites/check-slug?slug=${slug}`)
+        const params = new URLSearchParams({ slug })
+        if (siteId) params.set("siteId", siteId)
+        const res = await fetch(`/api/sites/check-slug?${params}`)
         if (!res.ok) {
-          // If server returns error, don't crash, just show as unavailable
           setIsAvailable(false)
           return
         }
@@ -83,7 +100,7 @@ export function PreviewCustomizer({
     }, 500)
 
     return () => clearTimeout(timer)
-  }, [slug])
+  }, [slug, siteSlug, siteId])
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)
