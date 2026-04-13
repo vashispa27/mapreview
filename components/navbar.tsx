@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { MapPin, Menu, X, LayoutGrid, LogOut } from "lucide-react"
+import { MapPin, Menu, X, LayoutGrid, LogOut, Shield, Zap, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSession, signOut } from "next-auth/react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -17,6 +17,45 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
+
+function PlanBadge({ plan, planExpiresAt }: { plan: string; planExpiresAt: string | null }) {
+  if (plan === "pro") {
+    return (
+      <div className="flex flex-col gap-0.5">
+        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-full w-fit">
+          <Sparkles className="w-2.5 h-2.5" />
+          Pro Plan
+        </span>
+        {planExpiresAt && (
+          <span className="text-[10px] text-muted-foreground">
+            Valid until {new Date(planExpiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          </span>
+        )}
+      </div>
+    )
+  }
+  if (plan === "base") {
+    return (
+      <div className="flex flex-col gap-0.5">
+        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-muted text-muted-foreground px-2 py-0.5 rounded-full w-fit">
+          <Zap className="w-2.5 h-2.5" />
+          Base Plan
+        </span>
+        {planExpiresAt && (
+          <span className="text-[10px] text-muted-foreground">
+            Valid until {new Date(planExpiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          </span>
+        )}
+      </div>
+    )
+  }
+  return (
+    <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-muted text-muted-foreground px-2 py-0.5 rounded-full w-fit">
+      <Shield className="w-2.5 h-2.5" />
+      No Active Plan
+    </span>
+  )
+}
 
 const navLinks = [
   { name: "Features", href: "#features" },
@@ -103,14 +142,20 @@ export function Navbar() {
                     </Avatar>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" className="w-64">
                   <DropdownMenuLabel>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col gap-1.5">
                       <span>{isAdminMode ? "Admin Mode" : session?.user?.name}</span>
                       {!isAdminMode && session?.user?.email && (
                         <span className="text-xs font-normal text-muted-foreground">
                           {session.user.email}
                         </span>
+                      )}
+                      {!isAdminMode && (
+                        <PlanBadge
+                          plan={session?.user?.plan ?? "free"}
+                          planExpiresAt={session?.user?.planExpiresAt ?? null}
+                        />
                       )}
                     </div>
                   </DropdownMenuLabel>

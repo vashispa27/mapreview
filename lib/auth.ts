@@ -18,6 +18,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     session({ session, user }) {
       if (session.user) {
         session.user.id = user.id
+        session.user.plan = (user as any).plan ?? "free"
+        session.user.planExpiresAt = (user as any).planExpiresAt ?? null
       }
       return session
     },

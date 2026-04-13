@@ -2,10 +2,12 @@
 
 import { useEffect, useState, use } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import { BusinessData, SiteConfig, colorSchemes, generateMockBusinessData } from "@/lib/mock-data"
 import { SiteTemplate } from "@/components/site-template"
 import { PreviewCustomizer } from "@/components/preview-customizer"
+import { PurchaseModal } from "@/components/purchase-modal"
 import { Loader2 } from "lucide-react"
 
 interface PreviewPageProps {
@@ -15,9 +17,11 @@ interface PreviewPageProps {
 export default function PreviewPage({ params }: PreviewPageProps) {
   const { id } = use(params)
   const router = useRouter()
+  const { data: session } = useSession()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [business, setBusiness] = useState<BusinessData | null>(null)
+  const [purchaseModalOpen, setPurchaseModalOpen] = useState(false)
   const [config, setConfig] = useState<SiteConfig>({
     colorScheme: colorSchemes[0],
     layout: "modern",
@@ -149,6 +153,17 @@ export default function PreviewPage({ params }: PreviewPageProps) {
   }
 
   const handlePublish = async (slug: string) => {
+    // Gate: user must have an active paid plan to publish
+    const userPlan = session?.user?.plan ?? "free"
+    const planExpiresAt = session?.user?.planExpiresAt
+    const isExpired = planExpiresAt ? new Date(planExpiresAt) < new Date() : true
+    const hasPlan = (userPlan === "base" || userPlan === "pro") && !isExpired
+
+    if (!isAdminDemo && !hasPlan) {
+      setPurchaseModalOpen(true)
+      return
+    }
+
     setIsPublishing(true)
     try {
       // 1. Save the slug to the database via PATCH
@@ -241,7 +256,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
           Demo Mode - Using mock data for testing
         </div>
       )}
-      
+
       <div className="pr-0 md:pr-[360px] transition-all duration-300">
         <SiteTemplate
           business={business}
@@ -259,6 +274,11 @@ export default function PreviewPage({ params }: PreviewPageProps) {
         onPublish={handlePublish}
         isPublishing={isPublishing}
         isPublished={isPublished}
+      />
+
+      <PurchaseModal
+        open={purchaseModalOpen}
+        onClose={() => setPurchaseModalOpen(false)}
       />
     </div>
   )

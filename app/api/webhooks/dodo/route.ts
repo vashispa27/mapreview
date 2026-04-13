@@ -4,7 +4,7 @@ import { DodoPayments } from "dodopayments"
 
 const client = new DodoPayments({
   bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
-  webhookSecret: process.env.DODO_WEBHOOK_SECRET!,
+  webhookKey: process.env.DODO_WEBHOOK_SECRET,
 })
 
 export async function POST(req: NextRequest) {
@@ -12,13 +12,10 @@ export async function POST(req: NextRequest) {
   const headers = Object.fromEntries(req.headers.entries())
 
   try {
-    // Official Dodo SDK Unwrap method for secure verification and parsing
-    const event = client.webhooks.unwrap(body, headers)
+    const event = client.webhooks.unwrap(body, { headers })
 
-    // Handle Payment Succeeded
     if (event.type === "payment.succeeded") {
       const paymentData = event.data
-      
       const paymentId = paymentData.payment_id
       const amount = paymentData.total_amount
       const currency = paymentData.currency
@@ -26,33 +23,92 @@ export async function POST(req: NextRequest) {
       const plan = (paymentData.metadata as any)?.plan
 
       if (userId) {
-        // 1. Record the payment
+        // 1 year validity from now
+        const planExpiresAt = new Date()
+        planExpiresAt.setFullYear(planExpiresAt.getFullYear() + 1)
+
         await db.payment.upsert({
           where: { id: paymentId },
-          update: { 
-            status: "succeeded",
-            amount: amount,
-          },
+          update: { status: "succeeded", amount },
           create: {
             id: paymentId,
-            amount: amount,
-            currency: currency,
+            amount,
+            currency,
             status: "succeeded",
-            userId: userId,
+            userId,
           },
         })
 
-        // 2. Update the user's plan
         await db.user.update({
           where: { id: userId },
           data: {
-            plan: plan || "pro",
-            isLifetime: plan === "lifetime",
+            plan: plan || "base",
+            planExpiresAt,
           },
         })
-        
-        console.log(`✅ Webhook: User ${userId} upgraded to ${plan} (Amount: ${amount} ${currency})`)
+
+        console.log(`✅ Webhook: User ${userId} upgraded to ${plan} (Amount: ${amount} ${currency}). Valid until ${planExpiresAt.toISOString()}`)
       }
+    }
+
+    if (event.type === "payment.failed") {
+      const paymentData = event.data
+      const paymentId = paymentData.payment_id
+      const userId = (paymentData.metadata as any)?.userId
+
+      await db.payment.upsert({
+        where: { id: paymentId },
+        update: { status: "failed" },
+        create: {
+          id: paymentId,
+          amount: paymentData.total_amount ?? 0,
+          currency: paymentData.currency ?? "usd",
+          status: "failed",
+          userId: userId ?? "unknown",
+        },
+      })
+
+      console.log(`❌ Webhook: Payment ${paymentId} failed for user ${userId}`)
+    }
+
+    if (event.type === "payment.cancelled") {
+      const paymentData = event.data
+      const paymentId = paymentData.payment_id
+      const userId = (paymentData.metadata as any)?.userId
+
+      await db.payment.upsert({
+        where: { id: paymentId },
+        update: { status: "cancelled" },
+        create: {
+          id: paymentId,
+          amount: paymentData.total_amount ?? 0,
+          currency: paymentData.currency ?? "usd",
+          status: "cancelled",
+          userId: userId ?? "unknown",
+        },
+      })
+
+      console.log(`🚫 Webhook: Payment ${paymentId} cancelled for user ${userId}`)
+    }
+
+    if (event.type === "payment.processing") {
+      const paymentData = event.data
+      const paymentId = paymentData.payment_id
+      const userId = (paymentData.metadata as any)?.userId
+
+      await db.payment.upsert({
+        where: { id: paymentId },
+        update: { status: "processing" },
+        create: {
+          id: paymentId,
+          amount: paymentData.total_amount ?? 0,
+          currency: paymentData.currency ?? "usd",
+          status: "processing",
+          userId: userId ?? "unknown",
+        },
+      })
+
+      console.log(`⏳ Webhook: Payment ${paymentId} processing for user ${userId}`)
     }
 
     return NextResponse.json({ received: true })

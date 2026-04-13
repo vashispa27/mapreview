@@ -5,16 +5,20 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { 
-  MapPin, 
-  ExternalLink, 
-  Pencil, 
-  Trash2, 
+import {
+  MapPin,
+  ExternalLink,
+  Pencil,
+  Trash2,
   Loader2,
   Plus,
   Globe,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  Zap,
+  Sparkles,
+  Shield,
+  ShoppingCart
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAdminMode } from "@/components/providers/admin-provider"
@@ -69,6 +73,45 @@ const mockSites: Site[] = [
     },
   },
 ]
+
+function PlanInfo({ plan, planExpiresAt }: { plan: string; planExpiresAt: string | null }) {
+  const isPaid = plan === "base" || plan === "pro"
+  const isExpired = planExpiresAt ? new Date(planExpiresAt) < new Date() : false
+
+  const badgeContent = plan === "pro" ? (
+    <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider bg-primary/10 text-primary px-3 py-1.5 rounded-full">
+      <Sparkles className="w-3.5 h-3.5" />
+      Pro Plan
+    </span>
+  ) : plan === "base" ? (
+    <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider bg-muted text-foreground px-3 py-1.5 rounded-full border border-border">
+      <Zap className="w-3.5 h-3.5" />
+      Base Plan
+    </span>
+  ) : (
+    <Link
+      href="/#pricing"
+      className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider bg-destructive/10 text-destructive px-3 py-1.5 rounded-full hover:bg-destructive/20 transition-colors"
+    >
+      <ShoppingCart className="w-3.5 h-3.5" />
+      No Active Plan — Get one
+    </Link>
+  )
+
+  return (
+    <div className="bg-muted/50 px-4 py-2 rounded-lg border border-border flex items-center gap-3">
+      <div className="flex flex-col gap-1">
+        <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground leading-none">Current Plan</span>
+        {badgeContent}
+        {isPaid && planExpiresAt && (
+          <span className={`text-[10px] ${isExpired ? "text-destructive font-semibold" : "text-muted-foreground"}`}>
+            {isExpired ? "Expired" : "Valid until"} {new Date(planExpiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function MySitesPage() {
   const { data: session, status } = useSession()
@@ -177,18 +220,24 @@ export default function MySitesPage() {
               Manage all your generated websites in one place.
             </p>
           </div>
-          <div className="bg-muted/50 px-4 py-2 rounded-lg border border-border flex items-center gap-3">
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground leading-none mb-1">Usage Limit</span>
-              <span className="text-sm font-bold">
-                {sites.length} / 3 <span className="text-muted-foreground font-medium">sites created</span>
-              </span>
-            </div>
-            <div className="w-12 h-1.5 bg-border rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-primary transition-all duration-500" 
-                style={{ width: `${Math.min((sites.length / 3) * 100, 100)}%` }}
-              />
+          <div className="flex items-center gap-3 flex-wrap">
+            <PlanInfo
+              plan={session?.user?.plan ?? "free"}
+              planExpiresAt={session?.user?.planExpiresAt ?? null}
+            />
+            <div className="bg-muted/50 px-4 py-2 rounded-lg border border-border flex items-center gap-3">
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground leading-none mb-1">Usage Limit</span>
+                <span className="text-sm font-bold">
+                  {sites.length} / 3 <span className="text-muted-foreground font-medium">sites created</span>
+                </span>
+              </div>
+              <div className="w-12 h-1.5 bg-border rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-500"
+                  style={{ width: `${Math.min((sites.length / 3) * 100, 100)}%` }}
+                />
+              </div>
             </div>
           </div>
         </div>

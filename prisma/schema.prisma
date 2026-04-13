@@ -53,9 +53,9 @@ model User {
   createdAt     DateTime  @default(now())
 
   // Payment Fields
-  plan          String    @default("base") // base | pro | lifetime
-  isLifetime    Boolean   @default(false)
-  payments      Payment[]
+  plan           String    @default("free") // free | base | pro
+  planExpiresAt  DateTime?
+  payments       Payment[]
 
   accounts Account[]
   sessions Session[]

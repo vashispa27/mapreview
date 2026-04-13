@@ -22,9 +22,11 @@ export async function POST(req: NextRequest) {
     const { plan } = body
 
     // Product IDs from Dodo Dashboard
-    const productId = plan === "lifetime" 
-      ? process.env.DODO_LIFETIME_PRODUCT_ID 
-      : process.env.DODO_PRO_PRODUCT_ID
+    const productId = plan === "base"
+      ? process.env.DODO_BASE_PRODUCT_ID
+      : plan === "pro"
+      ? process.env.DODO_PRO_PRODUCT_ID
+      : undefined
 
     if (!productId) {
       return NextResponse.json({ 

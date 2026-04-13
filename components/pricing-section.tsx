@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Check, Sparkles, Zap, Infinity, Loader2 } from "lucide-react"
+import { Check, Sparkles, Zap, Loader2, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSession, signIn } from "next-auth/react"
@@ -20,11 +20,6 @@ export function PricingSection() {
   }
 
   const handleCheckout = async (plan: string) => {
-    if (plan === "base") {
-      window.dispatchEvent(new CustomEvent("focus-input"))
-      return
-    }
-
     if (!session) {
       signIn("google")
       return
@@ -54,71 +49,61 @@ export function PricingSection() {
     {
       id: "base",
       name: "Base",
-      description: "Perfect for getting started",
-      price: "$0",
-      priceSuffix: "/forever",
+      description: "Everything you need to get started",
+      price: "$9",
+      priceSuffix: "/year",
+      badge: null,
       features: [
-        "Create up to 3 Websites",
-        "maptosite.com/your-name URL",
-        "Free 24/7 Hosting Support",
-        "Unlimited Content Edits",
-        "Standard Templates",
+        "50 reviews analysed per site",
+        "3 websites with unlimited edits",
+        "Automatic updates with live reviews",
+        "Custom URL with MapToSite branding",
+        "7-day support on Discord",
       ],
-      buttonText: "Start for Free",
+      buttonText: "Get Base Plan",
       popular: false,
-      icon: Zap
+      icon: Zap,
     },
     {
       id: "pro",
       name: "Pro",
-      description: "For growing businesses",
+      description: "For businesses that need more power",
       price: "$19",
-      priceSuffix: "/month",
+      priceSuffix: "/year",
+      badge: "Most Popular",
       features: [
-        "Create up to 5 Websites",
-        "Custom Domain Support (.com)",
-        "24/7 Priority Live Support",
-        "Remove MapToSite Branding",
-        "Advanced Elite Templates",
+        "200 reviews analysed per site",
+        "10 websites with unlimited edits",
+        "Request for custom domain",
+        "Weekly reviews report analysis",
+        "Automatic updates with live reviews",
+        "7-day priority support on Discord",
       ],
-      buttonText: "Upgrade to Pro",
+      buttonText: "Get Pro Plan",
       popular: true,
-      icon: Sparkles
+      icon: Sparkles,
     },
-    {
-      id: "lifetime",
-      name: "Lifetime",
-      description: "The ultimate deal",
-      price: "$99",
-      priceSuffix: "one-time",
-      features: [
-        "UNLIMITED Website Creations",
-        "Free Custom Domain (.com)",
-        "All current & future Elite features",
-        "VIP Concierge Support",
-        "Zero Recurring Fees",
-      ],
-      buttonText: "Get Lifetime Access",
-      popular: false,
-      icon: Infinity
-    }
   ]
 
   return (
     <section id="pricing" className="py-24 px-6 bg-muted/30">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <motion.div {...fadeInUp} className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4 italic uppercase">
             Choose Your <span className="text-primary">Plan</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Scale your online presence with professional, high-performance websites.
+            One-time payment. Full access for 1 year. No hidden fees.
           </p>
+          <div className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted px-4 py-2 rounded-full">
+            <RefreshCw className="w-3.5 h-3.5" />
+            Plans renew annually — cancel any time before renewal
+          </div>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
           {tiers.map((tier, index) => (
-            <motion.div 
+            <motion.div
               key={tier.name}
               {...fadeInUp}
               transition={{ delay: 0.2 + index * 0.1 }}
@@ -128,10 +113,10 @@ export function PricingSection() {
                 "relative overflow-hidden border-2 shadow-xl bg-card flex flex-col w-full transition-all hover:shadow-2xl hover:-translate-y-1",
                 tier.popular ? "border-primary" : "border-border/50"
               )}>
-                {tier.popular && (
+                {tier.badge && (
                   <div className="absolute top-0 right-0 px-4 py-1.5 bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest rounded-bl-xl flex items-center gap-1.5">
                     <Sparkles className="w-3 h-3" />
-                    Most Popular
+                    {tier.badge}
                   </div>
                 )}
 
@@ -145,7 +130,7 @@ export function PricingSection() {
                     </div>
                     <CardTitle className="text-2xl font-black uppercase italic tracking-tight">{tier.name}</CardTitle>
                   </div>
-                  <CardDescription className="text-base h-10 line-clamp-2">{tier.description}</CardDescription>
+                  <CardDescription className="text-base">{tier.description}</CardDescription>
                   <div className="mt-6 flex items-baseline gap-1">
                     <span className="text-5xl font-black tracking-tighter">{tier.price}</span>
                     <span className="text-muted-foreground font-bold text-sm">{tier.priceSuffix}</span>
@@ -172,14 +157,18 @@ export function PricingSection() {
                 </CardContent>
 
                 <CardFooter className="p-8 pt-0">
-                  <Button 
+                  <Button
                     className="w-full h-14 text-base font-black uppercase tracking-widest shadow-lg"
                     variant={tier.popular ? "default" : "outline"}
                     size="lg"
                     disabled={loadingPlan !== null}
                     onClick={() => handleCheckout(tier.id)}
                   >
-                    {loadingPlan === tier.id ? <Loader2 className="w-5 h-5 animate-spin" /> : tier.buttonText}
+                    {loadingPlan === tier.id ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      tier.buttonText
+                    )}
                   </Button>
                 </CardFooter>
               </Card>
