@@ -10,10 +10,15 @@ export async function GET() {
   }
 
   try {
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { plan: true }
+    })
+
     const sites = await db.site.findMany({
       where: {
         userId: session.user.id,
-        deleted: false // Only return non-deleted sites to the UI
+        deleted: false
       },
       orderBy: {
         createdAt: "desc",
@@ -29,12 +34,10 @@ export async function GET() {
       },
     })
 
-    // Also get the total count (including deleted) for the usage limit
-    const totalGenerated = await db.site.count({
-      where: { userId: session.user.id }
+    return NextResponse.json({ 
+      sites, 
+      plan: user?.plan || "base"
     })
-
-    return NextResponse.json({ sites, totalGenerated })
   } catch (error) {
     console.error("Failed to fetch sites:", error)
     return NextResponse.json({ error: "Failed to fetch sites" }, { status: 500 })

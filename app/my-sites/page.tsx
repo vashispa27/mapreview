@@ -5,20 +5,16 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import {
-  MapPin,
-  ExternalLink,
-  Pencil,
-  Trash2,
+import { 
+  MapPin, 
+  ExternalLink, 
+  Pencil, 
+  Trash2, 
   Loader2,
   Plus,
   Globe,
   Calendar,
-  AlertCircle,
-  Zap,
-  Sparkles,
-  Shield,
-  ShoppingCart
+  AlertCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAdminMode } from "@/components/providers/admin-provider"
@@ -46,78 +42,13 @@ interface Site {
   } | null
 }
 
-// Mock sites for admin mode
-const mockSites: Site[] = [
-  {
-    id: "admin-demo",
-    slug: "golden-spoon",
-    url: "https://maps.google.com/mock-restaurant",
-    businessName: "The Golden Spoon Bistro",
-    status: "COMPLETED",
-    createdAt: new Date().toISOString(),
-    businessData: {
-      name: "The Golden Spoon Bistro",
-      heroImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800",
-    },
-  },
-  {
-    id: "admin-demo-2",
-    slug: "sunrise-coffee",
-    url: "https://maps.google.com/mock-cafe",
-    businessName: "Sunrise Coffee House",
-    status: "COMPLETED",
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    businessData: {
-      name: "Sunrise Coffee House",
-      heroImage: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800",
-    },
-  },
-]
-
-function PlanInfo({ plan, planExpiresAt }: { plan: string; planExpiresAt: string | null }) {
-  const isPaid = plan === "base" || plan === "pro"
-  const isExpired = planExpiresAt ? new Date(planExpiresAt) < new Date() : false
-
-  const badgeContent = plan === "pro" ? (
-    <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider bg-primary/10 text-primary px-3 py-1.5 rounded-full">
-      <Sparkles className="w-3.5 h-3.5" />
-      Pro Plan
-    </span>
-  ) : plan === "base" ? (
-    <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider bg-muted text-foreground px-3 py-1.5 rounded-full border border-border">
-      <Zap className="w-3.5 h-3.5" />
-      Base Plan
-    </span>
-  ) : (
-    <Link
-      href="/#pricing"
-      className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider bg-destructive/10 text-destructive px-3 py-1.5 rounded-full hover:bg-destructive/20 transition-colors"
-    >
-      <ShoppingCart className="w-3.5 h-3.5" />
-      No Active Plan — Get one
-    </Link>
-  )
-
-  return (
-    <div className="bg-muted/50 px-4 py-2 rounded-lg border border-border flex items-center gap-3">
-      <div className="flex flex-col gap-1">
-        <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground leading-none">Current Plan</span>
-        {badgeContent}
-        {isPaid && planExpiresAt && (
-          <span className={`text-[10px] ${isExpired ? "text-destructive font-semibold" : "text-muted-foreground"}`}>
-            {isExpired ? "Expired" : "Valid until"} {new Date(planExpiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-          </span>
-        )}
-      </div>
-    </div>
-  )
-}
-
 export default function MySitesPage() {
   const { data: session, status } = useSession()
   const { isAdminMode } = useAdminMode()
   const router = useRouter()
   const [sites, setSites] = useState<Site[]>([])
+  const [totalActive, setTotalActive] = useState(0)
+  const [userPlan, setUserPlan] = useState("base")
   const [loading, setLoading] = useState(true)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -132,13 +63,6 @@ export default function MySitesPage() {
       return
     }
 
-    // Use mock sites for admin mode
-    if (isAdminMode) {
-      setSites(mockSites)
-      setLoading(false)
-      return
-    }
-
     // Fetch real sites
     const fetchSites = async () => {
       try {
@@ -146,8 +70,11 @@ export default function MySitesPage() {
         if (res.ok) {
           const data = await res.json()
           setSites(data.sites)
-        }
-      } catch (error) {
+          setUserPlan(data.plan)
+          // Filter out failed sites for the usage count
+          const activeCount = data.sites.filter((s: Site) => s.status !== "FAILED").length
+          setTotalActive(activeCount)
+        }      } catch (error) {
         console.error("Failed to fetch sites:", error)
       } finally {
         setLoading(false)
@@ -157,31 +84,7 @@ export default function MySitesPage() {
     fetchSites()
   }, [status, isLoggedIn, isAdminMode, router])
 
-  const handleDelete = async () => {
-    if (!deleteId) return
-
-    // For admin mode, just remove from local state
-    if (isAdminMode) {
-      setSites(sites.filter(s => s.id !== deleteId))
-      setDeleteId(null)
-      return
-    }
-
-    setDeleting(true)
-    try {
-      const res = await fetch(`/api/sites/${deleteId}`, {
-        method: "DELETE",
-      })
-      if (res.ok) {
-        setSites(sites.filter(s => s.id !== deleteId))
-      }
-    } catch (error) {
-      console.error("Failed to delete site:", error)
-    } finally {
-      setDeleting(false)
-      setDeleteId(null)
-    }
-  }
+  const limit = userPlan === "pro" ? 5 : userPlan === "lifetime" ? 100 : 1
 
   if (status === "loading" || loading) {
     return (
@@ -220,37 +123,21 @@ export default function MySitesPage() {
               Manage all your generated websites in one place.
             </p>
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <PlanInfo
-              plan={session?.user?.plan ?? "free"}
-              planExpiresAt={session?.user?.planExpiresAt ?? null}
-            />
-            <div className="bg-muted/50 px-4 py-2 rounded-lg border border-border flex items-center gap-3">
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground leading-none mb-1">Usage Limit</span>
-                <span className="text-sm font-bold">
-                  {sites.length} / 3 <span className="text-muted-foreground font-medium">sites created</span>
-                </span>
-              </div>
-              <div className="w-12 h-1.5 bg-border rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all duration-500"
-                  style={{ width: `${Math.min((sites.length / 3) * 100, 100)}%` }}
-                />
-              </div>
+          <div className="bg-muted/50 px-4 py-2 rounded-lg border border-border flex items-center gap-3">
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground leading-none mb-1">Usage Limit</span>
+              <span className="text-sm font-bold">
+                {totalActive} / {limit === 100 ? "∞" : limit} <span className="text-muted-foreground font-medium">active sites</span>
+              </span>
+            </div>
+            <div className="w-12 h-1.5 bg-border rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-500" 
+                style={{ width: `${Math.min((totalActive / limit) * 100, 100)}%` }}
+              />
             </div>
           </div>
         </div>
-
-        {/* Admin Mode Indicator */}
-        {isAdminMode && (
-          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600" />
-            <p className="text-amber-800 text-sm">
-              You are in admin mode. These are demo sites for testing purposes.
-            </p>
-          </div>
-        )}
 
         {sites.length === 0 ? (
           <motion.div
@@ -360,36 +247,6 @@ export default function MySitesPage() {
           </div>
         )}
       </main>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this site?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The website will be permanently deleted
-              and will no longer be accessible.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={deleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

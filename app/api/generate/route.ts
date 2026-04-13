@@ -17,30 +17,49 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 })
     }
 
-    // Strict URL check for short links as requested
     const isGoogleMapsUrl = url.includes("maps.app.goo.gl") || url.includes("goo.gl/maps")
-    
     if (!isGoogleMapsUrl) {
       return NextResponse.json({ 
-        error: "Please provide a valid Google Maps short URL (e.g., https://maps.app.goo.gl/...)" 
+        error: "Please provide a valid Google Maps short URL." 
       }, { status: 400 })
     }
 
-    // Usage limit check (Max 3 sites)
-    const siteCount = await db.site.count({
-      where: { userId: session.user.id }
+    // 1. Fetch User and their current sites
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { plan: true }
     })
 
-    if (siteCount >= 3) {
+    const allSites = await db.site.findMany({
+      where: { userId: session.user.id },
+      select: { status: true }
+    })
+
+    // 2. CHECK: Is there a site ALREADY in progress?
+    const inProgressStatuses = ["QUEUED", "SCRAPING_APIFY", "ANALYZING_GEMINI"]
+    const siteInProgress = allSites.some(s => inProgressStatuses.includes(s.status))
+
+    if (siteInProgress) {
       return NextResponse.json({ 
-        error: "Usage limit reached. You can only generate up to 3 websites with a free account." 
+        error: "You already have a site being generated. Please wait for it to finish before starting a new one!" 
       }, { status: 403 })
     }
 
-    // Connect Memory Dictionary safely locking local variables immediately 
+    // 3. CHECK: Has the user reached their total limit? (Ignore FAILED sites)
+    const activeSiteCount = allSites.filter(s => s.status !== "FAILED").length
+    const limit = user?.plan === "pro" ? 5 : user?.plan === "lifetime" ? 100 : 1
+    
+    if (activeSiteCount >= limit) {
+      const message = user?.plan === "base" || !user?.plan 
+        ? "Usage limit reached. You can only have 1 active website on the free plan."
+        : `Usage limit reached. Your ${user.plan} plan allows up to ${limit} active websites.`
+        
+      return NextResponse.json({ error: message }, { status: 403 })
+    }
+
+    // --- Start Generation ---
     const jobId = createJob(url)
 
-    // Log the site creation in the database
     await db.site.create({
       data: {
         id: jobId,
@@ -50,17 +69,15 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Execute absolute Decoupling triggering Serverless Event Webhooks via Message Brokers completely reliably.
     await inngest.send({
       name: "app/generate.site",
       data: { url, jobId }
     })
 
-    // Reply with current count so frontend knows limits
-    return NextResponse.json({ success: true, jobId, siteCount: siteCount + 1 })
+    return NextResponse.json({ success: true, jobId })
     
   } catch (error) {
-    console.error("Error creating job payload tracking:", error)
-    return NextResponse.json({ error: "Failed to queue remote site generation limits correctly natively." }, { status: 500 })
+    console.error("Generation Error:", error)
+    return NextResponse.json({ error: "Failed to queue site generation." }, { status: 500 })
   }
 }
