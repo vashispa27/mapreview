@@ -64,7 +64,7 @@ export function PurchaseModal({ open, onClose }: PurchaseModalProps) {
         "Request for custom domain",
         "Weekly reviews report analysis",
         "Automatic updates with live reviews",
-        "7-day priority Discord support",
+        "7-day priority support",
       ],
     },
   ]

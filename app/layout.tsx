@@ -13,6 +13,27 @@ export const metadata: Metadata = {
     icon: '/icon.svg',
     apple: '/apple-icon.png',
   },
+  openGraph: {
+    title: 'MapToSite - Turn Google Maps into Beautiful Websites',
+    description: 'Your competitors have websites. Your customers expect one. Turn your Google Maps listing into a professional website in 30 seconds.',
+    url: 'https://maptosite.app',
+    siteName: 'MapToSite',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'MapToSite - Google Maps to Website in seconds',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MapToSite - Turn Google Maps into Beautiful Websites',
+    description: 'Your competitors have websites. Your customers expect one. Turn your Google Maps listing into a professional website in 30 seconds.',
+    images: ['/og-image.png'],
+  },
 }
 
 import { AuthProvider } from "@/components/providers/auth-provider"

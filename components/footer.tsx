@@ -36,11 +36,11 @@ export function Footer() {
 
           {/* Contact Us */}
           <div>
-            <h4 className="font-semibold text-foreground mb-4 uppercase tracking-wider text-xs">Contact Us</h4>
+            <h4 className="font-semibold text-foreground mb-4 uppercase tracking-wider text-xs"></h4>
             <ul className="space-y-3">
               <li>
                 <a href="mailto:support@maptosite.com" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  support@maptosite.com
+                  
                 </a>
               </li>
             </ul>
