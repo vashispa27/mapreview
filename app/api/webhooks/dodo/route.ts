@@ -1,73 +1,67 @@
 import { NextRequest, NextResponse } from "next/server"
-import crypto from "crypto"
 import { db } from "@/lib/db"
+import DodoPayments from "dodopayments"
 
-const WEBHOOK_SECRET = process.env.DODO_WEBHOOK_SECRET
-
-function verifySignature(rawBody: string, signature: string) {
-  if (!WEBHOOK_SECRET) return false
-  const hmac = crypto
-    .createHmac("sha256", WEBHOOK_SECRET)
-    .update(rawBody)
-    .digest("hex")
-  
-  try {
-    return crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(signature))
-  } catch (e) {
-    return false
-  }
-}
+const client = new DodoPayments({
+  bearerToken: process.env.DODO_PAYMENTS_API_KEY,
+  environment: "test", // "test" | "live"
+  webhookKey: process.env.DODO_WEBHOOK_SECRET, // webhook secret
+})
 
 export async function POST(req: NextRequest) {
-  // Dodo V2 uses webhook-signature, but some environments might still send dodo-signature
-  const signature = req.headers.get("webhook-signature") || req.headers.get("dodo-signature")
   const rawBody = await req.text()
 
-  if (!signature || !verifySignature(rawBody, signature)) {
-    console.error("❌ Invalid Dodo Webhook Signature")
-    return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
-  }
+  try {
+    const event = client.webhooks.unwrap(rawBody, {
+      headers: {
+        "webhook-id": req.headers.get("webhook-id") || "",
+        "webhook-signature": req.headers.get("webhook-signature") || "",
+        "webhook-timestamp": req.headers.get("webhook-timestamp") || "",
+      },
+    })
 
-  const event = JSON.parse(rawBody)
+    // Dodo v2 uses event_type; keep fallback to type just in case
+    const eventType = (event as any).event_type || (event as any).type
 
-  // V2 uses event_type
-  if (event.event_type === "payment.succeeded" || event.type === "payment.succeeded") {
-    const paymentData = event.data
-    const userId = paymentData.metadata?.userId
-    const plan = paymentData.metadata?.plan
-    const paymentId = paymentData.payment_id || paymentData.id
+    if (eventType === "payment.succeeded") {
+      const paymentData = (event as any).data
+      const userId = paymentData.metadata?.userId
+      const plan = paymentData.metadata?.plan
+      const paymentId = paymentData.payment_id || paymentData.id
 
-    if (userId) {
-      try {
-        // 1. Record the payment
-        await db.payment.upsert({
-          where: { id: paymentId },
-          update: { status: "succeeded" },
-          create: {
-            id: paymentId,
-            amount: paymentData.amount,
-            currency: paymentData.currency,
-            status: "succeeded",
-            userId: userId,
-          },
-        })
+      if (userId) {
+        try {
+          await db.payment.upsert({
+            where: { id: paymentId },
+            update: { status: "succeeded" },
+            create: {
+              id: paymentId,
+              amount: paymentData.amount,
+              currency: paymentData.currency,
+              status: "succeeded",
+              userId: userId,
+            },
+          })
 
-        // 2. Update the user's plan
-        await db.user.update({
-          where: { id: userId },
-          data: {
-            plan: plan || "pro",
-            isLifetime: plan === "lifetime",
-          },
-        })
-        
-        console.log(`✅ Webhook: User ${userId} upgraded to ${plan}`)
-      } catch (dbError) {
-        console.error("❌ Database Error in Dodo Webhook:", dbError)
-        return NextResponse.json({ error: "Database update failed" }, { status: 500 })
+          await db.user.update({
+            where: { id: userId },
+            data: {
+              plan: plan || "pro",
+              isLifetime: plan === "lifetime",
+            },
+          })
+
+          console.log(`✅ Webhook: User ${userId} upgraded to ${plan}`)
+        } catch (dbError) {
+          console.error("❌ Database Error in Dodo Webhook:", dbError)
+          return NextResponse.json({ error: "Database update failed" }, { status: 500 })
+        }
       }
     }
-  }
 
-  return NextResponse.json({ received: true })
+    return NextResponse.json({ received: true })
+  } catch (err) {
+    console.error("❌ Invalid Dodo Webhook Signature", err)
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
+  }
 }
