@@ -114,10 +114,10 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center px-4 py-20 overflow-hidden">
+    <>
       {/* URL Tutorial Modal */}
       <Dialog open={isTutorialOpen} onOpenChange={setIsTutorialOpen}>
-        <DialogContent className="sm:max-w-xl p-0 overflow-hidden border-none bg-transparent shadow-none">
+        <DialogContent className="sm:max-w-xl p-0 overflow-hidden border-none bg-transparent shadow-none z-[200]">
           <div className="bg-card rounded-3xl overflow-hidden shadow-2xl border border-border">
             <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
               <div className="flex items-center gap-3">
@@ -149,7 +149,8 @@ export function HeroSection() {
         </DialogContent>
       </Dialog>
 
-      <div className="max-w-7xl mx-auto w-full">
+      <section className="relative min-h-screen flex items-center justify-center px-4 py-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left side - Content */}
           <motion.div
@@ -290,5 +291,6 @@ export function HeroSection() {
         </div>
       </div>
     </section>
+    </>
   )
 }
