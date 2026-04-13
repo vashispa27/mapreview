@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai"
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai"
 
 /**
  * AI Content Generator with Fallback Logic
@@ -12,7 +12,7 @@ export async function generateBusinessContent(parsedData: any) {
     return null
   }
 
-  const ai = new GoogleGenAI({ apiKey })
+  const genAI = new GoogleGenerativeAI(apiKey)
   const topReviews = parsedData.reviews.slice(0, 30)
 
   const prompt = `
@@ -43,28 +43,28 @@ ${topReviews.map((r: any, idx: number) => `[ID: ${idx}] ${r.text}`).join("\n\n")
     try {
       console.log(`🤖 Attempting generation with model: ${modelName}...`)
       
-      const model = ai.getGenerativeModel({ model: modelName })
+      const model = genAI.getGenerativeModel({ model: modelName })
       
       const response = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             properties: {
-              description: { type: Type.STRING },
+              description: { type: SchemaType.STRING },
               features: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
+                type: SchemaType.ARRAY,
+                items: { type: SchemaType.STRING },
                 description: "Exactly 4 strings."
               },
               reviews: {
-                type: Type.ARRAY,
+                type: SchemaType.ARRAY,
                 items: {
-                  type: Type.OBJECT,
+                  type: SchemaType.OBJECT,
                   properties: {
-                    originalIndex: { type: Type.INTEGER },
-                    jtbdHeader: { type: Type.STRING }
+                    originalIndex: { type: SchemaType.NUMBER },
+                    jtbdHeader: { type: SchemaType.STRING }
                   },
                   required: ["originalIndex", "jtbdHeader"]
                 }
