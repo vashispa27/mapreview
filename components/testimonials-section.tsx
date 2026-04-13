@@ -46,12 +46,12 @@ export function TestimonialsSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-primary font-semibold mb-2 block">Testimonials</span>
+          <span className="text-primary font-semibold mb-2 block">Real Business Owners</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">
-            Loved by small businesses everywhere
+            They stopped losing customers to better-looking competitors
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Join thousands of business owners who transformed their online presence
+            Small business owners who finally have an online presence that matches the quality of their work
           </p>
         </motion.div>
 

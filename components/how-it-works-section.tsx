@@ -7,22 +7,22 @@ const steps = [
   {
     step: "01",
     icon: Link2,
-    title: "Paste your Google Maps URL",
-    description: "Copy your business URL from Google Maps and paste it into our generator. That's all we need to get started.",
+    title: "Paste your Google Maps link",
+    description: "That Maps listing you already have — with all your reviews and photos? That's your raw material. Just share the link.",
     color: "from-green-500 to-emerald-400",
   },
   {
     step: "02",
     icon: Wand2,
-    title: "Watch the magic happen",
-    description: "Our AI extracts your reviews, photos, business info, and creates a beautiful, responsive website in seconds.",
+    title: "We build your website automatically",
+    description: "Our AI pulls your reviews, photos, hours, and business details from Google and assembles a professional, mobile-ready website.",
     color: "from-blue-500 to-cyan-400",
   },
   {
     step: "03",
     icon: Rocket,
-    title: "Launch & share",
-    description: "Your site is live instantly! Share it anywhere, add your custom domain, and start getting more customers.",
+    title: "Publish and start winning customers",
+    description: "Share your link, add it to your business cards, and watch customers arrive already trusting you — because they've seen your reviews.",
     color: "from-orange-500 to-amber-400",
   },
 ]
@@ -38,12 +38,12 @@ export function HowItWorksSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-primary font-semibold mb-2 block">Simple Process</span>
+          <span className="text-primary font-semibold mb-2 block">You already have everything you need</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">
-            From Google Maps to website in 3 steps
+            From zero to live website in 3 steps
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            No coding, no designers, no hassle. Just paste and publish.
+            Your reviews, photos, and business info are already on Google. We just put them on a website you own.
           </p>
         </motion.div>
 

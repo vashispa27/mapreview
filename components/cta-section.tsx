@@ -57,11 +57,11 @@ export function CTASection() {
           </motion.div>
 
           <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6 text-balance">
-            Ready to give your business the website it deserves?
+            Every day without a website is a customer lost to a competitor.
           </h2>
 
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
-            {"Start with your Google Maps link and watch as we transform your reviews into a beautiful one-page website."}
+            You&apos;ve already done the hard part — building a great business with real reviews. Let us turn that into a website that works for you 24/7, starting right now.
           </p>
 
           {/* CTA Form */}
@@ -100,7 +100,7 @@ export function CTASection() {
             transition={{ delay: 0.4 }}
             className="mt-6 text-sm text-muted-foreground"
           >
-            Takes 30 seconds • Free forever plan available
+            Takes 30 seconds • No designers, no developers, no hassle
           </motion.p>
         </motion.div>
       </div>

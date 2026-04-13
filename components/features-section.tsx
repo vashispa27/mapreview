@@ -8,43 +8,43 @@ import { MiniMascot } from "@/components/mascot"
 const features = [
   {
     icon: Star,
-    title: "Real Reviews",
-    description: "Import genuine customer reviews directly from your Google Maps listing. Build trust instantly.",
+    title: "Your Reviews, Front and Center",
+    description: "73% of customers trust a business more when they see reviews on a dedicated website. Yours are already on Google — now put them where it converts.",
     color: "text-amber-500",
     bgColor: "bg-amber-500/10",
   },
   {
     icon: Camera,
-    title: "Authentic Photos",
-    description: "Showcase real photos from customers and your business. No stock images needed.",
+    title: "Real Photos, Real Credibility",
+    description: "Stock photos scream \"fake.\" Your real customer photos and business shots tell an authentic story that makes people choose you over the competition.",
     color: "text-pink-500",
     bgColor: "bg-pink-500/10",
   },
   {
     icon: Clock,
-    title: "30 Second Setup",
-    description: "Paste your URL and your website is ready. No technical skills required.",
+    title: "No Designers. No Developers.",
+    description: "A professional website used to cost $3,000–$10,000 and months of back-and-forth. With MapToSite, you're live in 30 seconds — no technical skills required.",
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
   },
   {
     icon: Globe,
-    title: "Custom Domain",
-    description: "Use your own domain or get a free subdomain. Your brand, your way.",
+    title: "Own Your Online Presence",
+    description: "A Google Maps listing is rented space — Google can change it anytime. Your own website is yours forever, with your brand, your URL, your rules.",
     color: "text-green-500",
     bgColor: "bg-green-500/10",
   },
   {
     icon: Zap,
-    title: "Lightning Fast",
-    description: "Optimized for speed. Your site loads instantly on any device.",
+    title: "Show Up in Search Results",
+    description: "Websites rank on Google. A Maps pin doesn't. Give your business a real shot at appearing when customers in your area search for what you offer.",
     color: "text-orange-500",
     bgColor: "bg-orange-500/10",
   },
   {
     icon: Shield,
-    title: "Always Updated",
-    description: "Reviews and info sync automatically. Always show your latest and best.",
+    title: "Always Accurate, Automatically",
+    description: "Outdated hours or wrong info drives customers away. Your site stays in sync with your Google listing — so it's always current without any extra work.",
     color: "text-violet-500",
     bgColor: "bg-violet-500/10",
   },
@@ -70,10 +70,10 @@ export function FeaturesSection() {
             <MiniMascot className="w-16 h-20 mx-auto" />
           </motion.div>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">
-            Why businesses love MapToSite
+            Your Google Maps listing is a goldmine. Are you using it?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Everything you need to convert your Google Maps presence into a professional website
+            You already have reviews, photos, and credibility on Google. A website turns all of that into customers — instead of just leaving it on a platform you don&apos;t own.
           </p>
         </motion.div>
 

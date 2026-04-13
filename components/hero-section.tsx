@@ -167,7 +167,7 @@ export function HeroSection() {
               className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Turn Google Maps into Websites</span>
+              <span>97% of customers Google a business before visiting</span>
             </motion.div>
 
             {/* Headline */}
@@ -177,9 +177,9 @@ export function HeroSection() {
               transition={{ delay: 0.3 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6"
             >
-              <span className="text-balance">Your business deserves a</span>{" "}
+              <span className="text-balance">Don&apos;t let customers pick</span>{" "}
               <span className="text-primary relative">
-                beautiful website
+                your competitor
                 <motion.svg
                   className="absolute -bottom-2 left-0 w-full"
                   viewBox="0 0 200 12"
@@ -205,7 +205,7 @@ export function HeroSection() {
               transition={{ delay: 0.4 }}
               className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 text-pretty"
             >
-              Paste your Google Maps "Share" link and watch as we transform your reviews into a beautiful one-page website.
+              When someone searches for your business, do they find a professional website — or just a Google Maps pin? Your competitors have websites. Your customers expect one. Get yours in 30 seconds.
             </motion.p>
 
             {/* URL Input Area */}
