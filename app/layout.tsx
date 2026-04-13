@@ -17,6 +17,7 @@ export const metadata: Metadata = {
 
 import { AuthProvider } from "@/components/providers/auth-provider"
 import { AdminProvider } from "@/components/providers/admin-provider"
+import Script from "next/script"
 
 export default function RootLayout({
   children,
@@ -26,6 +27,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased">
+        <Script id="crisp-widget" strategy="afterInteractive">
+          {`
+            window.$crisp=[];
+            window.CRISP_WEBSITE_ID="2f66a409-5d22-4f8a-9209-e573f37cb7d9";
+            (function(){
+              d=document;
+              s=d.createElement("script");
+              s.src="https://client.crisp.chat/l.js";
+              s.async=1;
+              d.getElementsByTagName("head")[0].appendChild(s);
+            })();
+          `}
+        </Script>
         <AuthProvider>
           <AdminProvider>
             {children}
