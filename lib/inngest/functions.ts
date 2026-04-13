@@ -25,10 +25,17 @@ export const generateSiteJob = inngest.createFunction(
 
       // 2. Update Prisma Database for persistence
       try {
-        await db.site.update({
+        const site = await db.site.update({
           where: { id: jobId },
-          data: { status: "FAILED" }
+          data: { status: "FAILED" },
+          include: { user: true }
         })
+
+        // SEND FAILURE EMAIL
+        if (site.user?.email) {
+          const { sendSiteStatusEmail } = await import("@/lib/email")
+          await sendSiteStatusEmail(site.user.email, site.businessName || "Your Site", "FAILED")
+        }
       } catch (e) {
         console.error("Failed to update database on failure:", e)
       }
@@ -183,6 +190,14 @@ export const generateSiteJob = inngest.createFunction(
         // Catch logical errors — don't retry, just inform the user
         updateJob(jobId, { status: "FAILED", errorMessage: "error occurred in analysing your business, please contact the developer" })
         await db.site.update({ where: { id: jobId }, data: { status: "FAILED" } })
+        console.error(`\n❌ [${jobId}] Fatal Mapping Error (no retry):`, err)
+      }
+    })
+
+    return { success: true, url }
+  }
+)
+site.update({ where: { id: jobId }, data: { status: "FAILED" } })
         console.error(`\n❌ [${jobId}] Fatal Mapping Error (no retry):`, err)
       }
     })

@@ -68,6 +68,13 @@ export async function POST(req: NextRequest) {
         },
       })
 
+      // SEND FAILURE EMAIL
+      const user = await db.user.findUnique({ where: { id: userId || "" } })
+      if (user?.email) {
+        const { sendPaymentEmail } = await import("@/lib/email")
+        await sendPaymentEmail(user.email, "Pro", paymentData.total_amount ?? 0, "FAILED")
+      }
+
       console.log(`❌ Webhook: Payment ${paymentId} failed for user ${userId}`)
     }
 
