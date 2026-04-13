@@ -5,6 +5,7 @@ import { parseScrapedData } from "@/lib/parser"
 import { generateBusinessContent } from "@/lib/ai"
 import { BusinessData } from "@/lib/mock-data"
 import { db } from "@/lib/db"
+import { sendSiteStatusEmail } from "@/lib/email"
 import sampleData from "../../sample_scraped_data.json"
 
 export const generateSiteJob = inngest.createFunction(
@@ -23,7 +24,7 @@ export const generateSiteJob = inngest.createFunction(
         errorMessage: "Generation failed after multiple attempts. Please try again later." 
       })
 
-      // 2. Update Prisma Database for persistence
+      // 2. Update Prisma Database for persistence and notify user
       try {
         const site = await db.site.update({
           where: { id: jobId },
@@ -33,7 +34,6 @@ export const generateSiteJob = inngest.createFunction(
 
         // SEND FAILURE EMAIL
         if (site.user?.email) {
-          const { sendSiteStatusEmail } = await import("@/lib/email")
           await sendSiteStatusEmail(site.user.email, site.businessName || "Your Site", "FAILED")
         }
       } catch (e) {
@@ -153,9 +153,9 @@ export const generateSiteJob = inngest.createFunction(
             const reviewerName = r.name || "Anonymous User"
             return {
               author: reviewerName,
-              avatar: `https://i.pravatar.cc/150?u=${reviewerName.replace(/\s/g, '')}`,
-              rating: r.rating || r.stars || 5,
-              date: r.publishedAtDate || "Recent",
+              avatar: r.avatar,
+              rating: r.stars || 5,
+              date: r.date || "Recent",
               text: r.text,
               jtbdHeader: jtbd
             }
@@ -168,7 +168,7 @@ export const generateSiteJob = inngest.createFunction(
           ; (businessData as any).analysis = aiData
 
         // Store the final business data to Prisma for persistence!
-        await db.site.update({
+        const site = await db.site.update({
           where: { id: jobId },
           data: {
             status: "COMPLETED",
@@ -180,24 +180,24 @@ export const generateSiteJob = inngest.createFunction(
               fontStyle: "sans",
               animations: true
             } as any
-          }
+          },
+          include: { user: true }
         })
 
         updateJob(jobId, { status: "COMPLETED" })
+
+        // SEND SUCCESS EMAIL
+        if (site.user?.email) {
+          const liveUrl = `https://maptosite.com/site/${site.slug || site.id}`
+          await sendSiteStatusEmail(site.user.email, businessData.name, "SUCCESS", liveUrl)
+        }
+
         const endTime = new Date().toISOString()
         console.log(`\n\n🏁 [${endTime}] INNGEST JOB COMPLETED SUCCESSFULLY! (${jobId})`)
       } catch (err) {
         // Catch logical errors — don't retry, just inform the user
         updateJob(jobId, { status: "FAILED", errorMessage: "error occurred in analysing your business, please contact the developer" })
         await db.site.update({ where: { id: jobId }, data: { status: "FAILED" } })
-        console.error(`\n❌ [${jobId}] Fatal Mapping Error (no retry):`, err)
-      }
-    })
-
-    return { success: true, url }
-  }
-)
-site.update({ where: { id: jobId }, data: { status: "FAILED" } })
         console.error(`\n❌ [${jobId}] Fatal Mapping Error (no retry):`, err)
       }
     })
