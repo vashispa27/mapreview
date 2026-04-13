@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai"
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai"
 
 /**
  * AI Content Generator with Fallback Logic
@@ -12,7 +12,7 @@ export async function generateBusinessContent(parsedData: any) {
     return null
   }
 
-  const ai = new GoogleGenAI({ apiKey })
+  const genAI = new GoogleGenerativeAI(apiKey)
   const topReviews = parsedData.reviews.slice(0, 30)
 
   const prompt = `
@@ -29,12 +29,10 @@ Original Description: ${(parsedData.businessInfo as any)?.description || "Not pr
 Reviews to Analyze:
 ${topReviews.map((r: any, idx: number) => `[ID: ${idx}] ${r.text}`).join("\n\n")}`;
 
-  // MODELS TO TRY IN ORDER
-  // Note: Using standard IDs as '3' and '2.5' are not yet public strings
+  // MODELS TO TRY IN ORDER (High Performance -> Fast Fallback -> Lite Fallback)
+  // Note: Updated names to match current Google AI Studio stable IDs
   const modelsToTry = [
-    "gemini-2.0-flash", 
-    "gemini-1.5-flash",
-    "gemini-1.5-flash-8b"
+    "gemini-flash-latest"
   ]
 
   let lastError = null
@@ -43,27 +41,28 @@ ${topReviews.map((r: any, idx: number) => `[ID: ${idx}] ${r.text}`).join("\n\n")
     try {
       console.log(`🤖 Attempting generation with model: ${modelName}...`)
       
-      const response = await ai.models.generateContent({
-        model: modelName,
-        contents: prompt,
-        config: {
+      const model = genAI.getGenerativeModel({ model: modelName })
+      
+      const response = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             properties: {
-              description: { type: Type.STRING },
+              description: { type: SchemaType.STRING },
               features: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
+                type: SchemaType.ARRAY,
+                items: { type: SchemaType.STRING },
                 description: "Exactly 4 strings."
               },
               reviews: {
-                type: Type.ARRAY,
+                type: SchemaType.ARRAY,
                 items: {
-                  type: Type.OBJECT,
+                  type: SchemaType.OBJECT,
                   properties: {
-                    originalIndex: { type: Type.INTEGER },
-                    jtbdHeader: { type: Type.STRING }
+                    originalIndex: { type: SchemaType.NUMBER },
+                    jtbdHeader: { type: SchemaType.STRING }
                   },
                   required: ["originalIndex", "jtbdHeader"]
                 }
@@ -74,8 +73,8 @@ ${topReviews.map((r: any, idx: number) => `[ID: ${idx}] ${r.text}`).join("\n\n")
         }
       })
 
-      const resultText = response.text
-      if (!resultText) continue
+      const resultText = response.response.text()
+      if (!resultText) continue // Try next model if empty
 
       console.log(`✅ Success with ${modelName}`)
       return JSON.parse(resultText)
@@ -84,10 +83,13 @@ ${topReviews.map((r: any, idx: number) => `[ID: ${idx}] ${r.text}`).join("\n\n")
       lastError = err
       console.warn(`⚠️ Model ${modelName} failed or throttled. Error: ${err.message || "Unknown"}`)
       
+      // If it's a "Safety" block, don't fallback, just fail (it will likely fail on all models)
       if (err.message?.includes("SAFETY")) {
         console.error("❌ Generation blocked by Safety Filters")
         break
       }
+      
+      // Continue to next model in the loop...
     }
   }
 

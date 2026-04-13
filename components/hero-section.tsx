@@ -227,7 +227,12 @@ export function HeroSection() {
                       setUrl(e.target.value)
                       setError("")
                     }}
-                    onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault()
+                        handleGenerate()
+                      }
+                    }}
                     className="pl-12 h-14 text-base bg-card border-border shadow-sm"
                     disabled={isLoading}
                   />
