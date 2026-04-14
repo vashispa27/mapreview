@@ -6,13 +6,34 @@ import { Card } from "@/components/ui/card"
 
 const showcaseWebsites = [
   {
-    name: "Mario's Pizzeria",
+    name: "Dhaba Stories",
+    rating: 4.9,
+    reviews: 850,
+    image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=250&fit=crop",
+    category: "Indian Restaurant",
+    location: "AECS Layout, Bangalore",
+    color: "from-orange-500 to-red-400",
+    href: "https://maptosite.app/site/dhaba-stories-aecs-layout"
+  },
+  {
+    name: "The Amritsar Cafe",
+    rating: 4.7,
+    reviews: 420,
+    image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=250&fit=crop",
+    category: "Cafe",
+    location: "Bangalore, India",
+    color: "from-yellow-500 to-amber-400",
+    href: "https://maptosite.app/site/the-amritsar-cafe"
+  },
+  {
+    name: "Pizza & Co",
     rating: 4.8,
-    reviews: 342,
+    reviews: 1200,
     image: "https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=400&h=250&fit=crop",
-    category: "Restaurant",
-    location: "Brooklyn, NY",
+    category: "Pizzeria",
+    location: "Downtown",
     color: "from-red-500 to-orange-400",
+    href: "https://maptosite.app/site/pizza"
   },
   {
     name: "Zen Wellness Spa",
@@ -22,6 +43,7 @@ const showcaseWebsites = [
     category: "Spa & Wellness",
     location: "San Francisco, CA",
     color: "from-teal-500 to-emerald-400",
+    href: "#"
   },
   {
     name: "Urban Fitness Gym",
@@ -31,15 +53,7 @@ const showcaseWebsites = [
     category: "Fitness",
     location: "Austin, TX",
     color: "from-blue-500 to-indigo-400",
-  },
-  {
-    name: "Bloom Flower Shop",
-    rating: 4.9,
-    reviews: 156,
-    image: "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=400&h=250&fit=crop",
-    category: "Retail",
-    location: "Portland, OR",
-    color: "from-pink-500 to-rose-400",
+    href: "#"
   },
   {
     name: "Golden Bean Cafe",
@@ -49,15 +63,7 @@ const showcaseWebsites = [
     category: "Coffee Shop",
     location: "Seattle, WA",
     color: "from-amber-500 to-yellow-400",
-  },
-  {
-    name: "Tech Repair Pro",
-    rating: 4.8,
-    reviews: 423,
-    image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=250&fit=crop",
-    category: "Services",
-    location: "Denver, CO",
-    color: "from-violet-500 to-purple-400",
+    href: "#"
   },
 ]
 
@@ -73,6 +79,7 @@ export function ShowcaseCards() {
           transition={{ delay: index * 0.1, duration: 0.5 }}
           whileHover={{ y: -8, scale: 1.02 }}
           className="group cursor-pointer"
+          onClick={() => window.open(site.href, '_blank')}
         >
           <Card className="overflow-hidden bg-card border-border/50 shadow-lg hover:shadow-2xl transition-all duration-300">
             <div className="relative h-40 overflow-hidden">
@@ -130,8 +137,9 @@ export function ShowcaseMarquee() {
         {duplicatedSites.map((site, index) => (
           <motion.div
             key={`${site.name}-${index}`}
-            className="flex-shrink-0 w-72"
+            className="flex-shrink-0 w-72 cursor-pointer"
             whileHover={{ scale: 1.05, y: -5 }}
+            onClick={() => window.open(site.href, '_blank')}
           >
             <Card className="overflow-hidden bg-card border-border/50 shadow-md">
               <div className="relative h-32 overflow-hidden">

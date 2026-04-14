@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     // 3. CHECK: Has the user reached their total limit? (Ignore FAILED sites)
     const activeSiteCount = allSites.filter(s => s.status !== "FAILED").length
-    const limit = user?.plan === "pro" ? 5 : user?.plan === "lifetime" ? 100 : 1
+    const limit = user?.plan === "pro" ? 10 : user?.plan === "base" ? 3 : 1
     
     if (activeSiteCount >= limit) {
       const message = user?.plan === "base" || !user?.plan 
