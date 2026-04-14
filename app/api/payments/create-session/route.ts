@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { DodoPayments } from "dodopayments"
 
+const isLive = process.env.PAYMENTS_MODE === "live"
+
 const client = new DodoPayments({
-  baseURL: process.env.PAYMENTS_URL,
+  baseURL: isLive
+    ? "https://live.dodopayments.com"
+    : "https://test.dodopayments.com",
   bearerToken: process.env.DODO_PAYMENTS_API_KEY || "empty",
 })
 
@@ -21,11 +25,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { plan } = body
 
-    // Product IDs from Dodo Dashboard
+    // Product IDs — live vs test
     const productId = plan === "base"
-      ? process.env.DODO_BASE_PRODUCT_ID
+      ? isLive ? process.env.DODO_BASE_PRODUCT_ID_LIVE : process.env.DODO_BASE_PRODUCT_ID_TEST
       : plan === "pro"
-      ? process.env.DODO_PRO_PRODUCT_ID
+      ? isLive ? process.env.DODO_PRO_PRODUCT_ID_LIVE : process.env.DODO_PRO_PRODUCT_ID_TEST
       : undefined
 
     if (!productId) {
