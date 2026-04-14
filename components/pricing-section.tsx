@@ -50,7 +50,7 @@ export function PricingSection() {
       id: "base",
       name: "Base",
       description: "Everything you need to get started",
-      price: "$5",
+      price: "$2",
       priceSuffix: "/month",
       badge: null,
       features: [
@@ -68,7 +68,7 @@ export function PricingSection() {
       id: "pro",
       name: "Pro",
       description: "For businesses that need more power",
-      price: "$10",
+      price: "$7",
       priceSuffix: "/month",
       badge: "Most Popular",
       features: [
@@ -97,7 +97,7 @@ export function PricingSection() {
           </p>
           <div className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted px-4 py-2 rounded-full">
             <RefreshCw className="w-3.5 h-3.5" />
-            Plans renew annually — cancel any time before renewal
+            Plans renew monthly — cancel any time before renewal
           </div>
         </motion.div>
 

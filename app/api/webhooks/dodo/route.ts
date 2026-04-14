@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     const event = client.webhooks.unwrap(body, { headers })
 
+    // ── Payment succeeded (fires on every billing cycle) ──────────────────────
     if (event.type === "payment.succeeded") {
       const paymentData = event.data
       const paymentId = paymentData.payment_id
@@ -26,11 +27,9 @@ export async function POST(req: NextRequest) {
       const currency = paymentData.currency
       const userId = (paymentData.metadata as any)?.userId
       const plan = (paymentData.metadata as any)?.plan as "base" | "pro"
+      const subscriptionId = (paymentData as any).subscription_id ?? null
 
       if (userId) {
-        const planExpiresAt = new Date()
-        planExpiresAt.setFullYear(planExpiresAt.getFullYear() + 1)
-
         await db.payment.upsert({
           where: { id: paymentId },
           update: { status: "succeeded", amount },
@@ -39,7 +38,11 @@ export async function POST(req: NextRequest) {
 
         await db.user.update({
           where: { id: userId },
-          data: { plan: plan || "base", planExpiresAt },
+          data: {
+            plan: plan || "base",
+            planExpiresAt: null,           // monthly subscription — no fixed expiry
+            ...(subscriptionId ? { subscriptionId } : {}),
+          },
         })
 
         const user = await db.user.findUnique({ where: { id: userId } })
@@ -49,14 +52,37 @@ export async function POST(req: NextRequest) {
             user.name || "",
             plan || "base",
             amount,
-            planExpiresAt
-          )
+            null // no expiry date for monthly subscriptions
+          ).catch((err) => console.error("Payment success email failed:", err))
         }
 
-        console.log(`✅ Payment succeeded: user ${userId} → ${plan}. Valid until ${planExpiresAt.toISOString()}`)
+        console.log(`✅ Payment succeeded: user ${userId} → ${plan} (sub: ${subscriptionId})`)
       }
     }
 
+    // ── Subscription cancelled or expired → revoke plan ───────────────────────
+    if (event.type === "subscription.cancelled" || event.type === "subscription.expired") {
+      const subData = event.data as any
+      const subscriptionId = subData.subscription_id
+      const userId = subData.metadata?.userId
+
+      if (userId) {
+        await db.user.update({
+          where: { id: userId },
+          data: { plan: "free", planExpiresAt: null, subscriptionId: null },
+        })
+        console.log(`🚫 Subscription ${event.type}: user ${userId} reverted to free`)
+      } else if (subscriptionId) {
+        // Fallback: look up by stored subscriptionId
+        await db.user.updateMany({
+          where: { subscriptionId },
+          data: { plan: "free", planExpiresAt: null, subscriptionId: null },
+        })
+        console.log(`🚫 Subscription ${event.type}: sub ${subscriptionId} reverted to free`)
+      }
+    }
+
+    // ── Payment failed ────────────────────────────────────────────────────────
     if (event.type === "payment.failed") {
       const paymentData = event.data
       const paymentId = paymentData.payment_id
@@ -78,11 +104,13 @@ export async function POST(req: NextRequest) {
       const user = await db.user.findUnique({ where: { id: userId || "" } })
       if (user?.email) {
         await sendPaymentFailedEmail(user.email, user.name || "", plan)
+          .catch((err) => console.error("Payment failed email failed:", err))
       }
 
       console.log(`❌ Payment failed: ${paymentId} for user ${userId}`)
     }
 
+    // ── Payment cancelled ─────────────────────────────────────────────────────
     if (event.type === "payment.cancelled") {
       const paymentData = event.data
       const paymentId = paymentData.payment_id
@@ -104,11 +132,13 @@ export async function POST(req: NextRequest) {
       const user = await db.user.findUnique({ where: { id: userId || "" } })
       if (user?.email) {
         await sendPaymentCancelledEmail(user.email, user.name || "", plan)
+          .catch((err) => console.error("Payment cancelled email failed:", err))
       }
 
       console.log(`🚫 Payment cancelled: ${paymentId} for user ${userId}`)
     }
 
+    // ── Payment processing ────────────────────────────────────────────────────
     if (event.type === "payment.processing") {
       const paymentData = event.data
       const paymentId = paymentData.payment_id

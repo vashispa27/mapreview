@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { MapPin, Twitter, Github, Mail } from "lucide-react"
+import { MapPin, Mail, Instagram } from "lucide-react"
 import { MiniMascot } from "@/components/mascot"
 import Link from "next/link"
 
@@ -36,11 +36,17 @@ export function Footer() {
 
           {/* Contact Us */}
           <div>
-            <h4 className="font-semibold text-foreground mb-4 uppercase tracking-wider text-xs"></h4>
+            <h4 className="font-semibold text-foreground mb-4 uppercase tracking-wider text-xs">Contact Us</h4>
             <ul className="space-y-3">
               <li>
-                <a href="mailto:support@maptosite.app" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  
+                <a 
+                  href="https://instagram.com/maptosite.app" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+                >
+                  <Instagram className="w-4 h-4" />
+                  @maptosite
                 </a>
               </li>
             </ul>

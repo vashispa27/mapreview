@@ -43,7 +43,6 @@ export default function LandingPage() {
         <ShowcaseSection />
         
         {/* Testimonials Section */}
-        <TestimonialsSection />
 
         {/* Pricing Section */}
         <PricingSection />

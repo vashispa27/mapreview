@@ -39,7 +39,7 @@ export function PurchaseModal({ open, onClose }: PurchaseModalProps) {
     {
       id: "base",
       name: "Base",
-      price: "$5",
+      price: "$2",
       priceSuffix: "/month",
       icon: Zap,
       popular: false,
@@ -54,7 +54,7 @@ export function PurchaseModal({ open, onClose }: PurchaseModalProps) {
     {
       id: "pro",
       name: "Pro",
-      price: "$10",
+      price: "$7",
       priceSuffix: "/month",
       icon: Sparkles,
       popular: true,

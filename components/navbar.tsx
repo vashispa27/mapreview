@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { MapPin, Menu, X, LayoutGrid, LogOut, Shield, Zap, Sparkles } from "lucide-react"
+import { MapPin, Menu, X, LayoutGrid, LogOut, Shield, Zap, Sparkles, Ban } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSession, signOut } from "next-auth/react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -16,9 +16,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import Link from "next/link"
 
-function PlanBadge({ plan, planExpiresAt }: { plan: string; planExpiresAt: string | null }) {
+function PlanBadge({ plan }: { plan: string }) {
   if (plan === "pro") {
     return (
       <div className="flex flex-col gap-0.5">
@@ -26,11 +36,7 @@ function PlanBadge({ plan, planExpiresAt }: { plan: string; planExpiresAt: strin
           <Sparkles className="w-2.5 h-2.5" />
           Pro Plan
         </span>
-        {planExpiresAt && (
-          <span className="text-[10px] text-muted-foreground">
-            Valid until {new Date(planExpiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-          </span>
-        )}
+        <span className="text-[10px] text-muted-foreground">Active · renews monthly</span>
       </div>
     )
   }
@@ -41,11 +47,7 @@ function PlanBadge({ plan, planExpiresAt }: { plan: string; planExpiresAt: strin
           <Zap className="w-2.5 h-2.5" />
           Base Plan
         </span>
-        {planExpiresAt && (
-          <span className="text-[10px] text-muted-foreground">
-            Valid until {new Date(planExpiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-          </span>
-        )}
+        <span className="text-[10px] text-muted-foreground">Active · renews monthly</span>
       </div>
     )
   }
@@ -69,6 +71,28 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loginModalOpen, setLoginModalOpen] = useState(false)
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
+  const [isCancelling, setIsCancelling] = useState(false)
+  const [cancelDone, setCancelDone] = useState(false)
+
+  const handleCancelMembership = async () => {
+    setIsCancelling(true)
+    try {
+      const res = await fetch("/api/payments/cancel", { method: "POST" })
+      if (res.ok) {
+        setCancelDone(true)
+      } else {
+        const data = await res.json()
+        alert(data.error || "Failed to cancel. Please try again.")
+        setCancelModalOpen(false)
+      }
+    } catch {
+      alert("Something went wrong. Please try again.")
+      setCancelModalOpen(false)
+    } finally {
+      setIsCancelling(false)
+    }
+  }
 
   // Combine real session with admin mode
   const isLoggedIn = !!session || isAdminMode
@@ -152,10 +176,7 @@ export function Navbar() {
                         </span>
                       )}
                       {!isAdminMode && (
-                        <PlanBadge
-                          plan={session?.user?.plan ?? "free"}
-                          planExpiresAt={session?.user?.planExpiresAt ?? null}
-                        />
+                        <PlanBadge plan={session?.user?.plan ?? "free"} />
                       )}
                     </div>
                   </DropdownMenuLabel>
@@ -166,6 +187,15 @@ export function Navbar() {
                       My Sites
                     </Link>
                   </DropdownMenuItem>
+                  {!isAdminMode && (session?.user?.plan === "base" || session?.user?.plan === "pro") && (
+                    <DropdownMenuItem
+                      className="flex items-center gap-2 cursor-pointer text-muted-foreground"
+                      onClick={() => setCancelModalOpen(true)}
+                    >
+                      <Ban className="w-4 h-4" />
+                      Cancel Membership
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"
@@ -303,11 +333,51 @@ export function Navbar() {
       </AnimatePresence>
 
       {/* Login Modal */}
-      <LoginModal 
-        open={loginModalOpen} 
+      <LoginModal
+        open={loginModalOpen}
         onOpenChange={setLoginModalOpen}
         onAdminLogin={() => setAdminMode(true)}
       />
+
+      {/* Cancel Membership Modal */}
+      <AlertDialog open={cancelModalOpen} onOpenChange={(o) => { if (!isCancelling) { setCancelModalOpen(o); if (!o) setCancelDone(false) } }}>
+        <AlertDialogContent>
+          {cancelDone ? (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Membership cancelled</AlertDialogTitle>
+                <AlertDialogDescription>
+                  You&apos;ll keep full access until the end of your current billing period. No further charges will be made.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction onClick={() => { setCancelModalOpen(false); setCancelDone(false) }}>
+                  Got it
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </>
+          ) : (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Cancel your membership?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  You&apos;ll keep access to all features until the end of your current billing period. After that, your account will revert to the free plan.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isCancelling}>Keep membership</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleCancelMembership}
+                  disabled={isCancelling}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {isCancelling ? "Cancelling…" : "Yes, cancel"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </>
+          )}
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

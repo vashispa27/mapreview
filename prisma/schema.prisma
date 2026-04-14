@@ -55,6 +55,7 @@ model User {
   // Payment Fields
   plan           String    @default("free") // free | base | pro
   planExpiresAt  DateTime?
+  subscriptionId String?   // DodoPayments subscription_id for cancellation
   payments       Payment[]
 
   accounts Account[]

@@ -162,12 +162,14 @@ export async function sendPaymentSuccessEmail(
   name: string,
   plan: "base" | "pro",
   amount: number,
-  planExpiresAt: Date
+  planExpiresAt: Date | null
 ) {
   const firstName = name?.split(" ")[0] || "there"
   const amountFormatted = `$${(amount / 100).toFixed(2)}`
   const planLabel = plan === "pro" ? "Pro" : "Base"
-  const expiryFormatted = planExpiresAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+  const expiryFormatted = planExpiresAt
+    ? planExpiresAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+    : null
   const planColor = plan === "pro" ? "#4f46e5" : "#374151"
   const planBg = plan === "pro" ? "#eef2ff" : "#f9fafb"
 
@@ -206,8 +208,8 @@ export async function sendPaymentSuccessEmail(
               <td align="right" style="padding-top:10px;font-size:14px;font-weight:700;color:#1a1a2e;">${amountFormatted}</td>
             </tr>
             <tr>
-              <td style="padding-top:10px;font-size:13px;color:#6b7280;">Valid until</td>
-              <td align="right" style="padding-top:10px;font-size:14px;font-weight:700;color:#1a1a2e;">${expiryFormatted}</td>
+              <td style="padding-top:10px;font-size:13px;color:#6b7280;">${expiryFormatted ? "Valid until" : "Billing"}</td>
+              <td align="right" style="padding-top:10px;font-size:14px;font-weight:700;color:#1a1a2e;">${expiryFormatted ?? "Monthly · renews automatically"}</td>
             </tr>
           </table>
         </td>
