@@ -26,45 +26,15 @@ const showcaseWebsites = [
     href: "https://maptosite.app/site/the-amritsar-cafe"
   },
   {
-    name: "Pizza & Co",
-    rating: 4.8,
-    reviews: 1200,
-    image: "https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=400&h=250&fit=crop",
-    category: "Pizzeria",
-    location: "Downtown",
-    color: "from-red-500 to-orange-400",
-    href: "https://maptosite.app/site/pizza"
-  },
-  {
-    name: "Zen Wellness Spa",
-    rating: 4.9,
-    reviews: 189,
-    image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&h=250&fit=crop",
-    category: "Spa & Wellness",
-    location: "San Francisco, CA",
-    color: "from-teal-500 to-emerald-400",
-    href: "#"
-  },
-  {
-    name: "Urban Fitness Gym",
+    name: "RC Fitness gym",
     rating: 4.7,
     reviews: 521,
     image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop",
     category: "Fitness",
-    location: "Austin, TX",
+    location: "Bangalore india",
     color: "from-blue-500 to-indigo-400",
-    href: "#"
-  },
-  {
-    name: "Golden Bean Cafe",
-    rating: 4.6,
-    reviews: 278,
-    image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=250&fit=crop",
-    category: "Coffee Shop",
-    location: "Seattle, WA",
-    color: "from-amber-500 to-yellow-400",
-    href: "#"
-  },
+    href: "https://maptosite.app/site/rc-fitness-club"
+  }
 ]
 
 export function ShowcaseCards() {
