@@ -29,18 +29,18 @@ export default function LandingPage() {
       <main className="relative z-10">
         {/* Hero Section */}
         <HeroSection />
-        
+
+        {/* How It Works Section */}
+        <section id="how-it-works">
+          <HowItWorksSection />
+        </section>
+
         {/* Why You Need a Website */}
         <WhyWebsiteSection />
 
         {/* Features Section */}
         <section id="features">
           <FeaturesSection />
-        </section>
-        
-        {/* How It Works Section */}
-        <section id="how-it-works">
-          <HowItWorksSection />
         </section>
         
         {/* Showcase Section */}
