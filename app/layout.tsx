@@ -48,6 +48,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-RXC8HGDM3G"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-RXC8HGDM3G');
+          `}
+        </Script>
         <Script id="crisp-widget" strategy="afterInteractive">
           {`
             window.$crisp=[];
