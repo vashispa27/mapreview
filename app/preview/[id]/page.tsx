@@ -156,7 +156,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
     // Gate: user must have an active paid plan to publish
     const userPlan = session?.user?.plan ?? "free"
     const planExpiresAt = session?.user?.planExpiresAt
-    const isExpired = planExpiresAt ? new Date(planExpiresAt) < new Date() : true
+    const isExpired = planExpiresAt ? new Date(planExpiresAt) < new Date() : false
     const hasPlan = (userPlan === "base" || userPlan === "pro") && !isExpired
 
     if (!isAdminDemo && !hasPlan) {

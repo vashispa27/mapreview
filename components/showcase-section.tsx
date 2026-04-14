@@ -45,13 +45,6 @@ export function ShowcaseSection() {
             className="inline-flex items-center gap-2 text-primary font-medium hover:underline"
             whileHover={{ x: 5 }}
           >
-            View all examples
-            <motion.span
-              animate={{ x: [0, 5, 0] }}
-              transition={{ duration: 1, repeat: Infinity }}
-            >
-              →
-            </motion.span>
           </motion.a>
         </motion.div>
       </div>
