@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight, Sparkles, MapPin, Loader2, HelpCircle, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,6 +18,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 
+const businessTypes = ["Restaurant owners", "Gym owners", "Salon owners", "Barbers", "Cafe owners", "Plumbers"]
+
 export function HeroSection() {
   const { data: session } = useSession()
   const router = useRouter()
@@ -26,6 +28,7 @@ export function HeroSection() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [isTutorialOpen, setIsTutorialOpen] = useState(false)
+  const [businessTypeIndex, setBusinessTypeIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -35,6 +38,13 @@ export function HeroSection() {
     }
     window.addEventListener("focus-input", handleFocusEvent)
     return () => window.removeEventListener("focus-input", handleFocusEvent)
+  }, [])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setBusinessTypeIndex(prev => (prev + 1) % businessTypes.length)
+    }, 2000)
+    return () => clearInterval(timer)
   }, [])
 
   const validateUrl = (testUrl: string) => {
@@ -164,10 +174,24 @@ export function HeroSection() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6"
+              className="inline-flex items-center gap-2 mb-6 h-10"
             >
-              <Sparkles className="w-4 h-4" />
-              <span>97% of customers Google a business before visiting</span>
+              <span className="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={businessTypeIndex}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.25 }}
+                    className="inline-block"
+                  >
+                    {businessTypes[businessTypeIndex]}
+                  </motion.span>
+                </AnimatePresence>
+              </span>
+              <span className="text-sm text-muted-foreground font-medium">— this is for you.</span>
             </motion.div>
 
             {/* Headline */}
@@ -205,7 +229,7 @@ export function HeroSection() {
               transition={{ delay: 0.4 }}
               className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 text-pretty"
             >
-              When someone searches for your business, do they find a professional website — or just a Google Maps pin? Your competitors have websites. Your customers expect one. Get yours in 30 seconds.
+              Your customers Google you before they visit. If they don&apos;t find a website, they find someone who has one.
             </motion.p>
 
             {/* URL Input Area */}

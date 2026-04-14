@@ -4,6 +4,7 @@ import { Navbar } from "@/components/navbar"
 import { HeroSection } from "@/components/hero-section"
 import { FeaturesSection } from "@/components/features-section"
 import { HowItWorksSection } from "@/components/how-it-works-section"
+import { WhyWebsiteSection } from "@/components/why-website-section"
 import { ShowcaseSection } from "@/components/showcase-section"
 import { TestimonialsSection } from "@/components/testimonials-section"
 import { PricingSection } from "@/components/pricing-section"
@@ -25,6 +26,9 @@ export default function LandingPage() {
         {/* Hero Section */}
         <HeroSection />
         
+        {/* Why You Need a Website */}
+        <WhyWebsiteSection />
+
         {/* Features Section */}
         <section id="features">
           <FeaturesSection />

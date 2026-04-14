@@ -39,13 +39,13 @@ export function PurchaseModal({ open, onClose }: PurchaseModalProps) {
     {
       id: "base",
       name: "Base",
-      price: "$9",
-      priceSuffix: "/year",
+      price: "$5",
+      priceSuffix: "/month",
       icon: Zap,
       popular: false,
       features: [
         "50 reviews analysed per site",
-        "3 websites with unlimited edits",
+        "Host upto 3 websites with unlimited edits",
         "Automatic updates with live reviews",
         "Custom URL with MapToSite branding",
         "7-day Discord support",
@@ -54,13 +54,13 @@ export function PurchaseModal({ open, onClose }: PurchaseModalProps) {
     {
       id: "pro",
       name: "Pro",
-      price: "$19",
-      priceSuffix: "/year",
+      price: "$10",
+      priceSuffix: "/month",
       icon: Sparkles,
       popular: true,
       features: [
         "200 reviews analysed per site",
-        "10 websites with unlimited edits",
+        "Host upto 10 websites with unlimited edits",
         "Request for custom domain",
         "Weekly reviews report analysis",
         "Automatic updates with live reviews",
