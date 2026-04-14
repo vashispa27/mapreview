@@ -27,7 +27,7 @@ async function testEmails() {
 
     // 2. Test Site Success Email
     console.log("📨 Sending Site Success Email...")
-    await sendSiteStatusEmail(targetEmail, "Mario's Pizza", "SUCCESS", "https://maptosite.com/site/marios-pizza")
+    await sendSiteStatusEmail(targetEmail, "Mario's Pizza", "SUCCESS", "https://maptosite.app/site/marios-pizza")
     console.log("✅ Site Success Email Sent!")
 
     // 3. Test Payment Email

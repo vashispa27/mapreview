@@ -105,7 +105,7 @@ export function HowItWorksSection() {
                 <div className="w-3 h-3 rounded-full bg-green-400" />
               </div>
               <div className="flex-1 bg-background rounded-lg px-4 py-1.5 text-sm text-muted-foreground mx-4 flex items-center gap-2">
-                <span className="text-primary">maptosite.com/create</span>
+                <span className="text-primary">maptosite.app/create</span>
               </div>
             </div>
 

@@ -175,7 +175,7 @@ export function WebsitePreviewCard({ className = "" }: { className?: string }) {
           <div className="w-3 h-3 rounded-full bg-green-400" />
         </div>
         <div className="flex-1 bg-background rounded-md px-3 py-1 text-xs text-muted-foreground mx-4">
-          mariospizzeria.maptosite.com
+          mariospizzeria.maptosite.app
         </div>
       </div>
       

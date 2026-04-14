@@ -188,7 +188,7 @@ export const generateSiteJob = inngest.createFunction(
 
         // SEND SUCCESS EMAIL
         if (site.user?.email) {
-          const liveUrl = `https://maptosite.com/site/${site.slug || site.id}`
+          const liveUrl = `https://maptosite.app/site/${site.slug || site.id}`
           await sendSiteStatusEmail(site.user.email, businessData.name, "SUCCESS", liveUrl)
         }
 

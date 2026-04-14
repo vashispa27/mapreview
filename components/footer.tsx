@@ -39,7 +39,7 @@ export function Footer() {
             <h4 className="font-semibold text-foreground mb-4 uppercase tracking-wider text-xs"></h4>
             <ul className="space-y-3">
               <li>
-                <a href="mailto:support@maptosite.com" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <a href="mailto:support@maptosite.app" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   
                 </a>
               </li>

@@ -84,7 +84,7 @@ export default function MySitesPage() {
     fetchSites()
   }, [status, isLoggedIn, isAdminMode, router])
 
-  const limit = userPlan === "pro" ? 5 : userPlan === "lifetime" ? 100 : 1
+  const limit = userPlan === "base" ? 3 : userPlan === "pro" ? 10 : 1
 
   if (status === "loading" || loading) {
     return (

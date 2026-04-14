@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
         userId: session.user.id,
         plan: plan,
       },
-      return_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/my-sites?payment=success`,
+      return_url: `${process.env.REDIRECT_URL || 'http://localhost:3000'}/my-sites`,
     })
 
     return NextResponse.json({ url: checkoutSession.checkout_url })

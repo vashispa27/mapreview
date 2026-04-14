@@ -20,7 +20,7 @@ interface LoginModalProps {
 }
 
 // List of authorized admin emails for email login
-const ADMIN_EMAILS = ["abhinav@maptosite.com", "admin@maptosite.com"]
+const ADMIN_EMAILS = ["abhinav@maptosite.app", "admin@maptosite.app"]
 
 export function LoginModal({ open, onOpenChange, onAdminLogin }: LoginModalProps) {
   const [email, setEmail] = useState("")
