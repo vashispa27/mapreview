@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth"
 import { DodoPayments } from "dodopayments"
 
 const client = new DodoPayments({
-  baseURL:"https://test.dodopayments.com",
+  baseURL: process.env.PAYMENTS_URL,
   bearerToken: process.env.DODO_PAYMENTS_API_KEY || "empty",
 })
 
