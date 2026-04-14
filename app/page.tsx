@@ -1,5 +1,6 @@
 "use client"
 
+import { AnnouncementBanner } from "@/components/announcement-banner"
 import { Navbar } from "@/components/navbar"
 import { HeroSection } from "@/components/hero-section"
 import { FeaturesSection } from "@/components/features-section"
@@ -18,6 +19,9 @@ export default function LandingPage() {
       {/* Floating background elements */}
       <FloatingElements />
       
+      {/* Announcement Banner */}
+      <AnnouncementBanner />
+
       {/* Navigation */}
       <Navbar />
       
