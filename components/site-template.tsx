@@ -1,9 +1,10 @@
 "use client"
 //hello;
-import { BusinessData, SiteConfig } from "@/lib/mock-data"
-import { Star, MapPin, Phone, Clock, Globe, Check, ChevronRight, ChevronDown, X, Instagram, Facebook, Twitter } from "lucide-react"
+import { useRef } from "react"
+import { BusinessData, SiteConfig, ColorScheme } from "@/lib/mock-data"
+import { Star, MapPin, Phone, Clock, Globe, Check, ChevronRight, ChevronDown, X, Instagram, Facebook, Twitter, UtensilsCrossed } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { motion, HTMLMotionProps } from "framer-motion"
+import { motion, AnimatePresence, HTMLMotionProps } from "framer-motion"
 import { PhotoManagerModal } from "./photo-manager-modal"
 import { HeroBackgroundModal } from "./hero-background-modal"
 import { AnimatedReviews } from "./animated-reviews"
@@ -44,9 +45,84 @@ function AnimatedDiv({
   )
 }
 
+// ─── Floating menu button + styled dialog — shared by all templates ───────────
+function MenuFloater({ business, colorScheme }: { business: BusinessData; colorScheme: ColorScheme }) {
+  const ref = useRef<HTMLDialogElement>(null)
+  if (!business.menuImage) return null
+  const isPdf = business.menuImage.startsWith("data:application/pdf")
+  return (
+    <>
+      <button
+        onClick={() => ref.current?.showModal()}
+        className="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-white shadow-2xl hover:scale-105 active:scale-95 transition-transform"
+        style={{ backgroundColor: colorScheme.primary }}
+      >
+        <UtensilsCrossed className="w-4 h-4" />
+        View Menu
+      </button>
+
+      <dialog
+        ref={ref}
+        style={{
+          padding: 0,
+          border: "none",
+          borderRadius: 16,
+          width: "min(580px, calc(100vw - 40px))",
+          maxHeight: "90vh",
+          overflow: "hidden",
+          margin: "auto",
+          inset: 0,
+          position: "fixed",
+        }}
+        className="shadow-2xl backdrop:bg-black/75 backdrop:backdrop-blur-sm"
+        onClick={(e) => { if (e.target === ref.current) ref.current?.close() }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", maxHeight: "90vh" }}>
+          {/* Header */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "16px 20px", borderBottom: "1px solid #e5e7eb",
+            background: "#fff", position: "sticky", top: 0, zIndex: 10, flexShrink: 0,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 8, display: "flex",
+                alignItems: "center", justifyContent: "center",
+                backgroundColor: colorScheme.primary + "20",
+              }}>
+                <UtensilsCrossed style={{ width: 16, height: 16, color: colorScheme.primary }} />
+              </div>
+              <span style={{ fontWeight: 700, fontSize: 15, color: "#111" }}>Our Menu</span>
+            </div>
+            <button
+              onClick={() => ref.current?.close()}
+              style={{
+                width: 32, height: 32, borderRadius: "50%", border: "none",
+                background: "#f3f4f6", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              <X style={{ width: 14, height: 14, color: "#555" }} />
+            </button>
+          </div>
+          {/* Content */}
+          <div style={{ overflowY: "auto", flex: 1 }}>
+            {isPdf ? (
+              <iframe src={business.menuImage} style={{ width: "100%", height: "70vh", display: "block", border: "none" }} title="Menu" />
+            ) : (
+              <img src={business.menuImage} alt="Our Menu" style={{ width: "100%", height: "auto", display: "block" }} />
+            )}
+          </div>
+        </div>
+      </dialog>
+    </>
+  )
+}
+
 export function SiteTemplate({ business, config, isPreview = false, onBusinessChange }: SiteTemplateProps) {
   const { colorScheme, layout, fontStyle, animations } = config
   const isDark = colorScheme.id === "midnight"
+
 
   const handleRemovePhoto = (indexToRemove: number) => {
     if (onBusinessChange) {
@@ -623,6 +699,8 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
           )}
         </div>
       </footer>
+
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -922,6 +1000,7 @@ function LuxuryTemplate({ business, config, isPreview = false, onBusinessChange 
           )}
         </div>
       </footer>
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -1236,6 +1315,7 @@ function BoldTemplate({ business, config, isPreview = false, onBusinessChange }:
           )}
         </div>
       </footer>
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -1598,6 +1678,7 @@ function ExecutiveTemplate({ business, config, isPreview = false, onBusinessChan
           )}
         </div>
       </footer>
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }

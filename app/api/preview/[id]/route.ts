@@ -102,6 +102,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   if (body.photos) currentBusiness.photos = body.photos
   if (body.heroImage) currentBusiness.heroImage = body.heroImage
+  if (body.menuImage !== undefined) currentBusiness.menuImage = body.menuImage || null
   if (body.description) currentBusiness.description = body.description
   if (body.features) currentBusiness.features = body.features
 

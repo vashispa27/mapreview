@@ -143,6 +143,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
         body: JSON.stringify({
           photos: newBusiness.photos,
           heroImage: newBusiness.heroImage,
+          menuImage: newBusiness.menuImage,
           description: newBusiness.description,
           features: newBusiness.features,
         }),

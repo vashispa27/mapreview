@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { BusinessData, SiteConfig } from "@/lib/mock-data"
 import { CustomizationOptions } from "./customization-options"
 import { Button } from "@/components/ui/button"
@@ -17,7 +17,9 @@ import {
   Star,
   Globe,
   AlertCircle,
-  X
+  X,
+  UtensilsCrossed,
+  Upload,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -46,6 +48,22 @@ export function PreviewCustomizer({
 }: PreviewCustomizerProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [widgetsOpen, setWidgetsOpen] = useState(false)
+  const menuFileRef = useRef<HTMLInputElement>(null)
+
+  const handleMenuUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !onBusinessChange) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      onBusinessChange({ ...business, menuImage: ev.target?.result as string })
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleMenuRemove = () => {
+    if (onBusinessChange) onBusinessChange({ ...business, menuImage: undefined })
+  }
 
   // Slug Selection State
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -164,6 +182,20 @@ export function PreviewCustomizer({
 
             {/* Customization Options */}
             <CustomizationOptions config={config} onConfigChange={onConfigChange} />
+
+            {/* Add Widgets */}
+            {onBusinessChange && (
+              <div className="pt-2 border-t">
+                <button
+                  onClick={() => setWidgetsOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-sm font-medium text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all"
+                >
+                  <span className="text-base leading-none">＋</span>
+                  Add Widgets
+                </button>
+                <input ref={menuFileRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={handleMenuUpload} />
+              </div>
+            )}
 
             {/* Actions */}
             <div className="space-y-3 pt-4 border-t">
@@ -294,6 +326,84 @@ export function PreviewCustomizer({
                   By clicking confirm, your site will be accessible to the public.
                 </p>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Widgets Modal */}
+      <AnimatePresence>
+        {widgetsOpen && (
+          <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="bg-card border shadow-2xl rounded-2xl w-full max-w-sm p-5 relative"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-base">Widgets</h3>
+                <button onClick={() => setWidgetsOpen(false)} className="text-muted-foreground hover:text-foreground">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Menu Floater Widget */}
+              <div className="rounded-xl border-2 border-border overflow-hidden">
+                <div className="flex items-center gap-3 p-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <UtensilsCrossed className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm">Menu Floater</p>
+                    <p className="text-xs text-muted-foreground">A floating button visitors tap to view your menu</p>
+                  </div>
+                  {business.menuImage ? (
+                    <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-green-100 text-green-700">Active</span>
+                  ) : null}
+                </div>
+
+                {/* Configured state — thumbnail */}
+                {business.menuImage && (
+                  <div className="border-t border-border px-4 pb-4 pt-3 space-y-3">
+                    <div className="relative rounded-lg overflow-hidden border border-border">
+                      <img src={business.menuImage} alt="Menu preview" className="w-full max-h-32 object-cover" />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => menuFileRef.current?.click()}
+                        className="flex-1 py-2 text-xs font-medium rounded-lg border border-border hover:bg-muted transition"
+                      >
+                        Replace
+                      </button>
+                      <button
+                        onClick={handleMenuRemove}
+                        className="flex-1 py-2 text-xs font-medium rounded-lg border border-destructive/40 text-destructive hover:bg-destructive/5 transition"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Unconfigured state — upload prompt */}
+                {!business.menuImage && (
+                  <div className="border-t border-border p-4">
+                    <button
+                      onClick={() => menuFileRef.current?.click()}
+                      className="w-full border-2 border-dashed border-border rounded-xl py-5 flex flex-col items-center gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all"
+                    >
+                      <Upload className="w-5 h-5 text-muted-foreground" />
+                      <p className="text-sm font-medium">Upload menu image or PDF</p>
+                      <p className="text-xs text-muted-foreground">Tap to select a file</p>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <p className="text-xs text-muted-foreground text-center mt-4">
+                More widgets coming soon
+              </p>
             </motion.div>
           </div>
         )}

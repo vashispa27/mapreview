@@ -13,6 +13,7 @@ export interface BusinessData {
   phone: string
   website?: string
   heroImage?: string
+  menuImage?: string
   socials?: {
     instagram?: string
     facebook?: string
