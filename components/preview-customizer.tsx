@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { BusinessData, SiteConfig } from "@/lib/mock-data"
 import { CustomizationOptions } from "./customization-options"
+import { PageManager } from "./page-manager"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,6 +21,8 @@ import {
   X,
   UtensilsCrossed,
   Upload,
+  Paintbrush,
+  LayoutGrid,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -49,6 +52,7 @@ export function PreviewCustomizer({
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [copied, setCopied] = useState(false)
   const [widgetsOpen, setWidgetsOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<"design" | "pages">("design")
   const menuFileRef = useRef<HTMLInputElement>(null)
 
   const handleMenuUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,21 +184,51 @@ export function PreviewCustomizer({
               </div>
             </div>
 
-            {/* Customization Options */}
-            <CustomizationOptions config={config} onConfigChange={onConfigChange} />
+            {/* Tab Bar */}
+            <div className="flex rounded-xl bg-muted p-1 gap-1">
+              <button
+                onClick={() => setActiveTab("design")}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "design" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <Paintbrush className="w-3.5 h-3.5" />
+                Design
+              </button>
+              <button
+                onClick={() => setActiveTab("pages")}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === "pages" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                Pages
+              </button>
+            </div>
 
-            {/* Add Widgets */}
-            {onBusinessChange && (
-              <div className="pt-2 border-t">
-                <button
-                  onClick={() => setWidgetsOpen(true)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-sm font-medium text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all"
-                >
-                  <span className="text-base leading-none">＋</span>
-                  Add Widgets
-                </button>
-                <input ref={menuFileRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={handleMenuUpload} />
-              </div>
+            {/* Design Tab */}
+            {activeTab === "design" && (
+              <>
+                <CustomizationOptions config={config} onConfigChange={onConfigChange} />
+
+                {/* Add Widgets */}
+                {onBusinessChange && (
+                  <div className="pt-2 border-t">
+                    <button
+                      onClick={() => setWidgetsOpen(true)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-sm font-medium text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all"
+                    >
+                      <span className="text-base leading-none">＋</span>
+                      Add Widgets
+                    </button>
+                    <input ref={menuFileRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={handleMenuUpload} />
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Pages Tab */}
+            {activeTab === "pages" && onBusinessChange && (
+              <PageManager business={business} onChange={onBusinessChange} />
+            )}
+            {activeTab === "pages" && !onBusinessChange && (
+              <p className="text-sm text-muted-foreground text-center py-4">Page editing not available.</p>
             )}
 
             {/* Actions */}

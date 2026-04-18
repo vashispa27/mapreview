@@ -3,6 +3,22 @@ export interface SitePhoto {
   caption: string
 }
 
+export interface ServiceItem {
+  id: string
+  title: string
+  price: string
+  description?: string
+  image?: string
+}
+
+export interface ProductItem {
+  id: string
+  title: string
+  price: string
+  description?: string
+  image?: string
+}
+
 export interface BusinessData {
   id: string
   name: string
@@ -18,7 +34,15 @@ export interface BusinessData {
     instagram?: string
     facebook?: string
     twitter?: string
+    linkedin?: string
   }
+  pages?: {
+    services?: boolean
+    products?: boolean
+    contact?: boolean
+  }
+  services?: ServiceItem[]
+  products?: ProductItem[]
   hours: {
     day: string
     hours: string

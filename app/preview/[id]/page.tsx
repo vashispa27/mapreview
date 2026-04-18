@@ -146,6 +146,10 @@ export default function PreviewPage({ params }: PreviewPageProps) {
           menuImage: newBusiness.menuImage,
           description: newBusiness.description,
           features: newBusiness.features,
+          pages: newBusiness.pages,
+          services: newBusiness.services,
+          products: newBusiness.products,
+          socials: newBusiness.socials,
         }),
       })
     } catch (err) {

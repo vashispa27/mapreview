@@ -1,8 +1,13 @@
 "use client"
 //hello;
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { BusinessData, SiteConfig, ColorScheme } from "@/lib/mock-data"
-import { Star, MapPin, Phone, Clock, Globe, Check, ChevronRight, ChevronDown, X, Instagram, Facebook, Twitter, UtensilsCrossed } from "lucide-react"
+import { Star, MapPin, Phone, Clock, Globe, Check, ChevronRight, ChevronDown, X, Instagram, Facebook, Twitter, UtensilsCrossed, ShoppingCart } from "lucide-react"
+import { ServicesPage } from "./site-pages/ServicesPage"
+import { ProductsPage } from "./site-pages/ProductsPage"
+import { ContactPage } from "./site-pages/ContactPage"
+import { CartDrawer, CartItem } from "./site-pages/CartDrawer"
+import { ServiceItem, ProductItem } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence, HTMLMotionProps } from "framer-motion"
 import { PhotoManagerModal } from "./photo-manager-modal"
@@ -42,6 +47,60 @@ function AnimatedDiv({
     <motion.div className={className} {...props}>
       {children}
     </motion.div>
+  )
+}
+
+// ─── Floating bottom page nav — shared by all templates ──────────────────────
+function FloatingPageNav({
+  activePage, onNavigate, pages, colorScheme, cartCount, onCartClick,
+}: {
+  activePage: string
+  onNavigate: (page: string) => void
+  pages: { services?: boolean; products?: boolean; contact?: boolean }
+  colorScheme: ColorScheme
+  cartCount: number
+  onCartClick: () => void
+}) {
+  const tabs = [
+    { key: "home", label: "Home" },
+    ...(pages.services ? [{ key: "services", label: "Services" }] : []),
+    ...(pages.products ? [{ key: "products", label: "Products" }] : []),
+    ...(pages.contact ? [{ key: "contact", label: "Contact" }] : []),
+  ]
+
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 bg-white/95 backdrop-blur-md border border-border shadow-2xl rounded-2xl px-2 py-2">
+      {tabs.map((tab) => (
+        <button
+          key={tab.key}
+          onClick={() => onNavigate(tab.key)}
+          className="px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap"
+          style={{
+            backgroundColor: activePage === tab.key ? colorScheme.primary : "transparent",
+            color: activePage === tab.key ? "#fff" : "#6b7280",
+          }}
+        >
+          {tab.label}
+        </button>
+      ))}
+      {pages.products && (
+        <button
+          onClick={onCartClick}
+          className="relative ml-1 p-2 rounded-xl transition hover:bg-black/5"
+          style={{ color: colorScheme.primary }}
+        >
+          <ShoppingCart className="w-4 h-4" />
+          {cartCount > 0 && (
+            <span
+              className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+              style={{ backgroundColor: colorScheme.primary }}
+            >
+              {cartCount}
+            </span>
+          )}
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -123,6 +182,40 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
   const { colorScheme, layout, fontStyle, animations } = config
   const isDark = colorScheme.id === "midnight"
 
+  type Page = "home" | "services" | "products" | "contact"
+  const [activePage, setActivePage] = useState<Page>("home")
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [cartOpen, setCartOpen] = useState(false)
+  const [prefilledService, setPrefilledService] = useState<ServiceItem | null>(null)
+
+  const pages = business.pages ?? {}
+  const cartCount = cartItems.reduce((s, c) => s + c.qty, 0)
+
+  const addToCart = (product: ProductItem) => {
+    setCartItems((prev) => {
+      const existing = prev.find((c) => c.product.id === product.id)
+      if (existing) return prev.map((c) => c.product.id === product.id ? { ...c, qty: c.qty + 1 } : c)
+      return [...prev, { product, qty: 1 }]
+    })
+    setCartOpen(true)
+  }
+
+  const updateQty = (productId: string, qty: number) => {
+    setCartItems((prev) => qty <= 0 ? prev.filter((c) => c.product.id !== productId) : prev.map((c) => c.product.id === productId ? { ...c, qty } : c))
+  }
+
+  const bookService = (svc: ServiceItem) => {
+    setPrefilledService(svc)
+    setActivePage("contact")
+  }
+
+  const handleCartCheckout = () => {
+    const summary = cartItems.map((c) => `${c.product.title} x${c.qty} @ ${c.product.price}`).join(", ")
+    setPrefilledService({ id: "cart", title: "Product Order", price: "", description: summary })
+    setCartOpen(false)
+    setActivePage("contact")
+  }
+
 
   const handleRemovePhoto = (indexToRemove: number) => {
     if (onBusinessChange) {
@@ -155,10 +248,70 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
     rounded: "font-sans tracking-wide",
   }[fontStyle]
 
-  // Route to pro templates
-  if (layout === "luxury") return <LuxuryTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
-  if (layout === "bold") return <BoldTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
-  if (layout === "executive") return <ExecutiveTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+  const hasPages = !!(pages.services || pages.products || pages.contact)
+
+  const navigate = (p: string) => {
+    setActivePage(p as Page)
+    if (p !== "contact") setPrefilledService(null)
+  }
+
+  const floatingNav = hasPages ? (
+    <FloatingPageNav
+      activePage={activePage}
+      onNavigate={navigate}
+      pages={pages}
+      colorScheme={colorScheme}
+      cartCount={cartCount}
+      onCartClick={() => setCartOpen(true)}
+    />
+  ) : null
+
+  const cartDrawer = (
+    <CartDrawer open={cartOpen} items={cartItems} colorScheme={colorScheme} onClose={() => setCartOpen(false)} onUpdateQty={updateQty} onCheckout={handleCartCheckout} />
+  )
+
+  // For non-home pages: same content across all layouts
+  if (activePage !== "home") {
+    return (
+      <div className={cn("min-h-screen", fontClass)} style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}>
+        {activePage === "services" && pages.services && (
+          <ServicesPage business={business} colorScheme={colorScheme} fontClass={fontClass} onBook={bookService} onBusinessChange={onBusinessChange} />
+        )}
+        {activePage === "products" && pages.products && (
+          <ProductsPage business={business} colorScheme={colorScheme} fontClass={fontClass} cartItems={cartItems} onAddToCart={addToCart} onBusinessChange={onBusinessChange} />
+        )}
+        {activePage === "contact" && pages.contact && (
+          <ContactPage business={business} colorScheme={colorScheme} fontClass={fontClass} prefilledService={prefilledService} />
+        )}
+        {floatingNav}
+        {cartDrawer}
+        <MenuFloater business={business} colorScheme={colorScheme} />
+      </div>
+    )
+  }
+
+  // Route to pro templates (home page only)
+  if (layout === "luxury") return (
+    <>
+      <LuxuryTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      {floatingNav}
+      {cartDrawer}
+    </>
+  )
+  if (layout === "bold") return (
+    <>
+      <BoldTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      {floatingNav}
+      {cartDrawer}
+    </>
+  )
+  if (layout === "executive") return (
+    <>
+      <ExecutiveTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      {floatingNav}
+      {cartDrawer}
+    </>
+  )
 
   // Layout-specific styles
   const layoutStyles = {
@@ -288,56 +441,47 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
         </div>
       </header>
 
-      {/* Quick Info Bar */}
+      {/* Sticky Nav */}
       <div
-        className={cn(
-          "sticky top-0 z-10 border-b",
-          animations && "transition-all duration-300"
-        )}
-        style={{
-          backgroundColor: isDark ? "#1e293b" : "#fff",
-          borderColor: isDark ? "#334155" : "#e5e7eb",
-        }}
+        className={cn("sticky top-0 z-10 border-b", animations && "transition-all duration-300")}
+        style={{ backgroundColor: isDark ? "#1e293b" : "#fff", borderColor: isDark ? "#334155" : "#e5e7eb" }}
       >
-        <div
-          className={cn(
-            "max-w-6xl mx-auto px-4 flex flex-wrap items-center justify-between gap-4",
-            layout === "minimal" ? "py-3" : "py-4"
-          )}
-        >
-          <div className="flex flex-wrap items-center gap-6">
-            <a
-              href={`tel:${business.phone}`}
-              className={cn(
-                "flex items-center gap-2 transition",
-                animations && "hover:opacity-80"
-              )}
-              style={{ color: colorScheme.primary }}
-            >
-              <Phone className="w-4 h-4" />
-              <span className="font-medium">{business.phone}</span>
+        {/* Top row: phone + directions */}
+        <div className={cn("max-w-6xl mx-auto px-4 flex flex-wrap items-center justify-between gap-4", layout === "minimal" ? "py-2" : "py-3")}>
+          <div className="flex flex-wrap items-center gap-5">
+            <a href={`tel:${business.phone}`} className={cn("flex items-center gap-2 transition text-sm", animations && "hover:opacity-80")} style={{ color: colorScheme.primary }}>
+              <Phone className="w-3.5 h-3.5" /><span className="font-medium">{business.phone}</span>
             </a>
-            <div className="flex items-center gap-2 hidden sm:flex" style={{ color: colorScheme.muted }}>
-              <MapPin className="w-4 h-4" />
-              <span className="text-sm">{business.address}</span>
+            <div className="hidden sm:flex items-center gap-2 text-sm" style={{ color: colorScheme.muted }}>
+              <MapPin className="w-3.5 h-3.5" /><span>{business.address}</span>
             </div>
           </div>
-          <a
-            href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              "px-4 py-2 font-medium text-white transition",
-              layoutStyles.cardStyle,
-              animations && "hover:opacity-90 hover:shadow-lg"
+          <div className="flex items-center gap-2">
+            {pages.products && (
+              <button
+                onClick={() => setCartOpen(true)}
+                className="relative p-2 rounded-lg hover:bg-black/5 transition"
+                style={{ color: colorScheme.primary }}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center" style={{ backgroundColor: colorScheme.primary }}>
+                    {cartCount}
+                  </span>
+                )}
+              </button>
             )}
-            style={{ backgroundColor: colorScheme.primary }}
-          >
-            Get Directions
-          </a>
+            <a href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`} target="_blank" rel="noopener noreferrer"
+              className={cn("px-3 py-1.5 text-sm font-medium text-white transition", layoutStyles.cardStyle, animations && "hover:opacity-90")}
+              style={{ backgroundColor: colorScheme.primary }}>
+              Directions
+            </a>
+          </div>
         </div>
+
       </div>
 
+      {/* Home page content */}
       <main className={cn("max-w-6xl mx-auto px-4", layout === "minimal" ? "py-8" : "py-12")}>
         {/* About Section */}
         <AnimatedDiv animate={animations} {...fadeInUp} className={layoutStyles.sectionGap}>
@@ -700,6 +844,8 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
         </div>
       </footer>
 
+      {floatingNav}
+      {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
     </div>
   )
