@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, Sparkles, MapPin, Loader2, HelpCircle, X } from "lucide-react"
+import { ArrowRight, Sparkles, MapPin, Loader2, HelpCircle, X, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Mascot } from "@/components/mascot"
 import { WebsitePreviewCard } from "@/components/showcase-cards"
 import { useSession, signIn } from "next-auth/react"
 import { useToast } from "@/hooks/use-toast"
+import { BusinessSearchModal } from "@/components/business-search-modal"
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ export function HeroSection() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [isTutorialOpen, setIsTutorialOpen] = useState(false)
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
   const [businessTypeIndex, setBusinessTypeIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -57,8 +59,8 @@ export function HeroSection() {
     return null
   }
 
-  const handleGenerate = async () => {
-    const finalUrl = url.trim()
+  const handleGenerate = async (overrideUrl?: string) => {
+    const finalUrl = (overrideUrl || url).trim()
 
     // ADMIN BYPASS
     if (finalUrl.toLowerCase() === "admin") {
@@ -262,6 +264,7 @@ export function HeroSection() {
                   />
                 </div>
                 <Button
+                  id="generate-btn"
                   size="lg"
                   className="h-14 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg shadow-primary/25"
                   onClick={handleGenerate}
@@ -280,6 +283,23 @@ export function HeroSection() {
                   )}
                 </Button>
               </div>
+
+              {session && (
+                <>
+                  <div className="relative py-2 flex items-center gap-4">
+                    <div className="flex-1 h-px bg-border/50"></div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">or search directly</span>
+                    <div className="flex-1 h-px bg-border/50"></div>
+                  </div>
+
+                  <div className="relative group cursor-pointer" onClick={() => setIsSearchModalOpen(true)}>
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <div className="w-full h-14 pl-12 pr-4 flex items-center text-muted-foreground bg-muted/30 border border-dashed border-border rounded-lg hover:border-primary/50 hover:bg-muted/50 transition-all">
+                      Search for your business name...
+                    </div>
+                  </div>
+                </>
+              )}
             </motion.div>
 
             {/* Error message */}
@@ -320,6 +340,17 @@ export function HeroSection() {
         </div>
       </div>
     </section>
+
+      <BusinessSearchModal 
+        isOpen={isSearchModalOpen} 
+        onClose={() => setIsSearchModalOpen(false)}
+        onSelect={(selectedUrl) => {
+          setUrl(selectedUrl)
+          setError("")
+          // Just fill the field, don't auto-generate as requested
+        }}
+      />
     </>
+
   )
 }

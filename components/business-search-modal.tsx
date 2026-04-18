@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Search, MapPin, Star, Loader2, X } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 
 interface BusinessSearchResult {
   id: string
@@ -15,34 +13,6 @@ interface BusinessSearchResult {
   reviews: number
   url: string
 }
-
-// MOCK DATA for Offline Mode
-const MOCK_RESULTS: BusinessSearchResult[] = [
-  {
-    id: "1",
-    name: "Mario's Authentic Pizzeria",
-    address: "123 Pizza Lane, Brooklyn, NY 11201",
-    rating: 4.8,
-    reviews: 1240,
-    url: "https://www.google.com/maps/place/marios-pizza"
-  },
-  {
-    id: "2",
-    name: "The Golden Bean Coffee",
-    address: "456 Espresso St, Seattle, WA 98101",
-    rating: 4.6,
-    reviews: 890,
-    url: "https://www.google.com/maps/place/golden-bean"
-  },
-  {
-    id: "3",
-    name: "Urban Fitness Gym",
-    address: "789 Muscle Ave, Austin, TX 78701",
-    rating: 4.9,
-    reviews: 2100,
-    url: "https://www.google.com/maps/place/urban-fitness"
-  }
-]
 
 interface BusinessSearchModalProps {
   onSelect: (url: string) => void
@@ -55,23 +25,29 @@ export function BusinessSearchModal({ onSelect, isOpen, onClose }: BusinessSearc
   const [results, setResults] = useState<BusinessSearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
 
-  // Simulate search logic
+  // Real search logic using our new API
   useEffect(() => {
     if (query.length < 3) {
       setResults([])
       return
     }
 
-    setIsSearching(true)
-    const timer = setTimeout(() => {
-      const filtered = MOCK_RESULTS.filter(r => 
-        r.name.toLowerCase().includes(query.toLowerCase()) || 
-        r.address.toLowerCase().includes(query.toLowerCase())
-      )
-      setResults(filtered)
-      setIsSearching(false)
-    }, 500)
+    const searchBusinesses = async () => {
+      setIsSearching(true)
+      try {
+        const res = await fetch(`/api/maps/search?q=${encodeURIComponent(query)}`)
+        if (res.ok) {
+          const data = await res.json()
+          setResults(data.results || [])
+        }
+      } catch (err) {
+        console.error("Search failed:", err)
+      } finally {
+        setIsSearching(false)
+      }
+    }
 
+    const timer = setTimeout(searchBusinesses, 800) // Debounce search
     return () => clearTimeout(timer)
   }, [query])
 
@@ -99,50 +75,62 @@ export function BusinessSearchModal({ onSelect, isOpen, onClose }: BusinessSearc
               placeholder="Type your business name (e.g. Mario's Pizzeria)..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="pl-10 h-12 text-base"
+              className="pl-10 h-12 text-base border-primary/20 focus-visible:ring-primary"
               autoFocus
             />
           </div>
 
           <div className="space-y-2">
             {isSearching ? (
-              <div className="flex items-center justify-center py-10 text-muted-foreground">
-                <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                Searching Google Maps...
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
+                <p className="font-medium">Searching Google Maps...</p>
+                <p className="text-xs mt-1">This might take a few seconds</p>
               </div>
             ) : results.length > 0 ? (
-              results.map((result) => (
-                <button
-                  key={result.id}
-                  onClick={() => {
-                    onSelect(result.url)
-                    onClose()
-                  }}
-                  className="w-full flex items-start gap-4 p-4 rounded-xl border bg-card hover:bg-muted/50 hover:border-primary/50 transition-all text-left group"
-                >
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                    <MapPin className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-foreground truncate">{result.name}</p>
-                    <p className="text-sm text-muted-foreground truncate">{result.address}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Star className="w-3 h-3 text-amber-500 fill-current" />
-                      <span className="text-xs font-medium">{result.rating}</span>
-                      <span className="text-xs text-muted-foreground">({result.reviews} reviews)</span>
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">Top results</p>
+                {results.map((result) => (
+                  <button
+                    key={result.id}
+                    onClick={() => {
+                      onSelect(result.url)
+                      onClose()
+                    }}
+                    className="w-full flex items-start gap-4 p-4 rounded-xl border bg-card hover:bg-primary/5 hover:border-primary/50 transition-all text-left group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                      <MapPin className="w-5 h-5 text-primary" />
                     </div>
-                  </div>
-                </button>
-              ))
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-foreground truncate group-hover:text-primary transition-colors">{result.name}</p>
+                      <p className="text-sm text-muted-foreground truncate">{result.address}</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Star className="w-3 h-3 text-amber-500 fill-current" />
+                        <span className="text-xs font-medium">{result.rating}</span>
+                        <span className="text-xs text-muted-foreground">({result.reviews} reviews)</span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
             ) : query.length >= 3 ? (
-              <p className="text-center py-10 text-muted-foreground">No businesses found. Try a different name.</p>
+              <div className="text-center py-12 text-muted-foreground">
+                <p className="font-medium">No businesses found.</p>
+                <p className="text-sm">Try typing the business name and city.</p>
+              </div>
             ) : (
-              <div className="text-center py-10 text-muted-foreground space-y-2">
-                <p>Start typing to search on Google Maps</p>
-                <p className="text-xs italic">(Currently in Mock Mode - Try typing "Mario" or "Bean")</p>
+              <div className="text-center py-12 text-muted-foreground bg-muted/30 rounded-xl border border-dashed">
+                <Search className="w-8 h-8 mx-auto mb-3 opacity-20" />
+                <p className="font-medium text-sm">Start typing to search directly on Google Maps</p>
+                <p className="text-xs mt-1 px-8">We'll find your business so you don't have to copy-paste links.</p>
               </div>
             )}
           </div>
+        </div>
+        
+        <div className="p-4 bg-muted/50 border-t text-center">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Powered by Google Maps Data</p>
         </div>
       </motion.div>
     </div>

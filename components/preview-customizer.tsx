@@ -23,6 +23,9 @@ import {
   Upload,
   Paintbrush,
   LayoutGrid,
+  QrCode,
+  Download,
+  Phone,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -53,7 +56,20 @@ export function PreviewCustomizer({
   const [copied, setCopied] = useState(false)
   const [widgetsOpen, setWidgetsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<"design" | "pages">("design")
+  const [qrOpen, setQrOpen] = useState(false)
   const menuFileRef = useRef<HTMLInputElement>(null)
+
+  const qrUrl = siteId ? `${typeof window !== "undefined" ? window.location.origin : ""}/go/${siteId}` : null
+  const qrImageUrl = qrUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=12&data=${encodeURIComponent(qrUrl)}` : null
+
+  const setSocial = (key: string, val: string) => {
+    if (!onBusinessChange) return
+    onBusinessChange({ ...business, socials: { ...business.socials, [key]: val } })
+  }
+  const setPhone = (val: string) => {
+    if (!onBusinessChange) return
+    onBusinessChange({ ...business, phone: val })
+  }
 
   const handleMenuUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -225,7 +241,34 @@ export function PreviewCustomizer({
 
             {/* Pages Tab */}
             {activeTab === "pages" && onBusinessChange && (
-              <PageManager business={business} onChange={onBusinessChange} />
+              <>
+                {/* Business Info — always editable */}
+                <div className="rounded-xl border border-border p-3.5 space-y-2.5">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Business Info</p>
+                  <div className="flex items-center gap-2.5 bg-muted/30 rounded-lg border border-border px-3 py-2 focus-within:border-primary transition">
+                    <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <input value={business.phone ?? ""} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number" className="flex-1 text-sm outline-none bg-transparent" />
+                  </div>
+                  {[
+                    { key: "instagram", label: "IG", placeholder: "Instagram URL" },
+                    { key: "facebook",  label: "fb", placeholder: "Facebook URL" },
+                    { key: "twitter",   label: "𝕏",  placeholder: "Twitter / X URL" },
+                    { key: "linkedin",  label: "in", placeholder: "LinkedIn URL" },
+                  ].map(({ key, label, placeholder }) => (
+                    <div key={key} className="flex items-center gap-2.5 bg-muted/30 rounded-lg border border-border px-3 py-2 focus-within:border-primary transition">
+                      <span className="text-xs font-bold text-muted-foreground w-5 text-center flex-shrink-0">{label}</span>
+                      <input
+                        value={(business.socials as any)?.[key] ?? ""}
+                        onChange={(e) => setSocial(key, e.target.value)}
+                        placeholder={placeholder}
+                        className="flex-1 text-sm outline-none bg-transparent"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <PageManager business={business} onChange={onBusinessChange} />
+              </>
             )}
             {activeTab === "pages" && !onBusinessChange && (
               <p className="text-sm text-muted-foreground text-center py-4">Page editing not available.</p>
@@ -251,6 +294,13 @@ export function PreviewCustomizer({
                   </>
                 )}
               </Button>
+
+              {siteId && (
+                <Button variant="outline" className="w-full gap-2" onClick={() => setQrOpen(true)}>
+                  <QrCode className="w-4 h-4" />
+                  Get QR Code
+                </Button>
+              )}
 
               <Button
                 variant="outline"
@@ -438,6 +488,48 @@ export function PreviewCustomizer({
               <p className="text-xs text-muted-foreground text-center mt-4">
                 More widgets coming soon
               </p>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* QR Code Modal */}
+      <AnimatePresence>
+        {qrOpen && qrImageUrl && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="bg-card border shadow-2xl rounded-2xl w-full max-w-xs p-6 relative text-center"
+            >
+              <button onClick={() => setQrOpen(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                <QrCode className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="font-bold text-base mb-1">QR Code</h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Scan to open your site. Works even if you change the URL later.
+              </p>
+
+              <div className="bg-white rounded-xl p-3 inline-block border mx-auto mb-4">
+                <img src={qrImageUrl} alt="QR Code" width={200} height={200} className="block" />
+              </div>
+
+              <a
+                href={qrImageUrl + "&download=1"}
+                download={`${business.name}-qr.png`}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition hover:opacity-90"
+                style={{ backgroundColor: "hsl(var(--primary))" }}
+              >
+                <Download className="w-4 h-4" />
+                Download PNG
+              </a>
+
+              <p className="text-[10px] text-muted-foreground mt-3 break-all opacity-60">{qrUrl}</p>
             </motion.div>
           </div>
         )}

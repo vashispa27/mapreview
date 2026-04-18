@@ -134,10 +134,13 @@ export const generateSiteJob = inngest.createFunction(
           phone: parsedData.businessInfo.phone || "",
           website: parsedData.businessInfo.website || "",
           socials: {
-            instagram: "https://instagram.com",
-            facebook: "https://facebook.com",
-            twitter: "https://twitter.com"
+            instagram: "",
+            facebook: "",
+            twitter: "",
           },
+          pages: { services: true, products: true, contact: true },
+          services: [],
+          products: [],
           heroImage: parsedData.photos[0] || "/placeholder.jpg",
           hours: parsedData.businessInfo.openingHours
             ? parsedData.businessInfo.openingHours.map((h: any) => ({ day: h.day, hours: h.hours }))
