@@ -17,10 +17,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 })
     }
 
-    const isGoogleMapsUrl = url.includes("maps.app.goo.gl") || url.includes("goo.gl/maps")
+    const isGoogleMapsUrl =
+      url.includes("maps.app.goo.gl") ||
+      url.includes("goo.gl/maps") ||
+      url.includes("google.com/maps") ||
+      url.includes("maps.google.com")
     if (!isGoogleMapsUrl) {
-      return NextResponse.json({ 
-        error: "Please provide a valid Google Maps short URL." 
+      return NextResponse.json({
+        error: "Please provide a valid Google Maps URL.",
       }, { status: 400 })
     }
 
