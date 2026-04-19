@@ -1,50 +1,50 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Star, Camera, Clock, Globe, Zap, Shield } from "lucide-react"
+import { Star, Camera, Clock, Globe, Zap, ShoppingBag } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { MiniMascot } from "@/components/mascot"
 
 const features = [
   {
-    icon: Star,
-    title: "Your Reviews, Front and Center",
-    description: "73% of customers trust a business more when they see reviews on a dedicated website. Yours are already on Google — now put them where it converts.",
+    icon: Zap,
+    title: "Live in under 60 seconds",
+    description: "Paste your Google Maps link and your full website is built automatically. No configuration, no waiting, no back-and-forth with a developer.",
     color: "text-amber-500",
     bgColor: "bg-amber-500/10",
   },
   {
-    icon: Camera,
-    title: "Real Photos, Real Credibility",
-    description: "Stock photos scream \"fake.\" Your real customer photos and business shots tell an authentic story that makes people choose you over the competition.",
+    icon: ShoppingBag,
+    title: "Add products & services instantly",
+    description: "List what you sell — with photos, descriptions, and prices — in seconds. No drag and drop, no page builder. Just fill in the details and it's on your site.",
     color: "text-pink-500",
     bgColor: "bg-pink-500/10",
   },
   {
     icon: Clock,
-    title: "No Designers. No Developers.",
-    description: "A professional website used to cost $3,000–$10,000 and months of back-and-forth. With MapToSite, you're live in 30 seconds — no technical skills required.",
+    title: "No drag and drop. Ever.",
+    description: "Page builders eat hours. MapToSite builds your site for you — then lets you add your services and products in a simple form. That's it. You're done.",
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
   },
   {
-    icon: Globe,
-    title: "Own Your Online Presence",
-    description: "A Google Maps listing is rented space — Google can change it anytime. Your own website is yours forever, with your brand, your URL, your rules.",
+    icon: Star,
+    title: "Your reviews sell for you",
+    description: "73% of customers trust a business more when they see reviews on a website. Yours are already on Google — we put them front and centre where they convert.",
     color: "text-green-500",
     bgColor: "bg-green-500/10",
   },
   {
-    icon: Zap,
-    title: "Show Up in Search Results",
-    description: "Websites rank on Google. A Maps pin doesn't. Give your business a real shot at appearing when customers in your area search for what you offer.",
+    icon: Camera,
+    title: "Real photos, built in",
+    description: "Your actual Google Maps photos are pulled in automatically. No stock images. No uploading. Just your real business, looking credible from day one.",
     color: "text-orange-500",
     bgColor: "bg-orange-500/10",
   },
   {
-    icon: Shield,
-    title: "Always Accurate, Automatically",
-    description: "Outdated hours or wrong info drives customers away. Your site stays in sync with your Google listing — so it's always current without any extra work.",
+    icon: Globe,
+    title: "Your site, your URL, your rules",
+    description: "A Google Maps listing is rented space. Your MapToSite website is yours — custom URL, your brand, works 24/7 even when you're not.",
     color: "text-violet-500",
     bgColor: "bg-violet-500/10",
   },
@@ -70,10 +70,10 @@ export function FeaturesSection() {
             <MiniMascot className="w-16 h-20 mx-auto" />
           </motion.div>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">
-            Your Google Maps listing is a goldmine. Are you using it?
+            Everything your customers need — built automatically in under a minute
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            You already have reviews, photos, and credibility on Google. A website turns all of that into customers — instead of just leaving it on a platform you don&apos;t own.
+            No drag and drop. No templates. No design decisions. Your full website — with your products, services, and prices — is ready before you finish your coffee.
           </p>
         </motion.div>
 

@@ -8,21 +8,21 @@ const steps = [
     step: "01",
     icon: Link2,
     title: "Paste your Google Maps link",
-    description: "That Maps listing you already have — with all your reviews and photos? That's your raw material. Just share the link.",
+    description: "That's it — your one input. Your Maps listing already has your reviews, photos, hours, and contact info. Paste the link and we do the rest.",
     color: "from-green-500 to-emerald-400",
   },
   {
     step: "02",
     icon: Wand2,
-    title: "We build your website automatically",
-    description: "Our AI pulls your reviews, photos, hours, and business details from Google and assembles a professional, mobile-ready website.",
+    title: "Your full website builds in seconds",
+    description: "AI assembles a complete, mobile-ready website from your Google data. No templates to configure. No design decisions. No drag and drop — ever.",
     color: "from-blue-500 to-cyan-400",
   },
   {
     step: "03",
     icon: Rocket,
-    title: "Publish and start winning customers",
-    description: "Share your link, add it to your business cards, and watch customers arrive already trusting you — because they've seen your reviews.",
+    title: "Add what you sell, then go live",
+    description: "List your services, products, and prices in seconds — then publish with one click. You get a real business website with everything customers need to buy from you.",
     color: "from-orange-500 to-amber-400",
   },
 ]
@@ -38,12 +38,12 @@ export function HowItWorksSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-primary font-semibold mb-2 block">You already have everything you need</span>
+          <span className="text-primary font-semibold mb-2 block">The fastest way to get online</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">
-            From zero to live website in 3 steps
+            A complete working website in under 60 seconds
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Your reviews, photos, and business info are already on Google. We just put them on a website you own.
+            No page builder. No drag and drop. No developer. Just paste, add your products or services, and go live.
           </p>
         </motion.div>
 

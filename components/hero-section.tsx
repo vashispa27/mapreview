@@ -25,7 +25,7 @@ interface SearchResult {
   url: string
 }
 
-const businessTypes = ["Restaurant owners", "Gym owners", "Salon owners", "Barbers", "Cafe owners", "Plumbers"]
+const businessTypes = ["60 seconds to go live", "No drag and drop", "Products & prices included", "No designers needed", "Real services, real bookings", "Zero coding required"]
 
 export function HeroSection() {
   const { data: session } = useSession()
@@ -268,7 +268,7 @@ export function HeroSection() {
                     </motion.span>
                   </AnimatePresence>
                 </span>
-                <span className="text-sm text-muted-foreground font-medium">— this is for you.</span>
+                <span className="text-sm text-muted-foreground font-medium">— no page builder needed.</span>
               </motion.div>
 
               {/* Headline */}
@@ -278,9 +278,9 @@ export function HeroSection() {
                 transition={{ delay: 0.3 }}
                 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6"
               >
-                <span className="text-balance">Don&apos;t let customers pick</span>{" "}
+                <span className="text-balance">Full website. Your products,<br className="hidden sm:block" /> services &amp; prices.</span>{" "}
                 <span className="text-primary relative">
-                  your competitor
+                  Live in 60 seconds.
                   <motion.svg
                     className="absolute -bottom-2 left-0 w-full"
                     viewBox="0 0 200 12"
@@ -306,7 +306,7 @@ export function HeroSection() {
                 transition={{ delay: 0.4 }}
                 className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 text-pretty"
               >
-                Your customers Google you before they visit. If they don&apos;t find a website, they find someone who has one.
+                Skip the drag-and-drop builders. Paste your Google Maps link, add what you sell, and you&apos;re live — no design skills, no developers, no waiting.
               </motion.p>
 
               {/* URL Input Area */}
