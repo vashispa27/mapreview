@@ -5,17 +5,17 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Zap, Copy, Check, X } from "lucide-react"
 
 const PROMOS: Record<string, { code: string; discount: string }> = {
-  under30: { code: process.env.NEXT_PUBLIC_PROMO_UNDER_30 ?? "", discount: "50%" },
-  under40: { code: process.env.NEXT_PUBLIC_PROMO_UNDER_40 ?? "", discount: "40%" },
-  under50: { code: process.env.NEXT_PUBLIC_PROMO_UNDER_50 ?? "", discount: "30%" },
-  under60: { code: process.env.NEXT_PUBLIC_PROMO_UNDER_60 ?? "", discount: "20%" },
+  under60:  { code: process.env.NEXT_PUBLIC_PROMO_UNDER_30 ?? "", discount: "50%" },
+  under80:  { code: process.env.NEXT_PUBLIC_PROMO_UNDER_40 ?? "", discount: "40%" },
+  under90:  { code: process.env.NEXT_PUBLIC_PROMO_UNDER_50 ?? "", discount: "30%" },
+  under100: { code: process.env.NEXT_PUBLIC_PROMO_UNDER_60 ?? "", discount: "20%" },
 }
 
 function getPromo(seconds: number) {
-  if (seconds < 30 && PROMOS.under30.code) return PROMOS.under30
-  if (seconds < 40 && PROMOS.under40.code) return PROMOS.under40
-  if (seconds < 50 && PROMOS.under50.code) return PROMOS.under50
-  if (seconds < 60 && PROMOS.under60.code) return PROMOS.under60
+  if (seconds < 60  && PROMOS.under60.code)  return PROMOS.under60
+  if (seconds < 80  && PROMOS.under80.code)  return PROMOS.under80
+  if (seconds < 90  && PROMOS.under90.code)  return PROMOS.under90
+  if (seconds < 100 && PROMOS.under100.code) return PROMOS.under100
   return null
 }
 
@@ -172,7 +172,7 @@ export function StickyTimer() {
           >
             <span className="text-base">⏱️</span>
             <span className="text-sm text-muted-foreground">
-              {elapsed}s — just over 60! Try again next time.
+              {elapsed}s — just over 100! Try again next time.
             </span>
             <button
               onClick={dismiss}

@@ -5,10 +5,10 @@ import { Zap, Clock, ArrowRight, Flame } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export const discountTiers = [
-  { time: "< 30s", discount: "50% off", color: "text-pink-500", bg: "bg-pink-500/10 border-pink-500/30", ring: "ring-1 ring-pink-500/40" },
-  { time: "< 40s", discount: "40% off", color: "text-violet-500", bg: "bg-violet-500/10 border-violet-500/30", ring: "" },
-  { time: "< 50s", discount: "30% off", color: "text-blue-500", bg: "bg-blue-500/10 border-blue-500/30", ring: "" },
-  { time: "< 60s", discount: "20% off", color: "text-teal-500", bg: "bg-teal-500/10 border-teal-500/30", ring: "" },
+  { time: "< 60s",  discount: "50% off", color: "text-pink-500",   bg: "bg-pink-500/10 border-pink-500/30",   ring: "ring-1 ring-pink-500/40" },
+  { time: "< 80s",  discount: "40% off", color: "text-violet-500", bg: "bg-violet-500/10 border-violet-500/30", ring: "" },
+  { time: "< 90s",  discount: "30% off", color: "text-blue-500",   bg: "bg-blue-500/10 border-blue-500/30",   ring: "" },
+  { time: "< 100s", discount: "20% off", color: "text-teal-500",   bg: "bg-teal-500/10 border-teal-500/30",   ring: "" },
 ]
 
 function TimerRing() {
