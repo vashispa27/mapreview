@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import { BusinessData, ServiceItem, ColorScheme } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 import { Calendar, Plus, ImagePlus, Check, X, Trash2 } from "lucide-react"
+import { compressImage } from "@/lib/compress-image"
 
 interface ServicesPageProps {
   business: BusinessData
@@ -25,12 +26,10 @@ export function ServicesPage({ business, colorScheme, fontClass, onBook, onBusin
 
   const set = (k: keyof typeof EMPTY, v: string) => setForm((f) => ({ ...f, [k]: v }))
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => set("image", ev.target?.result as string)
-    reader.readAsDataURL(file)
+    set("image", await compressImage(file, 800, 800, 0.82))
   }
 
   const handleSave = () => {

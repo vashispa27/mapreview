@@ -8,6 +8,7 @@ import {
   ChevronDown, ChevronUp, ImagePlus, Instagram, Linkedin,
   X,
 } from "lucide-react"
+import { compressImage } from "@/lib/compress-image"
 
 interface PageManagerProps {
   business: BusinessData
@@ -163,10 +164,8 @@ function ServicesEditor({ business, onChange }: { business: BusinessData; onChan
 
   const remove = (id: string) => update(services.filter((s) => s.id !== id))
 
-  const uploadImage = (id: string, file: File) => {
-    const reader = new FileReader()
-    reader.onload = (e) => edit(id, "image", e.target?.result as string)
-    reader.readAsDataURL(file)
+  const uploadImage = async (id: string, file: File) => {
+    edit(id, "image", await compressImage(file, 800, 800, 0.82))
   }
 
   return (
@@ -229,10 +228,8 @@ function ProductsEditor({ business, onChange }: { business: BusinessData; onChan
   const edit = (id: string, field: keyof ProductItem, value: string) =>
     update(products.map((p) => p.id === id ? { ...p, [field]: value } : p))
   const remove = (id: string) => update(products.filter((p) => p.id !== id))
-  const uploadImage = (id: string, file: File) => {
-    const reader = new FileReader()
-    reader.onload = (e) => edit(id, "image", e.target?.result as string)
-    reader.readAsDataURL(file)
+  const uploadImage = async (id: string, file: File) => {
+    edit(id, "image", await compressImage(file, 800, 800, 0.82))
   }
 
   return (

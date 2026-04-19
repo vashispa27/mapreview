@@ -359,7 +359,7 @@ export function PreviewCustomizer({
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium">dashlinkapp.com/site/</span>
+                    <span className="text-sm font-medium">maptosite.app/site/</span>
                     <Input 
                       value={slug}
                       onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))}

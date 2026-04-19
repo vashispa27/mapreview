@@ -4,6 +4,7 @@ import { useRef, useState, useCallback } from "react"
 import { SitePhoto } from "@/lib/mock-data"
 import { ImagePlus, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { compressImage } from "@/lib/compress-image"
 import {
   Dialog,
   DialogContent,
@@ -40,19 +41,10 @@ export function PhotoManagerModal({
     return Promise.all(
       files
         .filter((f) => f.type.startsWith("image/"))
-        .map(
-          (file) =>
-            new Promise<SitePhoto>((resolve) => {
-              const reader = new FileReader()
-              reader.onload = (e) => {
-                resolve({
-                  url: e.target?.result as string,
-                  caption: file.name.replace(/\.[^.]+$/, ""),
-                })
-              }
-              reader.readAsDataURL(file)
-            })
-        )
+        .map(async (file) => ({
+          url: await compressImage(file, 1200, 1200, 0.82),
+          caption: file.name.replace(/\.[^.]+$/, ""),
+        }))
     )
   }
 
