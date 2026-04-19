@@ -137,7 +137,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
 
     // Persist to server
     try {
-      await fetch(`/api/preview/${id}`, {
+      const res = await fetch(`/api/preview/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -152,6 +152,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
           socials: newBusiness.socials,
         }),
       })
+      if (!res.ok) console.error("Failed to save business data:", res.status, await res.text())
     } catch (err) {
       console.error("Failed to save business logic:", err)
     }
@@ -255,12 +256,10 @@ export default function PreviewPage({ params }: PreviewPageProps) {
 
   return (
     <div className="relative">
-      {/* Admin Demo Indicator */}
-      {id === "admin-demo" && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-medium shadow-lg border border-amber-200">
-          Demo Mode - Using mock data for testing
-        </div>
-      )}
+      {/* Preview Mode Indicator */}
+      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-medium shadow-lg border border-amber-200 whitespace-nowrap pointer-events-none">
+        {id === "admin-demo" ? "Demo Mode — Mock data" : "Preview Mode"}
+      </div>
 
       <div className="pr-0 md:pr-[360px] transition-all duration-300">
         <SiteTemplate

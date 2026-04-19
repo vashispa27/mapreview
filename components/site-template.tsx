@@ -52,7 +52,7 @@ function AnimatedDiv({
 
 // ─── Floating bottom page nav — shared by all templates ──────────────────────
 function FloatingPageNav({
-  activePage, onNavigate, pages, colorScheme, cartCount, onCartClick,
+  activePage, onNavigate, pages, colorScheme, cartCount, onCartClick, isPreview,
 }: {
   activePage: string
   onNavigate: (page: string) => void
@@ -60,6 +60,7 @@ function FloatingPageNav({
   colorScheme: ColorScheme
   cartCount: number
   onCartClick: () => void
+  isPreview?: boolean
 }) {
   const tabs = [
     { key: "home", label: "Home" },
@@ -83,7 +84,7 @@ function FloatingPageNav({
           {tab.label}
         </button>
       ))}
-      {pages.products && (
+      {pages.products && !isPreview && (
         <button
           onClick={onCartClick}
           className="relative ml-1 p-2 rounded-xl transition hover:bg-black/5"
@@ -263,6 +264,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       colorScheme={colorScheme}
       cartCount={cartCount}
       onCartClick={() => setCartOpen(true)}
+      isPreview={isPreview}
     />
   ) : null
 
@@ -278,7 +280,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
           <ServicesPage business={business} colorScheme={colorScheme} fontClass={fontClass} onBook={bookService} onBusinessChange={onBusinessChange} />
         )}
         {activePage === "products" && pages.products && (
-          <ProductsPage business={business} colorScheme={colorScheme} fontClass={fontClass} cartItems={cartItems} onAddToCart={addToCart} onBusinessChange={onBusinessChange} />
+          <ProductsPage business={business} colorScheme={colorScheme} fontClass={fontClass} cartItems={cartItems} onAddToCart={isPreview ? undefined : addToCart} onBusinessChange={onBusinessChange} />
         )}
         {activePage === "contact" && pages.contact && (
           <ContactPage business={business} colorScheme={colorScheme} fontClass={fontClass} prefilledService={prefilledService} />
@@ -607,7 +609,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
                       {isPreview && onBusinessChange && (
                         <button
                           onClick={() => handleRemovePhoto(index)}
-                          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm"
+                          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm"
                           title="Remove photo"
                         >
                           <X className="w-4 h-4" />
@@ -1013,7 +1015,7 @@ function LuxuryTemplate({ business, config, isPreview = false, onBusinessChange 
                         <span className="text-white text-sm font-medium">{photo.caption}</span>
                       </div>
                       {isPreview && onBusinessChange && (
-                        <button onClick={() => handleRemovePhoto(index)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm">
+                        <button onClick={() => handleRemovePhoto(index)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm">
                           <X className="w-4 h-4" />
                         </button>
                       )}
@@ -1326,7 +1328,7 @@ function BoldTemplate({ business, config, isPreview = false, onBusinessChange }:
                         <span className="text-white font-bold text-sm">{photo.caption}</span>
                       </div>
                       {isPreview && onBusinessChange && (
-                        <button onClick={() => handleRemovePhoto(index)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm">
+                        <button onClick={() => handleRemovePhoto(index)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm">
                           <X className="w-4 h-4" />
                         </button>
                       )}
@@ -1651,7 +1653,7 @@ function ExecutiveTemplate({ business, config, isPreview = false, onBusinessChan
                         <span className="text-white text-sm font-medium">{photo.caption}</span>
                       </div>
                       {isPreview && onBusinessChange && (
-                        <button onClick={() => handleRemovePhoto(index)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm">
+                        <button onClick={() => handleRemovePhoto(index)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm">
                           <X className="w-4 h-4" />
                         </button>
                       )}

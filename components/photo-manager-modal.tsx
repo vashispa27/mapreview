@@ -27,11 +27,13 @@ export function PhotoManagerModal({
 }: PhotoManagerModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isDraggingOver, setIsDraggingOver] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const handleAddFromPool = (photo: SitePhoto) => {
     if (!photos.some((p) => p.url === photo.url)) {
-      onChange([...photos, photo])
+      onChange([photo, ...photos])
     }
+    setOpen(false)
   }
 
   const readFilesAsDataURLs = (files: File[]): Promise<SitePhoto[]> => {
@@ -58,7 +60,8 @@ export function PhotoManagerModal({
     async (files: FileList | null) => {
       if (!files || files.length === 0) return
       const newPhotos = await readFilesAsDataURLs(Array.from(files))
-      onChange([...photos, ...newPhotos])
+      onChange([...newPhotos, ...photos])
+      setOpen(false)
     },
     [photos, onChange]
   )
@@ -72,7 +75,7 @@ export function PhotoManagerModal({
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <ImagePlus className="w-4 h-4" />

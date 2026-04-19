@@ -4,6 +4,8 @@ import { notFound } from "next/navigation"
 import { db } from "@/lib/db"
 import { BusinessData, SiteConfig, colorSchemes } from "@/lib/mock-data"
 
+export const dynamic = "force-dynamic"
+
 interface PublicSitePageProps {
   params: Promise<{ id: string }>
 }

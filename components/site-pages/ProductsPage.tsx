@@ -10,7 +10,7 @@ interface ProductsPageProps {
   colorScheme: ColorScheme
   fontClass: string
   cartItems: { product: ProductItem; qty: number }[]
-  onAddToCart: (product: ProductItem) => void
+  onAddToCart?: (product: ProductItem) => void
   onBusinessChange?: (b: BusinessData) => void
 }
 
@@ -117,23 +117,25 @@ export function ProductsPage({ business, colorScheme, fontClass, cartItems, onAd
                     )}
                     <div className="mt-auto">
                       <p className="text-xl font-bold mb-3" style={{ color: colorScheme.primary }}>{product.price}</p>
-                      <button
-                        onClick={() => onAddToCart(product)}
-                        className={cn(
-                          "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm transition-all active:scale-95",
-                          qty > 0 ? "text-white" : "border-2"
-                        )}
-                        style={qty > 0
-                          ? { backgroundColor: colorScheme.primary }
-                          : { borderColor: colorScheme.primary, color: colorScheme.primary, backgroundColor: "transparent" }
-                        }
-                      >
-                        {qty > 0 ? (
-                          <><span>In Cart ({qty})</span><Plus className="w-4 h-4" /></>
-                        ) : (
-                          <><ShoppingBag className="w-4 h-4" /><span>Add to Cart</span></>
-                        )}
-                      </button>
+                      {onAddToCart && (
+                        <button
+                          onClick={() => onAddToCart(product)}
+                          className={cn(
+                            "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm transition-all active:scale-95",
+                            qty > 0 ? "text-white" : "border-2"
+                          )}
+                          style={qty > 0
+                            ? { backgroundColor: colorScheme.primary }
+                            : { borderColor: colorScheme.primary, color: colorScheme.primary, backgroundColor: "transparent" }
+                          }
+                        >
+                          {qty > 0 ? (
+                            <><span>In Cart ({qty})</span><Plus className="w-4 h-4" /></>
+                          ) : (
+                            <><ShoppingBag className="w-4 h-4" /><span>Add to Cart</span></>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
