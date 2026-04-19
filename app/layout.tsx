@@ -39,6 +39,7 @@ export const metadata: Metadata = {
 import { AuthProvider } from "@/components/providers/auth-provider"
 import { AdminProvider } from "@/components/providers/admin-provider"
 import Script from "next/script"
+import { CrispWidget } from "@/components/crisp-widget"
 
 export default function RootLayout({
   children,
@@ -60,19 +61,7 @@ export default function RootLayout({
             gtag('config', 'G-RXC8HGDM3G');
           `}
         </Script>
-        <Script id="crisp-widget" strategy="afterInteractive">
-          {`
-            window.$crisp=[];
-            window.CRISP_WEBSITE_ID="2f66a409-5d22-4f8a-9209-e573f37cb7d9";
-            (function(){
-              d=document;
-              s=d.createElement("script");
-              s.src="https://client.crisp.chat/l.js";
-              s.async=1;
-              d.getElementsByTagName("head")[0].appendChild(s);
-            })();
-          `}
-        </Script>
+        <CrispWidget />
         <AuthProvider>
           <AdminProvider>
             {children}

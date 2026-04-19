@@ -52,8 +52,12 @@ export default async function PublicSitePage({ params }: PublicSitePageProps) {
     notFound()
   }
 
-  // Cast the stored JSON back to our types
-  const business = site.businessData as unknown as BusinessData
+  // Cast the stored JSON back to our types. Override id with the site's DB
+  // identifier so the contact form can resolve the owner's email correctly.
+  const business = {
+    ...(site.businessData as unknown as BusinessData),
+    id: site.slug || site.id,
+  }
   const rawConfig = site.config as any
   const config: SiteConfig = {
     colorScheme: colorSchemes.find(c => c.id === rawConfig?.colorSchemeId) || colorSchemes[0],
