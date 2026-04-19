@@ -173,7 +173,7 @@ export function ProductsPage({ business, colorScheme, fontClass, cartItems, onAd
                   <input
                     value={form.price}
                     onChange={(e) => set("price", e.target.value)}
-                    placeholder="Price (e.g. $29.99)"
+                    placeholder="Price (e.g. ₹299)"
                     className="w-full px-3 py-2 text-sm rounded-lg border outline-none transition"
                     style={{ borderColor: colorScheme.primary + "30", backgroundColor: colorScheme.background, color: colorScheme.text }}
                   />

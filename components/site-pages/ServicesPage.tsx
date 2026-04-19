@@ -156,7 +156,7 @@ export function ServicesPage({ business, colorScheme, fontClass, onBook, onBusin
                   <input
                     value={form.price}
                     onChange={(e) => set("price", e.target.value)}
-                    placeholder="Price (e.g. $50 / session)"
+                    placeholder="Price (e.g. ₹500 / session)"
                     className="w-full px-3 py-2 text-sm rounded-lg border outline-none transition"
                     style={{ borderColor: colorScheme.primary + "30", backgroundColor: colorScheme.background, color: colorScheme.text }}
                   />

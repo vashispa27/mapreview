@@ -157,7 +157,7 @@ function ServicesEditor({ business, onChange }: { business: BusinessData; onChan
 
   const update = (updated: ServiceItem[]) => onChange({ ...business, services: updated })
 
-  const add = () => update([...services, { id: nanoid(), title: "New Service", price: "$0", description: "" }])
+  const add = () => update([...services, { id: nanoid(), title: "New Service", price: "₹0", description: "" }])
 
   const edit = (id: string, field: keyof ServiceItem, value: string) =>
     update(services.map((s) => s.id === id ? { ...s, [field]: value } : s))
@@ -193,7 +193,7 @@ function ServicesEditor({ business, onChange }: { business: BusinessData; onChan
               />
               <input
                 value={svc.price} onChange={(e) => edit(svc.id, "price", e.target.value)}
-                placeholder="$0 / session" className="w-full px-2.5 py-1.5 text-sm rounded-lg border border-border bg-background outline-none focus:border-primary transition"
+                placeholder="₹0 / session" className="w-full px-2.5 py-1.5 text-sm rounded-lg border border-border bg-background outline-none focus:border-primary transition"
               />
             </div>
             <button onClick={() => remove(svc.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition">
@@ -224,7 +224,7 @@ function ProductsEditor({ business, onChange }: { business: BusinessData; onChan
   const products = business.products ?? []
 
   const update = (updated: ProductItem[]) => onChange({ ...business, products: updated })
-  const add = () => update([...products, { id: nanoid(), title: "New Product", price: "$0", description: "" }])
+  const add = () => update([...products, { id: nanoid(), title: "New Product", price: "₹0", description: "" }])
   const edit = (id: string, field: keyof ProductItem, value: string) =>
     update(products.map((p) => p.id === id ? { ...p, [field]: value } : p))
   const remove = (id: string) => update(products.filter((p) => p.id !== id))
@@ -257,7 +257,7 @@ function ProductsEditor({ business, onChange }: { business: BusinessData; onChan
               />
               <input
                 value={p.price} onChange={(e) => edit(p.id, "price", e.target.value)}
-                placeholder="$0.00" className="w-full px-2.5 py-1.5 text-sm rounded-lg border border-border bg-background outline-none focus:border-primary transition"
+                placeholder="₹0.00" className="w-full px-2.5 py-1.5 text-sm rounded-lg border border-border bg-background outline-none focus:border-primary transition"
               />
             </div>
             <button onClick={() => remove(p.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition">

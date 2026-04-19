@@ -12,10 +12,10 @@ const PROMOS: Record<string, { code: string; discount: string }> = {
 }
 
 function getPromo(seconds: number) {
-  if (seconds < 60  && PROMOS.under60.code)  return PROMOS.under60
-  if (seconds < 80  && PROMOS.under80.code)  return PROMOS.under80
-  if (seconds < 90  && PROMOS.under90.code)  return PROMOS.under90
-  if (seconds < 100 && PROMOS.under100.code) return PROMOS.under100
+  if (seconds < 60)  return PROMOS.under60
+  if (seconds < 80)  return PROMOS.under80
+  if (seconds < 90)  return PROMOS.under90
+  if (seconds < 100) return PROMOS.under100
   return null
 }
 
@@ -145,13 +145,17 @@ export function StickyTimer() {
               Done in {elapsed}s! You earned{" "}
               <span className="text-primary">{promo.discount} off</span>
             </span>
-            <button
-              onClick={copyCode}
-              className="flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 rounded-full px-3 py-1 font-mono font-bold text-xs hover:bg-primary/20 transition-colors"
-            >
-              {promo.code}
-              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3 opacity-60" />}
-            </button>
+            {promo.code ? (
+              <button
+                onClick={copyCode}
+                className="flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 rounded-full px-3 py-1 font-mono font-bold text-xs hover:bg-primary/20 transition-colors"
+              >
+                {promo.code}
+                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3 opacity-60" />}
+              </button>
+            ) : (
+              <span className="text-xs text-muted-foreground">Code sent to your email</span>
+            )}
             <button
               onClick={dismiss}
               className="w-6 h-6 rounded-full bg-muted flex items-center justify-center hover:bg-muted/70 transition-colors text-muted-foreground"

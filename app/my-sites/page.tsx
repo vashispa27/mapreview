@@ -63,7 +63,8 @@ export default function MySitesPage() {
       return
     }
 
-    // Fetch real sites
+    let pollTimer: ReturnType<typeof setTimeout> | null = null
+
     const fetchSites = async () => {
       try {
         const res = await fetch("/api/sites")
@@ -71,10 +72,33 @@ export default function MySitesPage() {
           const data = await res.json()
           setSites(data.sites)
           setUserPlan(data.plan)
-          // Filter out failed sites for the usage count
           const activeCount = data.sites.filter((s: Site) => s.status !== "FAILED").length
           setTotalActive(activeCount)
-        }      } catch (error) {
+
+          // Fire challenge-complete as soon as any site reaches COMPLETED
+          const challengeStart = localStorage.getItem("challenge_start_time")
+          if (challengeStart) {
+            const hasCompleted = data.sites.some((s: Site) => s.status === "COMPLETED")
+            if (hasCompleted) {
+              const seconds = Math.floor((Date.now() - Number(challengeStart)) / 1000)
+              window.dispatchEvent(new CustomEvent("challenge-complete", { detail: { seconds } }))
+              fetch("/api/promo-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ seconds }),
+              }).catch(() => {})
+            }
+          }
+
+          // Keep polling while any site is still building
+          const hasPending = data.sites.some(
+            (s: Site) => s.status !== "COMPLETED" && s.status !== "FAILED"
+          )
+          if (hasPending) {
+            pollTimer = setTimeout(fetchSites, 8000)
+          }
+        }
+      } catch (error) {
         console.error("Failed to fetch sites:", error)
       } finally {
         setLoading(false)
@@ -82,6 +106,7 @@ export default function MySitesPage() {
     }
 
     fetchSites()
+    return () => { if (pollTimer) clearTimeout(pollTimer) }
   }, [status, isLoggedIn, isAdminMode, router])
 
   const limit = userPlan === "base" ? 3 : userPlan === "pro" ? 10 : 1
