@@ -40,6 +40,7 @@ import { AuthProvider } from "@/components/providers/auth-provider"
 import { AdminProvider } from "@/components/providers/admin-provider"
 import Script from "next/script"
 import { CrispWidget } from "@/components/crisp-widget"
+import { StickyTimer } from "@/components/sticky-timer"
 
 export default function RootLayout({
   children,
@@ -62,6 +63,7 @@ export default function RootLayout({
           `}
         </Script>
         <CrispWidget />
+        <StickyTimer />
         <AuthProvider>
           <AdminProvider>
             {children}

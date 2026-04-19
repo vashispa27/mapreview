@@ -49,37 +49,41 @@ export function PricingSection() {
     {
       id: "base",
       name: "Base",
-      description: "Everything you need to get started",
-      price: "$2",
+      description: "Everything you need to get online fast",
+      price: "₹799",
       priceSuffix: "/month",
       badge: null,
       features: [
-        "50 reviews analysed per site",
-        "Host upto 3 websites with unlimited edits",
-        "Automatic updates with live reviews",
-        "Custom URL with MapToSite branding",
+        "Up to 10 websites",
+        "Unlimited edits to your website",
+        "Free hosting included",
+        "Automatic sync of reviews & photos from Google Maps",
+        "Full ecommerce — cart, products & services",
+        "Custom branding",
+        "Request for custom domain",
+        "Basic SEO setup",
         "7-day support",
       ],
-      buttonText: "Get Base Plan",
+      buttonText: "Get Started",
       popular: false,
       icon: Zap,
     },
     {
       id: "pro",
       name: "Pro",
-      description: "For businesses that need more power",
-      price: "$7",
-      priceSuffix: "/month",
-      badge: "Most Popular",
+      description: "Everything in Base, plus the tools to grow",
+      price: "₹6,999",
+      priceSuffix: "one-time",
+      badge: "Best Value",
       features: [
-        "200 reviews analysed per site",
-        "Host upto 10 websites with unlimited edits",
-        "Request for custom domain",
-        "Weekly reviews report analysis",
-        "Automatic updates with live reviews",
-        "7-day priority support",
+        "Everything in Base",
+        "Free custom domain",
+        "Free hosting & unlimited edits",
+        "Priority support",
+        "Website analytics dashboard",
+        "Advanced SEO — rank higher on Google",
       ],
-      buttonText: "Get Pro Plan",
+      buttonText: "Get Pro",
       popular: true,
       icon: Sparkles,
     },
@@ -93,11 +97,11 @@ export function PricingSection() {
             Choose Your <span className="text-primary">Plan</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            One-time payment. Full access for 1 year. No hidden fees.
+            Simple pricing. No hidden fees. Cancel any time.
           </p>
           <div className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted px-4 py-2 rounded-full">
             <RefreshCw className="w-3.5 h-3.5" />
-            Plans renew monthly — cancel any time before renewal
+            Pro is a one-time payment — pay once, use forever
           </div>
         </motion.div>
 

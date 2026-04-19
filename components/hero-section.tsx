@@ -7,7 +7,7 @@ import { ArrowRight, Sparkles, MapPin, Loader2, HelpCircle, X, Search } from "lu
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Mascot } from "@/components/mascot"
-import { WebsitePreviewCard } from "@/components/showcase-cards"
+import { SpeedChallengeHeroCard } from "@/components/speed-challenge-section"
 import { useSession, signIn } from "next-auth/react"
 import { useToast } from "@/hooks/use-toast"
 import { LoginModal } from "@/components/login-modal"
@@ -25,7 +25,7 @@ interface SearchResult {
   url: string
 }
 
-const businessTypes = ["60 seconds to go live", "No drag and drop", "Products & prices included", "No designers needed", "Real services, real bookings", "Zero coding required"]
+const businessTypes = ["60 seconds to go live", "Gyms & fitness centers", "Restaurants & dhabas", "No drag and drop", "Products & prices included", "No designers needed", "Real services, real bookings", "Zero coding required"]
 
 export function HeroSection() {
   const { data: session } = useSession()
@@ -185,6 +185,9 @@ export function HeroSection() {
         return
       }
 
+      // Start the speed challenge timer — stops when user publishes
+      window.dispatchEvent(new Event("challenge-start"))
+
       toast({
         title: "Site Generation Started!",
         description: "Your page is being built. Check the status in your My Sites dashboard.",
@@ -280,9 +283,9 @@ export function HeroSection() {
                 transition={{ delay: 0.3 }}
                 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6"
               >
-                <span className="text-balance">Full website. Your products,<br className="hidden sm:block" /> services &amp; prices.</span>{" "}
+                <span className="text-balance">Your Google Maps listing,</span>{" "}
                 <span className="text-primary relative">
-                  Live in 60 seconds.
+                  turned into a real website.
                   <motion.svg
                     className="absolute -bottom-2 left-0 w-full"
                     viewBox="0 0 200 12"
@@ -308,7 +311,8 @@ export function HeroSection() {
                 transition={{ delay: 0.4 }}
                 className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 text-pretty"
               >
-                Skip the drag-and-drop builders. Paste your Google Maps link, add what you sell, and you&apos;re live — no design skills, no developers, no waiting.
+                We pull your real photos and reviews straight from Google Maps — then let you add the products, services, and prices you want to sell.{" "}
+                <span className="text-foreground font-medium">Live in under 60 seconds.</span>
               </motion.p>
 
               {/* URL Input Area */}
@@ -437,19 +441,14 @@ export function HeroSection() {
               )}
             </motion.div>
 
-            {/* Right side - Visual */}
+            {/* Right side - Speed Challenge Card */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
               className="relative hidden lg:block"
             >
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <WebsitePreviewCard className="w-full max-w-md mx-auto" />
-              </motion.div>
+              <SpeedChallengeHeroCard className="w-full max-w-md mx-auto" />
 
               <motion.div
                 className="absolute -left-16 bottom-0"
