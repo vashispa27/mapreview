@@ -462,6 +462,54 @@ export async function sendInquiryEmail(
   }
 }
 
+// ─── Speed Challenge Promo Email ─────────────────────────────────────────────
+
+export async function sendSpeedChallengeEmail(
+  toEmail: string,
+  name: string,
+  seconds: number,
+  promoCode: string,
+  discount: string
+) {
+  const firstName = name?.split(" ")[0] || "there"
+
+  const body = `
+  ${heroSection("⚡", "linear-gradient(135deg,#fdf4ff 0%,#ede9fe 100%)", `You built it in ${seconds} seconds!`, `You earned ${discount} off your MapToSite plan.`)}
+
+  <div style="padding:32px 40px;">
+    <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+      Hi ${firstName}, you just completed the MapToSite Speed Challenge in <strong>${seconds} seconds</strong> — that earns you <strong>${discount} off</strong> any plan.
+    </p>
+
+    <div style="background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:12px;padding:20px 24px;margin:0 0 24px;text-align:center;">
+      <p style="margin:0 0 6px;font-size:12px;color:#7c3aed;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Your discount code</p>
+      <p style="margin:0;font-size:28px;font-weight:900;letter-spacing:2px;color:#4c1d95;">${promoCode}</p>
+      <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">${discount} off — apply at checkout</p>
+    </div>
+
+    <div style="margin:24px 0;">
+      ${button("Claim My Discount →", `${APP_URL}/#pricing`)}
+    </div>
+
+    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;">
+      This code is for you — use it when you upgrade to any paid plan.
+    </p>
+  </div>`
+
+  try {
+    return await client.send({
+      from: sender,
+      to: [{ email: toEmail }],
+      subject: `⚡ You did it in ${seconds}s — here's your ${discount} discount code`,
+      html: layout(`Speed Challenge complete! Your ${discount} off code inside.`, body),
+      text: `Hi ${firstName}, you completed the Speed Challenge in ${seconds}s! Use code ${promoCode} for ${discount} off at ${APP_URL}/#pricing`,
+      category: "Speed Challenge",
+    })
+  } catch (error) {
+    console.error("Failed to send speed challenge email:", error)
+  }
+}
+
 // ─── Legacy shim (used by existing webhook code) ─────────────────────────────
 
 export async function sendPaymentEmail(

@@ -88,6 +88,18 @@ export default function PreviewPage({ params }: PreviewPageProps) {
             animations: data.config?.animations ?? true,
           })
           setLoading(false)
+
+          // Stop speed challenge timer — site is built, email sent
+          const startTime = localStorage.getItem("challenge_start_time")
+          if (startTime) {
+            const seconds = Math.floor((Date.now() - Number(startTime)) / 1000)
+            window.dispatchEvent(new CustomEvent("challenge-complete", { detail: { seconds } }))
+            fetch("/api/promo-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ seconds }),
+            }).catch(() => {})
+          }
         } else if (data.status === "FAILED") {
           setError(data.errorMessage || "Application compiler encountered systemic rejection securely")
           setLoading(false)
@@ -180,13 +192,6 @@ export default function PreviewPage({ params }: PreviewPageProps) {
       })
 
       if (!res.ok) throw new Error("Failed to save custom URL")
-
-      // Stop the speed challenge timer and award discount
-      const startTime = localStorage.getItem("challenge_start_time")
-      if (startTime) {
-        const seconds = Math.floor((Date.now() - Number(startTime)) / 1000)
-        window.dispatchEvent(new CustomEvent("challenge-complete", { detail: { seconds } }))
-      }
 
       // 2. Redirect to the new custom public URL
       const finalSlug = slug || siteSlug || id
