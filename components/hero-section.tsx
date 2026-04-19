@@ -446,12 +446,12 @@ export function HeroSection() {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="relative hidden lg:block"
+              className="relative"
             >
               <SpeedChallengeHeroCard className="w-full max-w-md mx-auto" />
 
               <motion.div
-                className="absolute -left-16 bottom-0"
+                className="absolute -left-16 bottom-0 hidden lg:block"
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.8, type: "spring" }}
