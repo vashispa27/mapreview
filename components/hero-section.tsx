@@ -222,6 +222,8 @@ export function HeroSection() {
               <img
                 src="/url-tutorial.gif"
                 alt="How to copy Google Maps URL"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-auto rounded-xl shadow-inner"
               />
             </div>

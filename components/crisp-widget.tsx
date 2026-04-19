@@ -8,7 +8,7 @@ export function CrispWidget() {
   if (pathname.startsWith("/site/")) return null
 
   return (
-    <Script id="crisp-widget" strategy="afterInteractive">
+    <Script id="crisp-widget" strategy="lazyOnload">
       {`
         window.$crisp=[];
         window.CRISP_WEBSITE_ID="2f66a409-5d22-4f8a-9209-e573f37cb7d9";

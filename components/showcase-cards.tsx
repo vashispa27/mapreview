@@ -56,6 +56,10 @@ export function ShowcaseCards() {
               <motion.img
                 src={site.image}
                 alt={site.name}
+                width={400}
+                height={250}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.4 }}
@@ -116,6 +120,10 @@ export function ShowcaseMarquee() {
                 <img
                   src={site.image}
                   alt={site.name}
+                  width={288}
+                  height={128}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
                 <div className={`absolute inset-0 bg-gradient-to-t ${site.color} opacity-20`} />
@@ -163,6 +171,10 @@ export function WebsitePreviewCard({ className = "" }: { className?: string }) {
           <img
             src="https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=400&h=200&fit=crop"
             alt="Pizza restaurant"
+            width={400}
+            height={200}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />

@@ -17,8 +17,8 @@ import { writeFileSync } from "fs"
 
 // ─── CONFIG — edit these ────────────────────────────────────────────────────
 const APIFY_TOKEN = process.env.APIFY_TOKEN || "YOUR_TOKEN_HERE"
-const LOCATION    = "Bengaluru, India"  // e.g. "Bengaluru, India" or "Austin, TX"
-const MAX_RESULTS = 100
+const LOCATION    = "Dehradun, India"
+const MAX_RESULTS = 1000
 // ────────────────────────────────────────────────────────────────────────────
 
 if (APIFY_TOKEN === "YOUR_TOKEN_HERE") {
@@ -29,15 +29,14 @@ if (APIFY_TOKEN === "YOUR_TOKEN_HERE") {
 
 const client = new ApifyClient({ token: APIFY_TOKEN })
 
-console.log(`🔍  Searching for restaurants near: ${LOCATION}`)
+console.log(`🔍  Searching for gyms near: ${LOCATION}`)
 console.log(`    Target: ${MAX_RESULTS} results\n`)
 
 const run = await client.actor("compass/crawler-google-places").call({
-  searchStringsArray: ["restaurant", "cafe"],
+  searchStringsArray: ["gym", "fitness center"],
   locationQuery: LOCATION,
-  maxCrawledPlacesPerSearch: Math.ceil(MAX_RESULTS / 2), // split across 2 search terms
+  maxCrawledPlacesPerSearch: Math.ceil(MAX_RESULTS / 2),
   language: "en",
-  // Only fetch the fields we need — faster + cheaper
   scrapeReviews: false,
   scrapeImages: false,
 })
@@ -46,17 +45,22 @@ console.log(`✅  Run finished. Fetching results...`)
 
 const { items } = await client.dataset(run.defaultDatasetId).listItems()
 
-// Deduplicate by Google Maps URL, then trim to MAX_RESULTS
+// Deduplicate by Google Maps URL, filter for Instagram or Phone, then trim
 const seen = new Set()
 const places = items
   .filter((p) => {
     if (seen.has(p.url)) return false
     seen.add(p.url)
-    return true
+    
+    // Filter for Instagram or Phone
+    const hasInstagram = p.instagramUrl || (p.website && p.website.includes("instagram.com"));
+    const hasPhone = !!p.phone;
+    
+    return hasInstagram || hasPhone;
   })
   .slice(0, MAX_RESULTS)
 
-console.log(`📦  Got ${places.length} unique restaurants\n`)
+console.log(`📦  Got ${places.length} unique gyms with Instagram or Phone\n`)
 
 // ─── Build rows ──────────────────────────────────────────────────────────────
 const rows = places.map((p) => ({
@@ -65,21 +69,22 @@ const rows = places.map((p) => ({
   rating:        p.totalScore   ?? "",
   review_count:  p.reviewsCount ?? 0,
   website:       p.website      ?? "",
+  instagram:     p.instagramUrl ?? (p.website?.includes("instagram.com") ? p.website : ""),
   phone:         p.phone        ?? "",
   address:       p.address      ?? "",
   category:      p.categoryName ?? "",
 }))
 
 // ─── Write JSON ──────────────────────────────────────────────────────────────
-writeFileSync("restaurants.json", JSON.stringify(rows, null, 2))
-console.log("📄  restaurants.json written")
+writeFileSync("gyms.json", JSON.stringify(rows, null, 2))
+console.log("📄  gyms.json written")
 
 // ─── Write CSV ───────────────────────────────────────────────────────────────
 const escape = (v) => `"${String(v).replace(/"/g, '""')}"`
 const header = Object.keys(rows[0]).join(",")
 const csvRows = rows.map((r) => Object.values(r).map(escape).join(","))
-writeFileSync("restaurants.csv", [header, ...csvRows].join("\n"))
-console.log("📊  restaurants.csv written")
+writeFileSync("gyms.csv", [header, ...csvRows].join("\n"))
+console.log("📊  gyms.csv written")
 
 // ─── Quick preview ───────────────────────────────────────────────────────────
 console.log("\nTop 5 preview:")
