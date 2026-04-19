@@ -59,7 +59,7 @@ export function PreviewCustomizer({
   const [qrOpen, setQrOpen] = useState(false)
   const menuFileRef = useRef<HTMLInputElement>(null)
 
-  const qrUrl = siteId ? `${typeof window !== "undefined" ? window.location.origin : ""}/go/${siteId}` : null
+  const qrUrl = siteId ? `${typeof window !== "undefined" ? window.location.origin : ""}/site/${siteId}` : null
   const qrImageUrl = qrUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=12&data=${encodeURIComponent(qrUrl)}` : null
 
   const setSocial = (key: string, val: string) => {

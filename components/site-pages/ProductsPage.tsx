@@ -103,7 +103,7 @@ export function ProductsPage({ business, colorScheme, fontClass, cartItems, onAd
                     </button>
                   )}
                   {/* Image */}
-                  <div className="h-80 overflow-hidden flex items-center justify-center" style={{ backgroundColor: colorScheme.primary + "06" }}>
+                  <div className="h-72 overflow-hidden flex items-center justify-center" style={{ backgroundColor: colorScheme.primary + "06" }}>
                     {product.image ? (
                       <img src={product.image} alt={product.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
                     ) : (

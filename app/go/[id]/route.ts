@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 
-// Permanent QR redirect — links to /go/{siteId} always resolve to the
+// Permanent QR redirect — links to /site/{siteId} always resolve to the
 // current published URL, so QR codes survive slug changes.
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
