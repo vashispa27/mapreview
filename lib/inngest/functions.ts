@@ -275,8 +275,7 @@ export const generateSiteJob = inngest.createFunction(
 // ─── Daily gym membership reminder cron ──────────────────────────────────────
 
 export const gymMembershipReminderJob = inngest.createFunction(
-  { id: "gym-membership-reminders" },
-  { cron: "0 3 * * *" },
+  { id: "gym-membership-reminders", triggers: [{ cron: "0 3 * * *" }] },
   async ({ step }) => {
     await step.run("send-expiry-reminders", async () => {
       const now = new Date()
