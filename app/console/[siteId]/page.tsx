@@ -391,6 +391,9 @@ export default function GymConsolePage() {
                     {f === "all" ? "All" : f === "expiring" ? "Expiring" : f.charAt(0).toUpperCase() + f.slice(1)}
                   </button>
                 ))}
+                <Button onClick={() => setDrawerOpen(true)} size="sm">
+                  <Plus className="w-4 h-4 mr-1.5" />Add Member
+                </Button>
               </div>
             </div>
 
