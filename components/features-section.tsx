@@ -1,50 +1,50 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Star, Camera, Clock, Globe, Zap, ShoppingBag } from "lucide-react"
+import { Star, Camera, Globe, Zap, ShoppingBag, Users, FileText, Receipt } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { MiniMascot } from "@/components/mascot"
 
 const features = [
   {
     icon: Zap,
-    title: "Live in under 60 seconds",
-    description: "Paste your Google Maps link and your full website is built automatically. No configuration, no waiting, no back-and-forth with a developer.",
+    title: "Full website in 60 seconds",
+    description: "Paste your Google Maps link and your website is built automatically — real photos, reviews, services, and products. No configuration, no developer needed.",
     color: "text-amber-500",
     bgColor: "bg-amber-500/10",
   },
   {
     icon: ShoppingBag,
-    title: "Add products & services instantly",
-    description: "List what you sell — with photos, descriptions, and prices — in seconds. No drag and drop, no page builder. Just fill in the details and it's on your site.",
+    title: "Ecommerce built-in",
+    description: "Sell products and services with a cart, checkout, and WhatsApp order flow. Add photos, prices, and descriptions in seconds — no page builder required.",
     color: "text-pink-500",
     bgColor: "bg-pink-500/10",
   },
   {
-    icon: Clock,
-    title: "No drag and drop. Ever.",
-    description: "Page builders eat hours. MapToSite builds your site for you — then lets you add your services and products in a simple form. That's it. You're done.",
+    icon: Users,
+    title: "Gym member management",
+    description: "Full member console — track memberships, expiry dates, billing history, and send automated renewal reminders. Built for gym owners, not spreadsheet jockeys.",
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
+  },
+  {
+    icon: FileText,
+    title: "Diet & workout planner",
+    description: "Create reusable workout and diet plans with sessions, exercises, sets, reps, weight, and macros. Assign to members with one click — emailed instantly.",
+    color: "text-green-500",
+    bgColor: "bg-green-500/10",
+  },
+  {
+    icon: Receipt,
+    title: "GST billing & invoices",
+    description: "Auto-generate GST-compliant invoices (SAC 999723, 5% rate) for every membership. Export GSTR-1 CSV and print professional invoices in one click.",
+    color: "text-orange-500",
+    bgColor: "bg-orange-500/10",
   },
   {
     icon: Star,
     title: "Your reviews sell for you",
     description: "73% of customers trust a business more when they see reviews on a website. Yours are already on Google — we put them front and centre where they convert.",
-    color: "text-green-500",
-    bgColor: "bg-green-500/10",
-  },
-  {
-    icon: Camera,
-    title: "Real photos, built in",
-    description: "Your actual Google Maps photos are pulled in automatically. No stock images. No uploading. Just your real business, looking credible from day one.",
-    color: "text-orange-500",
-    bgColor: "bg-orange-500/10",
-  },
-  {
-    icon: Globe,
-    title: "Your site, your URL, your rules",
-    description: "A Google Maps listing is rented space. Your MapToSite website is yours — custom URL, your brand, works 24/7 even when you're not.",
     color: "text-violet-500",
     bgColor: "bg-violet-500/10",
   },
@@ -70,10 +70,10 @@ export function FeaturesSection() {
             <MiniMascot className="w-16 h-20 mx-auto" />
           </motion.div>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">
-            Everything your customers need — built automatically in under a minute
+            Not just a website — a full management platform, built in 60 seconds
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            No drag and drop. No templates. No design decisions. Your full website — with your products, services, and prices — is ready before you finish your coffee.
+            Website, ecommerce, gym member console, diet & workout planner, GST billing — all from one Google Maps link. Everything your business needs, nothing it doesn't.
           </p>
         </motion.div>
 

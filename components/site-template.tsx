@@ -249,7 +249,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
 
   const handleCartCheckout = () => {
     const summary = cartItems.map((c) => `${c.product.title} x${c.qty} @ ${c.product.price}`).join(", ")
-    setPrefilledService({ id: "cart", title: "Product Order", price: "", description: summary })
+    setPrefilledService({ id: "cart", title: "Product Order", price: summary, description: summary })
     setCartOpen(false)
     setActivePage("contact")
   }

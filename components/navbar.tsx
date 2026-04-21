@@ -36,7 +36,7 @@ function PlanBadge({ plan }: { plan: string }) {
           <Sparkles className="w-2.5 h-2.5" />
           Pro Plan
         </span>
-        <span className="text-[10px] text-muted-foreground">Active · one-time payment</span>
+        <span className="text-[10px] text-muted-foreground">Active · renews annually</span>
       </div>
     )
   }

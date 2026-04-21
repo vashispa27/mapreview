@@ -39,7 +39,7 @@ export function PurchaseModal({ open, onClose }: PurchaseModalProps) {
     {
       id: "base",
       name: "Base",
-      price: "₹799",
+      price: "₹999",
       priceSuffix: "/month",
       icon: Zap,
       popular: false,
@@ -55,15 +55,17 @@ export function PurchaseModal({ open, onClose }: PurchaseModalProps) {
     {
       id: "pro",
       name: "Pro",
-      price: "₹6,999",
-      priceSuffix: "one-time",
+      price: "₹9,999",
+      priceSuffix: "/year",
       icon: Sparkles,
       popular: true,
       features: [
         "Everything in Base",
+        "Gym member management console",
+        "Diet & workout planner",
+        "GST billing & invoices",
         "Free custom domain",
-        "Priority support",
-        "Website analytics & advanced SEO",
+        "Priority support & advanced SEO",
       ],
     },
   ]

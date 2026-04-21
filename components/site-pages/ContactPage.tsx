@@ -18,7 +18,11 @@ export function ContactPage({ business, colorScheme, fontClass, prefilledService
     email: "",
     phone: "",
     service: prefilledService?.title ?? "",
-    message: prefilledService ? `I'd like to book: ${prefilledService.title} (${prefilledService.price})` : "",
+    message: prefilledService
+      ? prefilledService.id === "cart"
+        ? `I'd like to order:\n${prefilledService.price}`
+        : `I'd like to book: ${prefilledService.title}${prefilledService.price ? ` (${prefilledService.price})` : ""}`
+      : "",
   })
   const [submitted, setSubmitted] = useState(false)
   const [sending, setSending] = useState(false)

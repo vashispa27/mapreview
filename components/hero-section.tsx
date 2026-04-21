@@ -25,7 +25,7 @@ interface SearchResult {
   url: string
 }
 
-const businessTypes = ["60 seconds to go live", "Gyms & fitness centers", "Restaurants & dhabas", "No drag and drop", "Products & prices included", "No designers needed", "Real services, real bookings", "Zero coding required"]
+const businessTypes = ["Live in 60 seconds", "Gym management software", "Member billing & GST invoices", "Diet & workout planner", "Ecommerce built-in", "No drag and drop. Ever.", "Restaurants & dhabas", "Zero coding required"]
 
 export function HeroSection() {
   const { data: session } = useSession()
@@ -283,9 +283,9 @@ export function HeroSection() {
                 transition={{ delay: 0.3 }}
                 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6"
               >
-                <span className="text-balance">Your Google Maps listing,</span>{" "}
+                <span className="text-balance">Your business, fully managed.</span>{" "}
                 <span className="text-primary relative">
-                  turned into a real website.
+                  Built in 60 seconds.
                   <motion.svg
                     className="absolute -bottom-2 left-0 w-full"
                     viewBox="0 0 200 12"
@@ -311,8 +311,8 @@ export function HeroSection() {
                 transition={{ delay: 0.4 }}
                 className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 text-pretty"
               >
-                We pull your real photos and reviews straight from Google Maps — then let you add the products, services, and prices you want to sell.{" "}
-                <span className="text-foreground font-medium">Live in under 60 seconds.</span>
+                Paste your Google Maps link and we build your website, ecommerce store, gym member console, diet & workout planner, and GST billing system — all in one.{" "}
+                <span className="text-foreground font-medium">No developers. No drag and drop. Just 60 seconds.</span>
               </motion.p>
 
               {/* URL Input Area */}

@@ -87,10 +87,12 @@ model Site {
   config       Json?
   deleted      Boolean  @default(false)
 
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  members     GymMember[]
-  gymSettings GymSettings?
-  gymPayments GymPayment[]
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  members      GymMember[]
+  gymSettings  GymSettings?
+  gymPayments  GymPayment[]
+  workoutPlans GymWorkoutPlan[]
+  dietPlans    GymDietPlan[]
 }
 
 model GymMember {
@@ -120,12 +122,48 @@ model GymMember {
 
   createdAt        DateTime @default(now())
 
-  workoutPlan Json?
-  dietPlan    Json?
-  payments    GymPayment[]
+  assignedPlanId     String?
+  assignedPlan       GymWorkoutPlan? @relation(fields: [assignedPlanId], references: [id], onDelete: SetNull)
+  assignedDietPlanId String?
+  assignedDietPlan   GymDietPlan?    @relation(fields: [assignedDietPlanId], references: [id], onDelete: SetNull)
+  payments           GymPayment[]
 
   @@index([siteId])
   @@index([endDate])
+}
+
+model GymWorkoutPlan {
+  id        String      @id @default(cuid())
+  siteId    String
+  site      Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  name      String
+  goal      String?
+  notes     String?
+  sessions  Json        @default("[]")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  members   GymMember[]
+
+  @@index([siteId])
+}
+
+model GymDietPlan {
+  id            String      @id @default(cuid())
+  siteId        String
+  site          Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  name          String
+  goal          String?
+  notes         String?
+  totalCalories Int         @default(0)
+  protein       Int         @default(0)
+  carbs         Int         @default(0)
+  fat           Int         @default(0)
+  meals         Json        @default("[]")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  members       GymMember[]
+
+  @@index([siteId])
 }
 
 model GymSettings {

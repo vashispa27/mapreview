@@ -49,17 +49,17 @@ export function PricingSection() {
     {
       id: "base",
       name: "Base",
-      description: "Everything you need to get online fast",
-      price: "₹799",
+      description: "Website + ecommerce for any business",
+      price: "₹999",
       priceSuffix: "/month",
       badge: null,
       features: [
         "Up to 10 websites",
-        "Unlimited edits to your website",
-        "Free hosting included",
-        "Automatic sync of reviews & photos from Google Maps",
-        "Full ecommerce — cart, products & services",
-        "Custom branding",
+        "Full website from Google Maps in 60 seconds",
+        "Ecommerce — cart, products & services",
+        "Automatic sync of reviews & photos",
+        "Custom branding & colors",
+        "Free hosting & unlimited edits",
         "Request for custom domain",
         "Basic SEO setup",
         "7-day support",
@@ -71,14 +71,17 @@ export function PricingSection() {
     {
       id: "pro",
       name: "Pro",
-      description: "Everything in Base, plus the tools to grow",
-      price: "₹6,999",
-      priceSuffix: "one-time",
+      description: "Full management platform for gyms & businesses",
+      price: "₹9,999",
+      priceSuffix: "/year",
       badge: "Best Value",
       features: [
         "Everything in Base",
+        "Gym member management console",
+        "Diet & workout planner with email delivery",
+        "GST billing — auto invoices, GSTR-1 export",
+        "Member renewal reminders (email)",
         "Free custom domain",
-        "Free hosting & unlimited edits",
         "Priority support",
         "Website analytics dashboard",
         "Advanced SEO — rank higher on Google",
@@ -101,7 +104,7 @@ export function PricingSection() {
           </p>
           <div className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted px-4 py-2 rounded-full">
             <RefreshCw className="w-3.5 h-3.5" />
-            Pro is a one-time payment — pay once, use forever
+            Pro billed annually · Base billed monthly · Cancel any time
           </div>
         </motion.div>
 

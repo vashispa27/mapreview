@@ -148,7 +148,7 @@ export default function GymConsolePage() {
   const [payments, setPayments] = useState<GymPayment[]>([])
   const [settings, setSettings] = useState<GymSettings | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<"members" | "earnings" | "settings">("members")
+  const [activeTab, setActiveTab] = useState<"members" | "earnings" | "settings" | "plans">("members")
 
   // Members state
   const [search, setSearch] = useState("")
@@ -166,6 +166,36 @@ export default function GymConsolePage() {
 
   // Earnings state
   const [selectedFY, setSelectedFY] = useState(getCurrentFY())
+
+  // Plans state
+  interface WorkoutPlanItem { id: string; name: string; goal: string | null; notes: string | null; sessions: any[] }
+  interface Exercise { name: string; sets: number; reps: string; weight: string; rest: string }
+  interface Meal { name: string; time: string; calories: number; protein: number; carbs: number; fat: number; foods: string[] }
+  interface DietPlanItem { id: string; name: string; goal: string | null; notes: string | null; totalCalories: number; protein: number; carbs: number; fat: number; meals: Meal[] }
+  const [plans, setPlans] = useState<WorkoutPlanItem[]>([])
+  const [editingPlan, setEditingPlan] = useState<WorkoutPlanItem | null>(null)
+  const [planEditorOpen, setPlanEditorOpen] = useState(false)
+  const [savingPlan, setSavingPlan] = useState(false)
+  const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null)
+  const [dietPlans, setDietPlans] = useState<DietPlanItem[]>([])
+  const [editingDietPlan, setEditingDietPlan] = useState<DietPlanItem | null>(null)
+  const [dietPlanEditorOpen, setDietPlanEditorOpen] = useState(false)
+  const [savingDietPlan, setSavingDietPlan] = useState(false)
+  const [deletingDietPlanId, setDeletingDietPlanId] = useState<string | null>(null)
+
+  function newSession() {
+    return { id: Math.random().toString(36).slice(2), name: "", type: "workout" as const, exercises: [], notes: "" }
+  }
+  function emptyPlan(): WorkoutPlanItem { return { id: "", name: "", goal: null, notes: null, sessions: [] } }
+  function emptyDietPlan(): DietPlanItem {
+    return { id: "", name: "", goal: null, notes: null, totalCalories: 0, protein: 0, carbs: 0, fat: 0,
+      meals: [
+        { name: "Breakfast", time: "7:00 AM", calories: 0, protein: 0, carbs: 0, fat: 0, foods: [] },
+        { name: "Lunch", time: "1:00 PM", calories: 0, protein: 0, carbs: 0, fat: 0, foods: [] },
+        { name: "Dinner", time: "7:00 PM", calories: 0, protein: 0, carbs: 0, fat: 0, foods: [] },
+      ],
+    }
+  }
 
   useEffect(() => { if (authStatus === "unauthenticated") router.push("/") }, [authStatus])
 
@@ -210,8 +240,20 @@ export default function GymConsolePage() {
       })
       .catch(() => {})
 
+  const fetchPlans = () =>
+    fetch(`/api/console/${siteId}/workout-plans`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => setPlans(d?.plans || []))
+      .catch(() => {})
+
+  const fetchDietPlans = () =>
+    fetch(`/api/console/${siteId}/diet-plans`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => setDietPlans(d?.plans || []))
+      .catch(() => {})
+
   useEffect(() => {
-    if (site) { fetchMembers(); fetchPayments(); fetchSettings() }
+    if (site) { fetchMembers(); fetchPayments(); fetchSettings(); fetchPlans(); fetchDietPlans() }
   }, [site])
 
   // ─── Handlers ───────────────────────────────────────────────────────────────
@@ -334,6 +376,7 @@ export default function GymConsolePage() {
           <div className="flex gap-0">
             {([
               { key: "members", label: "Members", icon: Users },
+              { key: "plans", label: "Workout Plans", icon: Dumbbell },
               { key: "earnings", label: "Earnings & Billing", icon: IndianRupee },
               { key: "settings", label: "GST Settings", icon: Settings },
             ] as const).map(({ key, label, icon: Icon }) => (
@@ -656,7 +699,378 @@ export default function GymConsolePage() {
             </Button>
           </div>
         )}
+
+        {/* ── WORKOUT PLANS TAB ── */}
+        {activeTab === "plans" && (
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold">Workout Plans</h2>
+                <p className="text-sm text-muted-foreground">Create plans once, assign to any member</p>
+              </div>
+              <Button size="sm" onClick={() => { setEditingPlan(emptyPlan()); setPlanEditorOpen(true) }}>
+                <Plus className="w-4 h-4 mr-1.5" />New Plan
+              </Button>
+            </div>
+
+            {plans.length === 0 ? (
+              <div className="text-center py-20 border-2 border-dashed border-border rounded-xl">
+                <Dumbbell className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="font-semibold text-muted-foreground">No workout plans yet</p>
+                <p className="text-xs text-muted-foreground mt-1">Create a plan and assign it to members</p>
+                <Button size="sm" className="mt-4" onClick={() => { setEditingPlan(emptyPlan()); setPlanEditorOpen(true) }}>
+                  <Plus className="w-4 h-4 mr-1.5" />Create First Plan
+                </Button>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {plans.map((plan) => (
+                  <div key={plan.id} className="bg-card border border-border rounded-xl p-5 flex flex-col gap-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-semibold">{plan.name}</h3>
+                        {plan.goal && <p className="text-xs text-muted-foreground mt-0.5">{plan.goal}</p>}
+                      </div>
+                      <span className="shrink-0 text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                        {plan.sessions.length} session{plan.sessions.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    {plan.notes && <p className="text-xs text-muted-foreground line-clamp-2">{plan.notes}</p>}
+                    <div className="flex gap-2 mt-auto pt-1">
+                      <Button size="sm" variant="outline" className="flex-1"
+                        onClick={() => { setEditingPlan({ ...plan, sessions: plan.sessions as any[] }); setPlanEditorOpen(true) }}>
+                        Edit
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                        disabled={deletingPlanId === plan.id}
+                        onClick={async () => {
+                          setDeletingPlanId(plan.id)
+                          await fetch(`/api/console/${siteId}/workout-plans/${plan.id}`, { method: "DELETE" })
+                          await fetchPlans()
+                          setDeletingPlanId(null)
+                        }}>
+                        {deletingPlanId === plan.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* ── DIET PLANS ── */}
+            <div className="border-t border-border pt-6 space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold">Diet Plans</h2>
+                  <p className="text-sm text-muted-foreground">Create nutrition plans and assign to members</p>
+                </div>
+                <Button size="sm" onClick={() => { setEditingDietPlan(emptyDietPlan()); setDietPlanEditorOpen(true) }}>
+                  <Plus className="w-4 h-4 mr-1.5" />New Diet Plan
+                </Button>
+              </div>
+
+              {dietPlans.length === 0 ? (
+                <div className="text-center py-16 border-2 border-dashed border-border rounded-xl">
+                  <FileText className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="font-semibold text-muted-foreground">No diet plans yet</p>
+                  <Button size="sm" className="mt-4" onClick={() => { setEditingDietPlan(emptyDietPlan()); setDietPlanEditorOpen(true) }}>
+                    <Plus className="w-4 h-4 mr-1.5" />Create First Diet Plan
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {dietPlans.map((plan) => (
+                    <div key={plan.id} className="bg-card border border-border rounded-xl p-5 flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h3 className="font-semibold">{plan.name}</h3>
+                          {plan.goal && <p className="text-xs text-muted-foreground mt-0.5">{plan.goal}</p>}
+                        </div>
+                        {plan.totalCalories > 0 && (
+                          <span className="shrink-0 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                            {plan.totalCalories} kcal
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex gap-2 text-xs text-muted-foreground">
+                        {plan.protein > 0 && <span>P: {plan.protein}g</span>}
+                        {plan.carbs > 0 && <span>C: {plan.carbs}g</span>}
+                        {plan.fat > 0 && <span>F: {plan.fat}g</span>}
+                      </div>
+                      <div className="flex gap-2 mt-auto pt-1">
+                        <Button size="sm" variant="outline" className="flex-1"
+                          onClick={() => { setEditingDietPlan({ ...plan, meals: plan.meals as Meal[] }); setDietPlanEditorOpen(true) }}>
+                          Edit
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                          disabled={deletingDietPlanId === plan.id}
+                          onClick={async () => {
+                            setDeletingDietPlanId(plan.id)
+                            await fetch(`/api/console/${siteId}/diet-plans/${plan.id}`, { method: "DELETE" })
+                            await fetchDietPlans()
+                            setDeletingDietPlanId(null)
+                          }}>
+                          {deletingDietPlanId === plan.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </main>
+
+      {/* ── PLAN EDITOR MODAL ── */}
+      {planEditorOpen && editingPlan && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setPlanEditorOpen(false)} />
+          <div className="relative w-full sm:max-w-2xl bg-card rounded-t-2xl sm:rounded-2xl shadow-2xl border border-border p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">{editingPlan.id ? "Edit Plan" : "New Workout Plan"}</h2>
+              <button onClick={() => setPlanEditorOpen(false)} className="p-1.5 rounded-lg hover:bg-muted transition text-muted-foreground">✕</button>
+            </div>
+
+            {/* Plan name + goal + notes */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">Plan Name *</label>
+                <input value={editingPlan.name} onChange={(e) => setEditingPlan((p) => p ? { ...p, name: e.target.value } : p)}
+                  placeholder="e.g. Beginner Strength, Weight Loss 12W"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">Goal</label>
+                <select value={editingPlan.goal || ""} onChange={(e) => setEditingPlan((p) => p ? { ...p, goal: e.target.value || null } : p)}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30">
+                  <option value="">Select goal…</option>
+                  {["Weight Loss","Muscle Gain","Endurance","General Fitness","Flexibility","Powerlifting"].map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">Notes</label>
+                <input value={editingPlan.notes || ""} onChange={(e) => setEditingPlan((p) => p ? { ...p, notes: e.target.value || null } : p)}
+                  placeholder="e.g. Focus on progressive overload, rest 48h between sessions"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+            </div>
+
+            {/* Sessions */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold">Workout Sessions</h3>
+                <button onClick={() => setEditingPlan((p) => p ? { ...p, sessions: [...p.sessions, newSession()] } : p)}
+                  className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition">
+                  <Plus className="w-3.5 h-3.5" />Add Session
+                </button>
+              </div>
+
+              {editingPlan.sessions.length === 0 && (
+                <div className="text-center py-8 border-2 border-dashed border-border rounded-xl text-sm text-muted-foreground">
+                  No sessions yet — add a session like "Chest Day" or "Full Body"
+                </div>
+              )}
+
+              {editingPlan.sessions.map((session: any) => (
+                <div key={session.id} className="bg-muted/30 border border-border rounded-xl overflow-hidden">
+                  <div className="flex items-center gap-2 px-3 py-2 border-b border-border flex-wrap">
+                    <input value={session.name}
+                      onChange={(e) => setEditingPlan((p) => p ? { ...p, sessions: p.sessions.map((s: any) => s.id === session.id ? { ...s, name: e.target.value } : s) } : p)}
+                      placeholder="Session name (e.g. Chest Day)"
+                      className="flex-1 min-w-[140px] px-2 py-1.5 rounded-lg border border-border bg-background text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/30" />
+                    <div className="flex gap-1">
+                      {(["workout","cardio"] as const).map((t) => (
+                        <button key={t} onClick={() => setEditingPlan((p) => p ? { ...p, sessions: p.sessions.map((s: any) => s.id === session.id ? { ...s, type: t } : s) } : p)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition ${session.type === t ? t === "cardio" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700" : "text-muted-foreground hover:bg-muted"}`}>
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                    <button onClick={() => setEditingPlan((p) => p ? { ...p, sessions: p.sessions.filter((s: any) => s.id !== session.id) } : p)}
+                      className="p-1 text-muted-foreground hover:text-red-500 transition rounded ml-auto">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="p-3 space-y-2">
+                    {session.exercises?.length > 0 && (
+                      <div className="grid grid-cols-[1fr_52px_60px_68px_68px_28px] gap-1.5 px-1">
+                        {["Exercise","Sets","Reps","Weight","Rest",""].map((h) => (
+                          <span key={h} className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{h}</span>
+                        ))}
+                      </div>
+                    )}
+                    {session.exercises?.map((ex: any, idx: number) => (
+                      <div key={idx} className="grid grid-cols-[1fr_52px_60px_68px_68px_28px] gap-1.5 items-center">
+                        <input value={ex.name} placeholder="Bench Press" autoComplete="off"
+                          onChange={(e) => setEditingPlan((p) => { if (!p) return p; const sessions = p.sessions.map((s: any) => { if (s.id !== session.id) return s; const exs = [...s.exercises]; exs[idx] = { ...exs[idx], name: e.target.value }; return { ...s, exercises: exs } }); return { ...p, sessions } })}
+                          className="px-2 py-1.5 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30 w-full" />
+                        <input value={ex.sets} type="number" min={1}
+                          onChange={(e) => setEditingPlan((p) => { if (!p) return p; const sessions = p.sessions.map((s: any) => { if (s.id !== session.id) return s; const exs = [...s.exercises]; exs[idx] = { ...exs[idx], sets: parseInt(e.target.value)||0 }; return { ...s, exercises: exs } }); return { ...p, sessions } })}
+                          className="px-2 py-1.5 rounded-lg border border-border bg-background text-sm text-center outline-none focus:ring-2 focus:ring-primary/30 w-full" />
+                        <input value={ex.reps} placeholder="10"
+                          onChange={(e) => setEditingPlan((p) => { if (!p) return p; const sessions = p.sessions.map((s: any) => { if (s.id !== session.id) return s; const exs = [...s.exercises]; exs[idx] = { ...exs[idx], reps: e.target.value }; return { ...s, exercises: exs } }); return { ...p, sessions } })}
+                          className="px-2 py-1.5 rounded-lg border border-border bg-background text-sm text-center outline-none focus:ring-2 focus:ring-primary/30 w-full" />
+                        <input value={ex.weight} placeholder="60kg"
+                          onChange={(e) => setEditingPlan((p) => { if (!p) return p; const sessions = p.sessions.map((s: any) => { if (s.id !== session.id) return s; const exs = [...s.exercises]; exs[idx] = { ...exs[idx], weight: e.target.value }; return { ...s, exercises: exs } }); return { ...p, sessions } })}
+                          className="px-2 py-1.5 rounded-lg border border-border bg-background text-sm text-center outline-none focus:ring-2 focus:ring-primary/30 w-full" />
+                        <input value={ex.rest} placeholder="60s"
+                          onChange={(e) => setEditingPlan((p) => { if (!p) return p; const sessions = p.sessions.map((s: any) => { if (s.id !== session.id) return s; const exs = [...s.exercises]; exs[idx] = { ...exs[idx], rest: e.target.value }; return { ...s, exercises: exs } }); return { ...p, sessions } })}
+                          className="px-2 py-1.5 rounded-lg border border-border bg-background text-sm text-center outline-none focus:ring-2 focus:ring-primary/30 w-full" />
+                        <button onClick={() => setEditingPlan((p) => { if (!p) return p; const sessions = p.sessions.map((s: any) => s.id === session.id ? { ...s, exercises: s.exercises.filter((_: any, i: number) => i !== idx) } : s); return { ...p, sessions } })}
+                          className="p-1 text-muted-foreground hover:text-red-500 transition rounded">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => setEditingPlan((p) => { if (!p) return p; const sessions = p.sessions.map((s: any) => s.id === session.id ? { ...s, exercises: [...(s.exercises||[]), { name: "", sets: 3, reps: "10", weight: "", rest: "60s" }] } : s); return { ...p, sessions } })}
+                      className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition mt-1">
+                      <Plus className="w-3.5 h-3.5" />Add Exercise
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button className="flex-1" disabled={savingPlan || !editingPlan.name} onClick={async () => {
+                setSavingPlan(true)
+                if (editingPlan.id) {
+                  await fetch(`/api/console/${siteId}/workout-plans/${editingPlan.id}`, {
+                    method: "PATCH", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: editingPlan.name, goal: editingPlan.goal, notes: editingPlan.notes, sessions: editingPlan.sessions }),
+                  })
+                } else {
+                  await fetch(`/api/console/${siteId}/workout-plans`, {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: editingPlan.name, goal: editingPlan.goal, notes: editingPlan.notes, sessions: editingPlan.sessions }),
+                  })
+                }
+                await fetchPlans()
+                setSavingPlan(false)
+                setPlanEditorOpen(false)
+              }}>
+                {savingPlan ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                {editingPlan.id ? "Save Changes" : "Create Plan"}
+              </Button>
+              <Button variant="outline" onClick={() => setPlanEditorOpen(false)}>Cancel</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DIET PLAN EDITOR MODAL ── */}
+      {dietPlanEditorOpen && editingDietPlan && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDietPlanEditorOpen(false)} />
+          <div className="relative w-full sm:max-w-2xl bg-card rounded-t-2xl sm:rounded-2xl shadow-2xl border border-border p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">{editingDietPlan.id ? "Edit Diet Plan" : "New Diet Plan"}</h2>
+              <button onClick={() => setDietPlanEditorOpen(false)} className="p-1.5 rounded-lg hover:bg-muted transition text-muted-foreground">✕</button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">Plan Name *</label>
+                <input value={editingDietPlan.name} onChange={(e) => setEditingDietPlan((p) => p ? { ...p, name: e.target.value } : p)}
+                  placeholder="e.g. Weight Loss Nutrition, Lean Bulk Diet"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">Goal</label>
+                <select value={editingDietPlan.goal || ""} onChange={(e) => setEditingDietPlan((p) => p ? { ...p, goal: e.target.value || null } : p)}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30">
+                  <option value="">Select goal…</option>
+                  {["Weight Loss","Muscle Gain","Maintenance","Lean Bulk","Fat Loss + Muscle Gain"].map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">Notes</label>
+                <input value={editingDietPlan.notes || ""} onChange={(e) => setEditingDietPlan((p) => p ? { ...p, notes: e.target.value || null } : p)}
+                  placeholder="e.g. Avoid processed sugar, drink 3L water"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold mb-3">Daily Targets</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[{ label: "Calories (kcal)", key: "totalCalories" }, { label: "Protein (g)", key: "protein" }, { label: "Carbs (g)", key: "carbs" }, { label: "Fat (g)", key: "fat" }].map(({ label, key }) => (
+                  <div key={key}>
+                    <label className="text-xs text-muted-foreground block mb-1">{label}</label>
+                    <input value={(editingDietPlan as any)[key] || ""} type="number" min={0}
+                      onChange={(e) => setEditingDietPlan((p) => p ? { ...p, [key]: parseInt(e.target.value) || 0 } : p)}
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold">Meals</h3>
+                <button onClick={() => setEditingDietPlan((p) => p ? { ...p, meals: [...p.meals, { name: "Snack", time: "", calories: 0, protein: 0, carbs: 0, fat: 0, foods: [] }] } : p)}
+                  className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition">
+                  <Plus className="w-3.5 h-3.5" />Add Meal
+                </button>
+              </div>
+              <div className="space-y-3">
+                {editingDietPlan.meals.map((meal, idx) => (
+                  <div key={idx} className="bg-muted/30 border border-border rounded-xl p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input value={meal.name} onChange={(e) => setEditingDietPlan((p) => { if (!p) return p; const meals = [...p.meals]; meals[idx] = { ...meals[idx], name: e.target.value }; return { ...p, meals } })}
+                        placeholder="Meal name" className="flex-1 px-2 py-1.5 rounded-lg border border-border bg-background text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/30" />
+                      <input value={meal.time} onChange={(e) => setEditingDietPlan((p) => { if (!p) return p; const meals = [...p.meals]; meals[idx] = { ...meals[idx], time: e.target.value }; return { ...p, meals } })}
+                        placeholder="7:00 AM" className="w-24 px-2 py-1.5 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30" />
+                      <button onClick={() => setEditingDietPlan((p) => p ? { ...p, meals: p.meals.filter((_, i) => i !== idx) } : p)}
+                        className="p-1 text-muted-foreground hover:text-red-500 transition rounded shrink-0">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[{ label: "Calories", key: "calories" }, { label: "Protein (g)", key: "protein" }, { label: "Carbs (g)", key: "carbs" }, { label: "Fat (g)", key: "fat" }].map(({ label, key }) => (
+                        <div key={key}>
+                          <label className="text-xs text-muted-foreground block mb-1">{label}</label>
+                          <input value={(meal as any)[key] || ""} type="number" min={0}
+                            onChange={(e) => setEditingDietPlan((p) => { if (!p) return p; const meals = [...p.meals]; meals[idx] = { ...meals[idx], [key]: parseInt(e.target.value) || 0 }; return { ...p, meals } })}
+                            className="w-full px-2 py-1.5 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30" />
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Foods (one per line)</label>
+                      <textarea value={meal.foods.join("\n")}
+                        onChange={(e) => setEditingDietPlan((p) => { if (!p) return p; const meals = [...p.meals]; meals[idx] = { ...meals[idx], foods: e.target.value.split("\n") }; return { ...p, meals } })}
+                        placeholder={"Oats 100g\nBanana\nMilk 200ml"} rows={2}
+                        className="w-full px-2 py-1.5 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button className="flex-1" disabled={savingDietPlan || !editingDietPlan.name} onClick={async () => {
+                setSavingDietPlan(true)
+                const body = { name: editingDietPlan.name, goal: editingDietPlan.goal, notes: editingDietPlan.notes, totalCalories: editingDietPlan.totalCalories, protein: editingDietPlan.protein, carbs: editingDietPlan.carbs, fat: editingDietPlan.fat, meals: editingDietPlan.meals }
+                if (editingDietPlan.id) {
+                  await fetch(`/api/console/${siteId}/diet-plans/${editingDietPlan.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+                } else {
+                  await fetch(`/api/console/${siteId}/diet-plans`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+                }
+                await fetchDietPlans()
+                setSavingDietPlan(false)
+                setDietPlanEditorOpen(false)
+              }}>
+                {savingDietPlan ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                {editingDietPlan.id ? "Save Changes" : "Create Diet Plan"}
+              </Button>
+              <Button variant="outline" onClick={() => setDietPlanEditorOpen(false)}>Cancel</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Member Drawer */}
       {drawerOpen && (
