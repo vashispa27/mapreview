@@ -1303,14 +1303,14 @@ function BoldTemplate({ business, config, isPreview = false, onBusinessChange }:
 
         {/* ABOUT + STATS */}
         <AnimatedDiv animate={animations} {...fadeIn} className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
+          <div className="min-w-0 overflow-hidden">
             <div className="flex items-center gap-3 mb-6">
               <div className="h-0.5 w-10" style={{ backgroundColor: colorScheme.primary }} />
               <span className="text-xs font-black tracking-[0.3em] uppercase" style={{ color: colorScheme.primary }}>About Us</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black mb-6 leading-tight">Who We Are</h2>
             <InlineTextArea value={business.description} onChange={handleUpdateDescription} disabled={!isPreview || !onBusinessChange}
-              className="text-base leading-relaxed" style={{ color: muted }} />
+              className="text-base leading-relaxed break-words" style={{ color: muted }} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="p-6 rounded-2xl text-center" style={{ backgroundColor: cardBg }}>

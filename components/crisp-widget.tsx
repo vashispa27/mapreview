@@ -2,12 +2,28 @@
 
 import Script from "next/script"
 import { usePathname } from "next/navigation"
+import { useEffect } from "react"
+
+function shouldHide(pathname: string) {
+  return (
+    pathname.startsWith("/site/") ||
+    pathname.startsWith("/preview/") ||
+    pathname.startsWith("/console/")
+  )
+}
 
 export function CrispWidget() {
   const pathname = usePathname()
-  if (pathname.startsWith("/site/")) return null
-  if (pathname.startsWith("/preview/")) return null
-  if (pathname.startsWith("/console/")) return null
+
+  useEffect(() => {
+    const w = window as any
+    if (!w.$crisp) return
+    if (shouldHide(pathname)) {
+      w.$crisp.push(["do", "chat:hide"])
+    } else {
+      w.$crisp.push(["do", "chat:show"])
+    }
+  }, [pathname])
 
   return (
     <Script id="crisp-widget" strategy="lazyOnload">

@@ -325,11 +325,6 @@ export default function GymConsolePage() {
               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-medium">Console</span>
             </div>
           </div>
-          {activeTab === "members" && (
-            <Button onClick={() => setDrawerOpen(true)} size="sm">
-              <Plus className="w-4 h-4 mr-1.5" />Add Member
-            </Button>
-          )}
         </div>
       </header>
 

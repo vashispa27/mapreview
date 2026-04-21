@@ -21,8 +21,11 @@ export async function POST(request: Request): Promise<NextResponse> {
     })
 
     return NextResponse.json(blob)
-  } catch (error) {
+  } catch (error: any) {
     console.error("Upload Error:", error)
+    if (error?.message?.includes("store does not exist") || error?.message?.includes("BLOB_READ_WRITE_TOKEN")) {
+      return NextResponse.json({ error: "Blob storage not configured. Add BLOB_READ_WRITE_TOKEN in Vercel project settings." }, { status: 500 })
+    }
     return NextResponse.json({ error: "Upload failed" }, { status: 500 })
   }
 }
