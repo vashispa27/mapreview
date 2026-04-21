@@ -4,24 +4,35 @@ import Script from "next/script"
 import { usePathname } from "next/navigation"
 import { useEffect } from "react"
 
+const HIDE_ROUTES = ["/site/", "/preview/", "/console/"]
+
 function shouldHide(pathname: string) {
-  return (
-    pathname.startsWith("/site/") ||
-    pathname.startsWith("/preview/") ||
-    pathname.startsWith("/console/")
-  )
+  return HIDE_ROUTES.some((r) => pathname.startsWith(r))
 }
+
+const CRISP_CSS_ID = "crisp-force-hide"
+const CRISP_HIDE_CSS = "#crisp-chatbox, .crisp-client { display: none !important; }"
 
 export function CrispWidget() {
   const pathname = usePathname()
 
   useEffect(() => {
+    const hide = shouldHide(pathname)
+    const existing = document.getElementById(CRISP_CSS_ID)
+
+    if (hide && !existing) {
+      const style = document.createElement("style")
+      style.id = CRISP_CSS_ID
+      style.textContent = CRISP_HIDE_CSS
+      document.head.appendChild(style)
+    } else if (!hide && existing) {
+      existing.remove()
+    }
+
+    // Also call Crisp API if already loaded
     const w = window as any
-    if (!w.$crisp) return
-    if (shouldHide(pathname)) {
-      w.$crisp.push(["do", "chat:hide"])
-    } else {
-      w.$crisp.push(["do", "chat:show"])
+    if (w.$crisp?.push) {
+      w.$crisp.push(["do", hide ? "chat:hide" : "chat:show"])
     }
   }, [pathname])
 
