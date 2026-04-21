@@ -87,5 +87,94 @@ model Site {
   config       Json?
   deleted      Boolean  @default(false)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  members     GymMember[]
+  gymSettings GymSettings?
+  gymPayments GymPayment[]
+}
+
+model GymMember {
+  id               String   @id @default(cuid())
+  siteId           String
+  site             Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  name             String
+  email            String?
+  phone            String
+
+  membershipPlanId String
+  membershipTitle  String
+  membershipPrice  String
+  durationMonths   Int      @default(1)
+  pricePerMonth    Int      @default(0)
+
+  startDate        DateTime
+  endDate          DateTime
+  status           String   @default("active") // active | expired
+
+  // Notification flags — reset on each renewal
+  notifiedEnroll   Boolean  @default(false)
+  notified7Days    Boolean  @default(false)
+  notified1Day     Boolean  @default(false)
+  notifiedExpired  Boolean  @default(false)
+
+  createdAt        DateTime @default(now())
+
+  workoutPlan Json?
+  dietPlan    Json?
+  payments    GymPayment[]
+
+  @@index([siteId])
+  @@index([endDate])
+}
+
+model GymSettings {
+  id             String   @id @default(cuid())
+  siteId         String   @unique
+  site           Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  gstin          String?
+  businessName   String?
+  address        String?
+  state          String?
+  isComposition  Boolean  @default(false)
+  invoicePrefix  String   @default("INV")
+  invoiceCounter Int      @default(0)
+  currentFY      String?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model GymPayment {
+  id            String    @id @default(cuid())
+  siteId        String
+  site          Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  memberId      String
+  member        GymMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  invoiceNumber String
+  invoiceDate   DateTime  @default(now())
+  financialYear String
+
+  memberName    String
+  memberPhone   String
+  memberEmail   String?
+  planTitle     String
+  durationMonths Int
+
+  taxableAmount Float
+  cgst          Float
+  sgst          Float
+  igst          Float
+  totalAmount   Float
+  isInterstate  Boolean  @default(false)
+
+  type          String   @default("enrollment") // enrollment | renewal
+
+  createdAt     DateTime @default(now())
+
+  @@index([siteId])
+  @@index([financialYear])
+  @@index([memberId])
 }

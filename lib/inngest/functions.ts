@@ -5,7 +5,8 @@ import { parseScrapedData } from "@/lib/parser"
 import { generateBusinessContent } from "@/lib/ai"
 import { BusinessData, ServiceItem, TrainerItem } from "@/lib/mock-data"
 import { db } from "@/lib/db"
-import { sendSiteStatusEmail } from "@/lib/email"
+import { sendSiteStatusEmail, sendGymExpiryReminderEmail } from "@/lib/email"
+import { formatDate, daysUntil } from "@/lib/gym-utils"
 import sampleData from "../../sample_scraped_data.json"
 
 const GYM_KEYWORDS = ["gym", "fitness", "crossfit", "yoga", "pilates", "zumba", "martial arts", "boxing", "health club", "sports club", "aerobics", "strength", "personal trainer", "dance studio", "wellness center"]
@@ -268,5 +269,60 @@ export const generateSiteJob = inngest.createFunction(
     })
 
     return { success: true, url }
+  }
+)
+
+// ─── Daily gym membership reminder cron ──────────────────────────────────────
+
+export const gymMembershipReminderJob = inngest.createFunction(
+  { id: "gym-membership-reminders", triggers: [{ event: "inngest/scheduled.timer", cron: "0 3 * * *" }] },
+  { event: "inngest/scheduled.timer" },
+  async ({ step }) => {
+    await step.run("send-expiry-reminders", async () => {
+      const now = new Date()
+      const in7 = new Date(now); in7.setDate(in7.getDate() + 7)
+      const in1 = new Date(now); in1.setDate(in1.getDate() + 1)
+      const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0)
+      const todayEnd = new Date(now); todayEnd.setHours(23, 59, 59, 999)
+
+      // Members expiring in ~7 days (between 6.5 and 7.5 days from now)
+      const sevenDayMembers = await db.gymMember.findMany({
+        where: { status: "active", notified7Days: false, email: { not: null }, endDate: { gte: new Date(in7.getTime() - 12 * 3_600_000), lte: new Date(in7.getTime() + 12 * 3_600_000) } },
+        include: { site: true },
+      })
+
+      // Members expiring in ~1 day
+      const oneDayMembers = await db.gymMember.findMany({
+        where: { status: "active", notified1Day: false, email: { not: null }, endDate: { gte: new Date(in1.getTime() - 12 * 3_600_000), lte: new Date(in1.getTime() + 12 * 3_600_000) } },
+        include: { site: true },
+      })
+
+      // Members whose membership expired today
+      const expiredToday = await db.gymMember.findMany({
+        where: { status: "active", notifiedExpired: false, email: { not: null }, endDate: { gte: todayStart, lte: todayEnd } },
+        include: { site: true },
+      })
+
+      const sendAndMark = async (members: typeof sevenDayMembers, daysLeft: number, flag: "notified7Days" | "notified1Day" | "notifiedExpired") => {
+        for (const m of members) {
+          if (!m.email) continue
+          const gymName = (m.site.businessData as any)?.name || "Your Gym"
+          await sendGymExpiryReminderEmail(
+            { memberEmail: m.email, memberName: m.name, gymName, planTitle: m.membershipTitle, endDate: formatDate(m.endDate) },
+            daysLeft
+          ).catch(console.error)
+          await db.gymMember.update({ where: { id: m.id }, data: { [flag]: true, ...(daysLeft === 0 ? { status: "expired" } : {}) } })
+        }
+      }
+
+      await sendAndMark(sevenDayMembers, 7, "notified7Days")
+      await sendAndMark(oneDayMembers, 1, "notified1Day")
+      await sendAndMark(expiredToday, 0, "notifiedExpired")
+
+      // Also bulk-expire any past-due active members with no email
+      await db.gymMember.updateMany({ where: { status: "active", endDate: { lt: todayStart } }, data: { status: "expired" } })
+
+      console.log(`✅ Gym reminders: 7d=${sevenDayMembers.length} 1d=${oneDayMembers.length} expired=${expiredToday.length}`)
+    })
   }
 )

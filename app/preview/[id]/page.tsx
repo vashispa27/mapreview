@@ -164,6 +164,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
           socials: newBusiness.socials,
           trainers: newBusiness.trainers,
           showTrainersSection: newBusiness.showTrainersSection,
+          isGym: newBusiness.isGym,
         }),
       })
       if (!res.ok) console.error("Failed to save business data:", res.status, await res.text())

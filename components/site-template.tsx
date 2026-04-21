@@ -73,39 +73,72 @@ function FloatingPageNav({
     ...(pages.contact ? [{ key: "contact", label: "Contact" }] : []),
   ]
 
+  const allTabs = [
+    ...tabs,
+    ...(pages.products && !isPreview ? [{ key: "__cart__", label: "Cart" }] : []),
+  ]
+
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 bg-white/95 backdrop-blur-md border border-border shadow-2xl rounded-2xl px-2 py-2">
-      {tabs.map((tab) => (
-        <button
-          key={tab.key}
-          onClick={() => onNavigate(tab.key)}
-          className="px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap"
-          style={{
-            backgroundColor: activePage === tab.key ? colorScheme.primary : "transparent",
-            color: activePage === tab.key ? "#fff" : "#6b7280",
-          }}
-        >
-          {tab.label}
-        </button>
-      ))}
-      {pages.products && !isPreview && (
-        <button
-          onClick={onCartClick}
-          className="relative ml-1 p-2 rounded-xl transition hover:bg-black/5"
-          style={{ color: colorScheme.primary }}
-        >
-          <ShoppingCart className="w-4 h-4" />
-          {cartCount > 0 && (
-            <span
-              className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
-              style={{ backgroundColor: colorScheme.primary }}
+    <>
+      {/* Mobile: full-width bottom tab bar */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-border shadow-2xl flex">
+        {allTabs.map((tab) => {
+          const isCart = tab.key === "__cart__"
+          const isActive = !isCart && activePage === tab.key
+          return (
+            <button
+              key={tab.key}
+              onClick={() => isCart ? onCartClick() : onNavigate(tab.key)}
+              className="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-[11px] font-semibold transition-colors relative"
+              style={{ color: isActive ? colorScheme.primary : "#9ca3af" }}
             >
-              {cartCount}
-            </span>
-          )}
-        </button>
-      )}
-    </div>
+              {isCart && cartCount > 0 && (
+                <span className="absolute top-2 right-1/4 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center"
+                  style={{ backgroundColor: colorScheme.primary }}>{cartCount}</span>
+              )}
+              {isActive && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full" style={{ backgroundColor: colorScheme.primary }} />
+              )}
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Desktop: floating pill */}
+      <div className="hidden sm:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-50 items-center gap-1 bg-white/95 backdrop-blur-md border border-border shadow-2xl rounded-2xl px-2 py-2">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => onNavigate(tab.key)}
+            className="px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap"
+            style={{
+              backgroundColor: activePage === tab.key ? colorScheme.primary : "transparent",
+              color: activePage === tab.key ? "#fff" : "#6b7280",
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+        {pages.products && !isPreview && (
+          <button
+            onClick={onCartClick}
+            className="relative ml-1 p-2 rounded-xl transition hover:bg-black/5"
+            style={{ color: colorScheme.primary }}
+          >
+            <ShoppingCart className="w-4 h-4" />
+            {cartCount > 0 && (
+              <span
+                className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+                style={{ backgroundColor: colorScheme.primary }}
+              >
+                {cartCount}
+              </span>
+            )}
+          </button>
+        )}
+      </div>
+    </>
   )
 }
 
@@ -280,7 +313,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
   // For non-home pages: same content across all layouts
   if (activePage !== "home") {
     return (
-      <div className={cn("min-h-screen", fontClass)} style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}>
+      <div className={cn("min-h-screen pb-16 sm:pb-0", fontClass)} style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}>
         {activePage === "services" && pages.services && (
           business.isGym
             ? <MembershipPage business={business} colorScheme={colorScheme} fontClass={fontClass} onEnquire={bookService} onBusinessChange={onBusinessChange} />

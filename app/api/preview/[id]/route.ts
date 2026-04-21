@@ -111,6 +111,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (body.socials !== undefined) currentBusiness.socials = body.socials
   if (body.trainers !== undefined) currentBusiness.trainers = body.trainers
   if (typeof body.showTrainersSection === "boolean") currentBusiness.showTrainersSection = body.showTrainersSection
+  if (typeof body.isGym === "boolean") currentBusiness.isGym = body.isGym
 
   // 3. Save to Prisma
   const updated = await db.site.update({

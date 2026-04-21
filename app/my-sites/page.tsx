@@ -5,16 +5,17 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { 
-  MapPin, 
-  ExternalLink, 
-  Pencil, 
-  Trash2, 
+import {
+  MapPin,
+  ExternalLink,
+  Pencil,
+  Trash2,
   Loader2,
   Plus,
   Globe,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  LayoutDashboard
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAdminMode } from "@/components/providers/admin-provider"
@@ -39,6 +40,7 @@ interface Site {
   businessData: {
     name?: string
     heroImage?: string
+    isGym?: boolean
   } | null
 }
 
@@ -237,31 +239,46 @@ export default function MySitesPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 mt-4">
+                    <div className="flex flex-col gap-2 mt-4">
                       {site.status === "COMPLETED" && (
                         <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            asChild
-                          >
-                            <Link href={`/site/${site.slug || site.id}`} target="_blank">
-                              <ExternalLink className="w-4 h-4 mr-1" />
-                              View
-                            </Link>
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            asChild
-                          >
-                            <Link href={`/preview/${site.slug || site.id}`}>
-                              <Pencil className="w-4 h-4 mr-1" />
-                              Edit
-                            </Link>
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                              asChild
+                            >
+                              <Link href={`/site/${site.slug || site.id}`} target="_blank">
+                                <ExternalLink className="w-4 h-4 mr-1" />
+                                View
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                              asChild
+                            >
+                              <Link href={`/preview/${site.slug || site.id}`}>
+                                <Pencil className="w-4 h-4 mr-1" />
+                                Edit
+                              </Link>
+                            </Button>
+                          </div>
+                          {site.businessData?.isGym && (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="w-full"
+                              asChild
+                            >
+                              <Link href={`/console/${site.id}`}>
+                                <LayoutDashboard className="w-4 h-4 mr-1" />
+                                Gym Console
+                              </Link>
+                            </Button>
+                          )}
                         </>
                       )}
                     </div>

@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation"
 export function CrispWidget() {
   const pathname = usePathname()
   if (pathname.startsWith("/site/")) return null
+  if (pathname.startsWith("/preview/")) return null
+  if (pathname.startsWith("/console/")) return null
 
   return (
     <Script id="crisp-widget" strategy="lazyOnload">

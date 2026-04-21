@@ -510,6 +510,234 @@ export async function sendSpeedChallengeEmail(
   }
 }
 
+// ─── Gym Member Emails ────────────────────────────────────────────────────────
+
+interface GymMemberEmailParams {
+  memberEmail: string
+  memberName: string
+  gymName: string
+  planTitle: string
+  startDate: string
+  endDate: string
+}
+
+export async function sendGymEnrollmentEmail({ memberEmail, memberName, gymName, planTitle, startDate, endDate }: GymMemberEmailParams) {
+  const firstName = memberName.split(" ")[0] || memberName
+
+  const body = `
+  ${heroSection("💪", "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)", `Welcome, ${firstName}!`, `Your membership at ${gymName} is now active.`)}
+
+  <div style="padding:32px 40px;">
+    <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+      Your <strong>${planTitle}</strong> membership has been activated. Here are your details:
+    </p>
+
+    <table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;margin-bottom:24px;">
+      <tr><td style="padding:20px 24px;">
+        <table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
+          <tr>
+            <td style="font-size:13px;color:#6b7280;padding-bottom:10px;">Gym</td>
+            <td align="right" style="font-size:14px;font-weight:700;color:#1a1a2e;padding-bottom:10px;">${gymName}</td>
+          </tr>
+          <tr>
+            <td style="font-size:13px;color:#6b7280;padding-bottom:10px;">Membership</td>
+            <td align="right" style="font-size:14px;font-weight:700;color:#1a1a2e;padding-bottom:10px;">${planTitle}</td>
+          </tr>
+          <tr>
+            <td style="font-size:13px;color:#6b7280;padding-bottom:10px;">Start date</td>
+            <td align="right" style="font-size:14px;font-weight:700;color:#1a1a2e;padding-bottom:10px;">${startDate}</td>
+          </tr>
+          <tr>
+            <td style="font-size:13px;color:#6b7280;">Valid until</td>
+            <td align="right" style="font-size:14px;font-weight:700;color:#16a34a;">${endDate}</td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+
+    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;">
+      See you at the gym! Contact your gym directly for any questions about your membership.
+    </p>
+  </div>`
+
+  try {
+    return await client.send({
+      from: sender,
+      to: [{ email: memberEmail }],
+      subject: `Your ${gymName} membership is active 💪`,
+      html: layout(`Welcome! Your ${planTitle} at ${gymName} starts today.`, body),
+      text: `Hi ${firstName}, your ${planTitle} membership at ${gymName} is active from ${startDate} to ${endDate}.`,
+      category: "Gym Membership",
+    })
+  } catch (error) {
+    console.error("Failed to send gym enrollment email:", error)
+  }
+}
+
+export async function sendGymRenewalEmail({ memberEmail, memberName, gymName, planTitle, startDate, endDate }: GymMemberEmailParams) {
+  const firstName = memberName.split(" ")[0] || memberName
+
+  const body = `
+  ${heroSection("🔄", "linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%)", "Membership Renewed!", `Your ${gymName} membership has been extended.`)}
+
+  <div style="padding:32px 40px;">
+    <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+      Great news, ${firstName}! Your <strong>${planTitle}</strong> membership has been renewed.
+    </p>
+
+    <table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:12px;margin-bottom:24px;">
+      <tr><td style="padding:20px 24px;">
+        <table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
+          <tr>
+            <td style="font-size:13px;color:#6b7280;padding-bottom:10px;">New start date</td>
+            <td align="right" style="font-size:14px;font-weight:700;color:#1a1a2e;padding-bottom:10px;">${startDate}</td>
+          </tr>
+          <tr>
+            <td style="font-size:13px;color:#6b7280;">Valid until</td>
+            <td align="right" style="font-size:14px;font-weight:700;color:#1d4ed8;">${endDate}</td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+
+    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;">
+      Keep up the great work — see you at ${gymName}!
+    </p>
+  </div>`
+
+  try {
+    return await client.send({
+      from: sender,
+      to: [{ email: memberEmail }],
+      subject: `Membership renewed at ${gymName} ✅`,
+      html: layout(`Your ${planTitle} at ${gymName} has been renewed until ${endDate}.`, body),
+      text: `Hi ${firstName}, your ${planTitle} at ${gymName} has been renewed. Valid until ${endDate}.`,
+      category: "Gym Membership",
+    })
+  } catch (error) {
+    console.error("Failed to send gym renewal email:", error)
+  }
+}
+
+export async function sendGymExpiryReminderEmail({ memberEmail, memberName, gymName, planTitle, endDate }: Omit<GymMemberEmailParams, "startDate"> & { startDate?: string }, daysLeft: number) {
+  const firstName = memberName.split(" ")[0] || memberName
+  const urgency = daysLeft <= 1 ? "🚨" : "⏰"
+  const urgencyText = daysLeft === 0 ? "expires today" : daysLeft === 1 ? "expires tomorrow" : `expires in ${daysLeft} days`
+
+  const body = `
+  ${heroSection(urgency, "linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%)", `Your membership ${urgencyText}`, `${gymName} — ${planTitle}`)}
+
+  <div style="padding:32px 40px;">
+    <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+      Hi ${firstName}, your <strong>${planTitle}</strong> membership at <strong>${gymName}</strong> ${urgencyText} on <strong>${endDate}</strong>.
+    </p>
+
+    <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
+      Contact your gym to renew and keep your fitness streak going!
+    </p>
+
+    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;">
+      This is an automated reminder from your gym's management system.
+    </p>
+  </div>`
+
+  try {
+    return await client.send({
+      from: sender,
+      to: [{ email: memberEmail }],
+      subject: `${urgency} Your ${gymName} membership ${urgencyText}`,
+      html: layout(`Your ${planTitle} at ${gymName} ${urgencyText} — contact your gym to renew.`, body),
+      text: `Hi ${firstName}, your ${planTitle} at ${gymName} ${urgencyText} on ${endDate}. Contact your gym to renew.`,
+      category: "Gym Reminder",
+    })
+  } catch (error) {
+    console.error("Failed to send gym expiry reminder:", error)
+  }
+}
+
+// ─── Gym Plan Email ───────────────────────────────────────────────────────────
+
+export async function sendGymPlanEmail({
+  memberEmail, memberName, gymName, workoutPlan, dietPlan,
+}: {
+  memberEmail: string
+  memberName: string
+  gymName: string
+  workoutPlan?: any
+  dietPlan?: any
+}) {
+  const firstName = memberName.split(" ")[0] || memberName
+
+  const workoutHtml = workoutPlan?.sessions?.length ? `
+    <h2 style="font-size:18px;font-weight:700;color:#1a1a2e;margin:32px 0 8px">💪 Workout Plan</h2>
+    ${workoutPlan.goal ? `<p style="color:#666;margin:0 0 16px">Goal: <strong>${workoutPlan.goal}</strong></p>` : ""}
+    ${(workoutPlan.sessions as any[]).map((s: any) => `
+      <h3 style="font-size:15px;font-weight:700;margin:20px 0 8px;color:#1a1a2e">${s.name || "Workout"} <span style="font-size:12px;color:#9ca3af;font-weight:400;text-transform:capitalize">(${s.type})</span></h3>
+      ${s.exercises?.length ? `
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:8px">
+          <tr style="background:#f9fafb">
+            ${["Exercise","Sets","Reps","Weight","Rest"].map((h) => `<th style="padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#555;border-bottom:1px solid #e5e7eb">${h}</th>`).join("")}
+          </tr>
+          ${s.exercises.map((e: any) => `<tr style="border-bottom:1px solid #f3f4f6">
+            <td style="padding:8px 12px;font-size:13px">${e.name}</td>
+            <td style="padding:8px 12px;font-size:13px;text-align:center">${e.sets}</td>
+            <td style="padding:8px 12px;font-size:13px;text-align:center">${e.reps}</td>
+            <td style="padding:8px 12px;font-size:13px;text-align:center">${e.weight || "—"}</td>
+            <td style="padding:8px 12px;font-size:13px;text-align:center">${e.rest}</td>
+          </tr>`).join("")}
+        </table>` : ""}
+      ${s.notes ? `<p style="font-size:12px;color:#9ca3af;font-style:italic;margin:4px 0 0">${s.notes}</p>` : ""}
+    `).join("")}
+    ${workoutPlan.notes ? `<p style="font-size:13px;color:#666;margin:12px 0 0;font-style:italic">Note: ${workoutPlan.notes}</p>` : ""}
+  ` : ""
+
+  const macroBar = (label: string, grams: number, cal: number, color: string) =>
+    `<td style="text-align:center;padding:12px">
+      <div style="font-size:22px;font-weight:700;color:${color}">${grams}g</div>
+      <div style="font-size:11px;color:#666;margin-top:2px">${label}</div>
+      <div style="font-size:11px;color:#9ca3af">${cal} kcal</div>
+    </td>`
+
+  const dietHtml = dietPlan ? `
+    <h2 style="font-size:18px;font-weight:700;color:#1a1a2e;margin:32px 0 8px">🥗 Diet Plan</h2>
+    ${dietPlan.goal ? `<p style="color:#666;margin:0 0 16px">Goal: <strong>${dietPlan.goal}</strong></p>` : ""}
+    <table width="100%" style="background:#f0fdf4;border-radius:8px;margin-bottom:20px;border:1px solid #bbf7d0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="text-align:center;padding:16px 12px;border-right:1px solid #bbf7d0">
+          <div style="font-size:28px;font-weight:800;color:#16a34a">${dietPlan.totalCalories}</div>
+          <div style="font-size:12px;color:#666">Daily Calories</div>
+        </td>
+        ${macroBar("Protein", dietPlan.protein, Math.round(dietPlan.protein * 4), "#2563eb")}
+        ${macroBar("Carbs", dietPlan.carbs, Math.round(dietPlan.carbs * 4), "#d97706")}
+        ${macroBar("Fat", dietPlan.fat, Math.round(dietPlan.fat * 9), "#dc2626")}
+      </tr>
+    </table>
+    ${dietPlan.meals?.length ? `
+      ${dietPlan.meals.map((m: any) => `
+        <div style="margin-bottom:12px;padding:14px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+          <div style="font-weight:700;font-size:14px">${m.name}${m.time ? ` <span style="font-weight:400;color:#9ca3af;font-size:12px">· ${m.time}</span>` : ""}</div>
+          ${m.calories ? `<div style="font-size:12px;color:#666;margin-top:2px">${m.calories} kcal · Protein ${m.protein || 0}g · Carbs ${m.carbs || 0}g · Fat ${m.fat || 0}g</div>` : ""}
+          ${m.foods?.length ? `<ul style="margin:8px 0 0;padding-left:18px;font-size:13px;color:#374151">${m.foods.filter(Boolean).map((f: string) => `<li style="margin-bottom:2px">${f}</li>`).join("")}</ul>` : ""}
+        </div>
+      `).join("")}
+    ` : ""}
+    ${dietPlan.notes ? `<p style="font-size:13px;color:#666;margin:12px 0 0;font-style:italic">Note: ${dietPlan.notes}</p>` : ""}
+  ` : ""
+
+  return client.send({
+    from: sender,
+    to: [{ email: memberEmail, name: memberName }],
+    subject: `Your Personalised Plan from ${gymName}`,
+    html: layout(`Your plan from ${gymName} is ready`, `
+      <h1 style="font-size:22px;font-weight:700;margin:0 0 8px">Hey ${firstName}! 👋</h1>
+      <p style="color:#555;margin:0 0 24px">Your trainer at <strong>${gymName}</strong> has prepared a personalised plan for you. Follow it consistently for best results!</p>
+      ${workoutHtml}
+      ${dietHtml}
+      <p style="margin:32px 0 0;color:#9ca3af;font-size:12px">Stay consistent, stay strong. 💪</p>
+    `),
+  })
+}
+
 // ─── Legacy shim (used by existing webhook code) ─────────────────────────────
 
 export async function sendPaymentEmail(
