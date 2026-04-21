@@ -2,9 +2,9 @@
 
 import { useRef, useState, useCallback } from "react"
 import { SitePhoto } from "@/lib/mock-data"
-import { ImagePlus, Plus } from "lucide-react"
+import { ImagePlus, Plus, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { compressImage } from "@/lib/compress-image"
+import { compressImageToBlob } from "@/lib/compress-image"
 import {
   Dialog,
   DialogContent,
@@ -28,6 +28,7 @@ export function PhotoManagerModal({
 }: PhotoManagerModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isDraggingOver, setIsDraggingOver] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [open, setOpen] = useState(false)
 
   const handleAddFromPool = (photo: SitePhoto) => {
@@ -37,23 +38,39 @@ export function PhotoManagerModal({
     setOpen(false)
   }
 
-  const readFilesAsDataURLs = (files: File[]): Promise<SitePhoto[]> => {
-    return Promise.all(
-      files
-        .filter((f) => f.type.startsWith("image/"))
-        .map(async (file) => ({
-          url: await compressImage(file, 1200, 1200, 0.82),
-          caption: file.name.replace(/\.[^.]+$/, ""),
-        }))
-    )
+  const uploadFile = async (file: File): Promise<SitePhoto> => {
+    // 1. Compress
+    const { blob } = await compressImageToBlob(file, 1200, 1200, 0.82)
+    
+    // 2. Upload to our API
+    const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+      method: "POST",
+      body: blob,
+    })
+
+    if (!response.ok) throw new Error("Upload failed")
+    
+    const data = await response.json()
+    return {
+      url: data.url,
+      caption: file.name.replace(/\.[^.]+$/, ""),
+    }
   }
 
   const handleFiles = useCallback(
     async (files: FileList | null) => {
       if (!files || files.length === 0) return
-      const newPhotos = await readFilesAsDataURLs(Array.from(files))
-      onChange([...newPhotos, ...photos])
-      setOpen(false)
+      setIsUploading(true)
+      try {
+        const fileArray = Array.from(files).filter(f => f.type.startsWith("image/"))
+        const newPhotos = await Promise.all(fileArray.map(uploadFile))
+        onChange([...newPhotos, ...photos])
+        setOpen(false)
+      } catch (err) {
+        console.error("Upload failed:", err)
+      } finally {
+        setIsUploading(false)
+      }
     },
     [photos, onChange]
   )
@@ -112,18 +129,27 @@ export function PhotoManagerModal({
             onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true) }}
             onDragLeave={() => setIsDraggingOver(false)}
             onDrop={handleDropzoneDrop}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => !isUploading && fileInputRef.current?.click()}
             className={cn(
-              "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all w-full",
-              isDraggingOver
-                ? "border-primary bg-primary/5 scale-[1.02]"
-                : "border-border hover:border-primary/50 hover:bg-muted/50"
+              "border-2 border-dashed rounded-xl p-6 text-center transition-all w-full",
+              isUploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:border-primary/50 hover:bg-muted/50",
+              isDraggingOver ? "border-primary bg-primary/5 scale-[1.02]" : "border-border"
             )}
           >
             <div className="flex flex-col items-center gap-2">
-              <ImagePlus className="w-6 h-6 text-muted-foreground" />
-              <p className="font-medium">Upload Local Photos</p>
-              <p className="text-xs text-muted-foreground">Drag and drop or click</p>
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <p className="font-medium">Uploading...</p>
+                  <p className="text-xs text-muted-foreground">Please wait</p>
+                </>
+              ) : (
+                <>
+                  <ImagePlus className="w-6 h-6 text-muted-foreground" />
+                  <p className="font-medium">Upload Local Photos</p>
+                  <p className="text-xs text-muted-foreground">Drag and drop or click</p>
+                </>
+              )}
             </div>
           </div>
 

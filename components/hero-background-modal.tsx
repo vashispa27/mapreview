@@ -2,8 +2,9 @@
 
 import { useRef, useState, useCallback } from "react"
 import { SitePhoto } from "@/lib/mock-data"
-import { ImagePlus, Images, X } from "lucide-react"
+import { ImagePlus, Images, X, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { compressImageToBlob } from "@/lib/compress-image"
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ export function HeroBackgroundModal({
 }: HeroBackgroundModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isDraggingOver, setIsDraggingOver] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [open, setOpen] = useState(false)
 
   // Combine both pools of photos so they have access to all scraped resources!
@@ -39,32 +41,41 @@ export function HeroBackgroundModal({
     setOpen(false)
   }
 
-  const readFilesAsDataURLs = (files: File[]): Promise<string[]> => {
-    return Promise.all(
-      files
-        .filter((f) => f.type.startsWith("image/"))
-        .map(
-          (file) =>
-            new Promise<string>((resolve) => {
-              const reader = new FileReader()
-              reader.onload = (e) => {
-                resolve(e.target?.result as string)
-              }
-              reader.readAsDataURL(file)
+  const uploadFiles = async (files: File[]): Promise<string[]> => {
+    setIsUploading(true)
+    try {
+      const results = await Promise.all(
+        files
+          .filter((f) => f.type.startsWith("image/"))
+          .map(async (file) => {
+            const { blob } = await compressImageToBlob(file, 1920, 1080, 0.85)
+            const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+              method: "POST",
+              body: blob
             })
-        )
-    )
+            if (!res.ok) throw new Error("Upload failed")
+            const data = await res.json()
+            return data.url
+          })
+      )
+      return results
+    } catch (err) {
+      console.error("Upload failed:", err)
+      return []
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleFiles = useCallback(
     async (files: FileList | null) => {
       if (!files || files.length === 0) return
-      const newPhotos = await readFilesAsDataURLs(Array.from(files))
-      if (newPhotos.length > 0) {
-        handleSelect(newPhotos[0])
+      const uploadedUrls = await uploadFiles(Array.from(files))
+      if (uploadedUrls.length > 0) {
+        handleSelect(uploadedUrls[0])
       }
     },
-    [onChange]
+    [handleSelect]
   )
 
   const handleDropzoneDrop = (e: React.DragEvent) => {
@@ -119,18 +130,27 @@ export function HeroBackgroundModal({
             onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true) }}
             onDragLeave={() => setIsDraggingOver(false)}
             onDrop={handleDropzoneDrop}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => !isUploading && fileInputRef.current?.click()}
             className={cn(
-              "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all w-full",
-              isDraggingOver
-                ? "border-primary bg-primary/5 scale-[1.02]"
-                : "border-border hover:border-primary/50 hover:bg-muted/50"
+              "border-2 border-dashed rounded-xl p-6 text-center transition-all w-full",
+              isUploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:border-primary/50 hover:bg-muted/50",
+              isDraggingOver ? "border-primary bg-primary/5 scale-[1.02]" : "border-border"
             )}
           >
             <div className="flex flex-col items-center gap-2">
-              <ImagePlus className="w-6 h-6 text-muted-foreground" />
-              <p className="font-medium">Upload Local Photo</p>
-              <p className="text-xs text-muted-foreground">Drag and drop or click</p>
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <p className="font-medium">Uploading...</p>
+                  <p className="text-xs text-muted-foreground">Please wait</p>
+                </>
+              ) : (
+                <>
+                  <ImagePlus className="w-6 h-6 text-muted-foreground" />
+                  <p className="font-medium">Upload Local Photo</p>
+                  <p className="text-xs text-muted-foreground">Drag and drop or click</p>
+                </>
+              )}
             </div>
           </div>
 

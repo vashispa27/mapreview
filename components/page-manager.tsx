@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import {
   Calendar, ShoppingBag, Phone, Plus, Trash2,
   ChevronDown, ChevronUp, ImagePlus, Instagram, Linkedin,
-  X,
+  X, Users,
 } from "lucide-react"
 import { compressImage } from "@/lib/compress-image"
 
@@ -17,25 +17,31 @@ interface PageManagerProps {
 
 function nanoid() { return Math.random().toString(36).slice(2, 10) }
 
-const ALL_PAGES = [
-  { key: "services" as const, label: "Services", icon: Calendar, description: "Showcase your services with booking" },
-  { key: "products" as const, label: "Products", icon: ShoppingBag, description: "Sell products with a cart checkout" },
-  { key: "contact" as const, label: "Contact Us", icon: Phone, description: "Inquiry form and social links" },
+type PageKey = "services" | "products" | "contact" | "trainers"
+
+const BASE_PAGES: { key: PageKey; label: string; gymLabel: string; icon: React.ElementType; description: string; gymOnly?: boolean }[] = [
+  { key: "services", label: "Services", gymLabel: "Membership Plans", icon: Calendar, description: "Showcase your services with booking" },
+  { key: "products", label: "Products", gymLabel: "Products", icon: ShoppingBag, description: "Sell products with a cart checkout" },
+  { key: "trainers", label: "Our Trainers", gymLabel: "Our Trainers", icon: Users, description: "Meet the team at your gym", gymOnly: true },
+  { key: "contact", label: "Contact Us", gymLabel: "Contact Us", icon: Phone, description: "Inquiry form and social links" },
 ]
 
 export function PageManager({ business, onChange }: PageManagerProps) {
   const [addOpen, setAddOpen] = useState(false)
   const pages = business.pages ?? {}
+  const isGym = !!business.isGym
+
+  const ALL_PAGES = BASE_PAGES.filter((p) => !p.gymOnly || isGym)
 
   const activePagesKeys = ALL_PAGES.filter((p) => !!pages[p.key])
   const availableToAdd = ALL_PAGES.filter((p) => !pages[p.key])
 
-  const addPage = (key: "services" | "products" | "contact") => {
+  const addPage = (key: PageKey) => {
     onChange({ ...business, pages: { ...pages, [key]: true } })
     setAddOpen(false)
   }
 
-  const removePage = (key: "services" | "products" | "contact") => {
+  const removePage = (key: PageKey) => {
     onChange({ ...business, pages: { ...pages, [key]: false } })
   }
 
@@ -57,12 +63,13 @@ export function PageManager({ business, onChange }: PageManagerProps) {
         pages[p.key] ? (
           <PageCard
             key={p.key}
-            label={p.label}
+            label={isGym ? p.gymLabel : p.label}
             icon={p.icon}
             onDelete={() => removePage(p.key)}
           >
-            {p.key === "services" && <ServicesEditor business={business} onChange={onChange} />}
+            {p.key === "services" && <ServicesEditor business={business} onChange={onChange} isGym={isGym} />}
             {p.key === "products" && <ProductsEditor business={business} onChange={onChange} />}
+            {p.key === "trainers" && <TrainersNote />}
             {p.key === "contact" && <ContactEditor business={business} onChange={onChange} />}
           </PageCard>
         ) : null
@@ -92,7 +99,7 @@ export function PageManager({ business, onChange }: PageManagerProps) {
                       <Icon className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold">{p.label}</p>
+                      <p className="text-sm font-semibold">{isGym ? p.gymLabel : p.label}</p>
                       <p className="text-xs text-muted-foreground">{p.description}</p>
                     </div>
                   </button>
@@ -150,8 +157,17 @@ function PageCard({ label, icon: Icon, onDelete, children }: {
   )
 }
 
+// ─── Trainers note ─────────────────────────────────────────────────────────
+function TrainersNote() {
+  return (
+    <p className="text-xs text-muted-foreground py-1">
+      Add and edit trainers directly on the Our Trainers page in the preview.
+    </p>
+  )
+}
+
 // ─── Services editor ───────────────────────────────────────────────────────
-function ServicesEditor({ business, onChange }: { business: BusinessData; onChange: (b: BusinessData) => void }) {
+function ServicesEditor({ business, onChange, isGym }: { business: BusinessData; onChange: (b: BusinessData) => void; isGym?: boolean }) {
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({})
   const services = business.services ?? []
 
@@ -212,7 +228,7 @@ function ServicesEditor({ business, onChange }: { business: BusinessData; onChan
         onClick={add}
         className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-2 border-dashed border-border text-sm font-medium text-muted-foreground hover:border-primary/40 hover:text-primary transition"
       >
-        <Plus className="w-4 h-4" /> Add Service
+        <Plus className="w-4 h-4" /> {isGym ? "Add Plan" : "Add Service"}
       </button>
     </div>
   )

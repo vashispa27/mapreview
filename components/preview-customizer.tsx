@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { BusinessData, SiteConfig } from "@/lib/mock-data"
+import { compressImageToBlob } from "@/lib/compress-image"
 import { CustomizationOptions } from "./customization-options"
 import { PageManager } from "./page-manager"
 import { Button } from "@/components/ui/button"
@@ -26,7 +27,15 @@ import {
   QrCode,
   Download,
   Phone,
+  ChevronDown,
 } from "lucide-react"
+
+const BUSINESS_TYPES = [
+  { id: "generic", label: "General Business", isGym: false },
+  { id: "gym", label: "Gym / Fitness", isGym: true },
+  { id: "salon", label: "Salon / Spa", isGym: false },
+  { id: "restaurant", label: "Restaurant / Café", isGym: false },
+]
 import { motion, AnimatePresence } from "framer-motion"
 
 interface PreviewCustomizerProps {
@@ -57,6 +66,7 @@ export function PreviewCustomizer({
   const [widgetsOpen, setWidgetsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<"design" | "pages">("design")
   const [qrOpen, setQrOpen] = useState(false)
+  const [isUploadingMenu, setIsUploadingMenu] = useState(false)
   const menuFileRef = useRef<HTMLInputElement>(null)
 
   const qrUrl = siteId ? `${typeof window !== "undefined" ? window.location.origin : ""}/site/${siteId}` : null
@@ -71,14 +81,25 @@ export function PreviewCustomizer({
     onBusinessChange({ ...business, phone: val })
   }
 
-  const handleMenuUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMenuUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !onBusinessChange) return
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      onBusinessChange({ ...business, menuImage: ev.target?.result as string })
+    
+    setIsUploadingMenu(true)
+    try {
+      const { blob } = await compressImageToBlob(file, 1200, 1600, 0.85)
+      const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: "POST",
+        body: blob
+      })
+      if (!res.ok) throw new Error("Upload failed")
+      const data = await res.json()
+      onBusinessChange({ ...business, menuImage: data.url })
+    } catch (err) {
+      console.error("Menu upload failed:", err)
+    } finally {
+      setIsUploadingMenu(false)
     }
-    reader.readAsDataURL(file)
   }
 
   const handleMenuRemove = () => {
@@ -185,20 +206,46 @@ export function PreviewCustomizer({
               </p>
             </div>
 
-            {/* Business Preview */}
-            <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
-              <h3 className="font-semibold truncate">{business.name}</h3>
-              <p className="text-sm text-muted-foreground truncate">
-                {business.category}
-              </p>
-              <div className="flex items-center gap-1 mt-2">
-                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <span className="text-sm font-medium">{business.rating}</span>
-                <span className="text-sm text-muted-foreground">
-                  ({business.totalReviews} reviews)
-                </span>
+            {/* Business Type Selector */}
+            {onBusinessChange && (
+              <div className="space-y-1.5">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Business Type</p>
+                <div className="relative">
+                  <select
+                    value={business.isGym ? "gym" : "generic"}
+                    onChange={(e) => {
+                      const isGym = e.target.value === "gym"
+                      onBusinessChange({
+                        ...business,
+                        isGym,
+                        showTrainersSection: isGym,
+                        trainers: isGym && (!business.trainers || business.trainers.length === 0)
+                          ? [
+                              { id: "trainer-1", name: "Trainer Name", specialization: "Strength & Conditioning", experience: "5+ years experience", bio: "Certified personal trainer. Tap to update details.", photo: undefined },
+                              { id: "trainer-2", name: "Trainer Name", specialization: "Yoga & Flexibility", experience: "3+ years experience", bio: "Experienced yoga instructor. Tap to update details.", photo: undefined },
+                            ]
+                          : business.trainers,
+                        services: isGym && (!business.services || business.services.length === 0)
+                          ? [
+                              { id: "gym-monthly", title: "Monthly Membership", price: "₹1,499 / month", description: "Full access to gym floor, all equipment, and cardio zone.", image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80" },
+                              { id: "gym-quarterly", title: "Quarterly Plan", price: "₹3,999 / 3 months", description: "Save more with our 3-month plan. Includes group classes like yoga and Zumba.", image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80" },
+                              { id: "gym-halfyearly", title: "Half-Yearly Plan", price: "₹6,999 / 6 months", description: "Our most popular plan. Full access, all group classes, and 2 personal training sessions.", image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80" },
+                              { id: "gym-annual", title: "Annual Membership", price: "₹11,999 / year", description: "Best value. Unlimited access to everything — gym floor, all classes, and 12 PT sessions.", image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80" },
+                            ]
+                          : business.services,
+                        pages: { ...business.pages, services: true, products: isGym ? false : business.pages?.products, trainers: isGym ? true : false },
+                      })
+                    }}
+                    className="w-full appearance-none px-3 py-2.5 pr-9 rounded-xl border border-border bg-background text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition cursor-pointer"
+                  >
+                    {BUSINESS_TYPES.map((type) => (
+                      <option key={type.id} value={type.id}>{type.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Tab Bar */}
             <div className="flex rounded-xl bg-muted p-1 gap-1">
@@ -444,6 +491,8 @@ export function PreviewCustomizer({
                   </div>
                   {business.menuImage ? (
                     <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-green-100 text-green-700">Active</span>
+                  ) : isUploadingMenu ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
                   ) : null}
                 </div>
 
@@ -452,17 +501,24 @@ export function PreviewCustomizer({
                   <div className="border-t border-border px-4 pb-4 pt-3 space-y-3">
                     <div className="relative rounded-lg overflow-hidden border border-border">
                       <img src={business.menuImage} alt="Menu preview" className="w-full max-h-32 object-cover" />
+                      {isUploadingMenu && (
+                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                          <Loader2 className="w-6 h-6 animate-spin text-white" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => menuFileRef.current?.click()}
-                        className="flex-1 py-2 text-xs font-medium rounded-lg border border-border hover:bg-muted transition"
+                        onClick={() => !isUploadingMenu && menuFileRef.current?.click()}
+                        disabled={isUploadingMenu}
+                        className="flex-1 py-2 text-xs font-medium rounded-lg border border-border hover:bg-muted transition disabled:opacity-50"
                       >
                         Replace
                       </button>
                       <button
                         onClick={handleMenuRemove}
-                        className="flex-1 py-2 text-xs font-medium rounded-lg border border-destructive/40 text-destructive hover:bg-destructive/5 transition"
+                        disabled={isUploadingMenu}
+                        className="flex-1 py-2 text-xs font-medium rounded-lg border border-destructive/40 text-destructive hover:bg-destructive/5 transition disabled:opacity-50"
                       >
                         Remove
                       </button>
@@ -474,12 +530,17 @@ export function PreviewCustomizer({
                 {!business.menuImage && (
                   <div className="border-t border-border p-4">
                     <button
-                      onClick={() => menuFileRef.current?.click()}
-                      className="w-full border-2 border-dashed border-border rounded-xl py-5 flex flex-col items-center gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all"
+                      onClick={() => !isUploadingMenu && menuFileRef.current?.click()}
+                      disabled={isUploadingMenu}
+                      className="w-full border-2 border-dashed border-border rounded-xl py-5 flex flex-col items-center gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all disabled:opacity-50"
                     >
-                      <Upload className="w-5 h-5 text-muted-foreground" />
-                      <p className="text-sm font-medium">Upload menu image or PDF</p>
-                      <p className="text-xs text-muted-foreground">Tap to select a file</p>
+                      {isUploadingMenu ? (
+                        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                      ) : (
+                        <Upload className="w-5 h-5 text-muted-foreground" />
+                      )}
+                      <p className="text-sm font-medium">{isUploadingMenu ? "Uploading Menu..." : "Upload menu image or PDF"}</p>
+                      <p className="text-xs text-muted-foreground">{isUploadingMenu ? "Please wait" : "Tap to select a file"}</p>
                     </button>
                   </div>
                 )}

@@ -19,6 +19,15 @@ export interface ProductItem {
   image?: string
 }
 
+export interface TrainerItem {
+  id: string
+  name: string
+  specialization: string
+  experience?: string
+  bio?: string
+  photo?: string
+}
+
 export interface BusinessData {
   id: string
   name: string
@@ -40,9 +49,13 @@ export interface BusinessData {
     services?: boolean
     products?: boolean
     contact?: boolean
+    trainers?: boolean
   }
   services?: ServiceItem[]
   products?: ProductItem[]
+  isGym?: boolean
+  trainers?: TrainerItem[]
+  showTrainersSection?: boolean
   hours: {
     day: string
     hours: string

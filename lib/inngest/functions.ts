@@ -3,10 +3,67 @@ import { updateJob, getJob } from "@/lib/job-store"
 import { createPreview } from "@/lib/preview-store"
 import { parseScrapedData } from "@/lib/parser"
 import { generateBusinessContent } from "@/lib/ai"
-import { BusinessData } from "@/lib/mock-data"
+import { BusinessData, ServiceItem, TrainerItem } from "@/lib/mock-data"
 import { db } from "@/lib/db"
 import { sendSiteStatusEmail } from "@/lib/email"
 import sampleData from "../../sample_scraped_data.json"
+
+const GYM_KEYWORDS = ["gym", "fitness", "crossfit", "yoga", "pilates", "zumba", "martial arts", "boxing", "health club", "sports club", "aerobics", "strength", "personal trainer", "dance studio", "wellness center"]
+
+function detectGym(categories: string[]): boolean {
+  const combined = categories.join(" ").toLowerCase()
+  return GYM_KEYWORDS.some((k) => combined.includes(k))
+}
+
+const GYM_TEMPLATE_SERVICES: ServiceItem[] = [
+  {
+    id: "gym-monthly",
+    title: "Monthly Membership",
+    price: "₹1,499 / month",
+    description: "Full access to gym floor, all equipment, and cardio zone. Perfect for getting started on your fitness journey.",
+    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80",
+  },
+  {
+    id: "gym-quarterly",
+    title: "Quarterly Plan",
+    price: "₹3,999 / 3 months",
+    description: "Save more with our 3-month plan. Includes full gym access plus group classes like yoga and Zumba.",
+    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80",
+  },
+  {
+    id: "gym-halfyearly",
+    title: "Half-Yearly Plan",
+    price: "₹6,999 / 6 months",
+    description: "Our most popular plan. Full access, all group classes, and 2 complimentary personal training sessions.",
+    image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
+  },
+  {
+    id: "gym-annual",
+    title: "Annual Membership",
+    price: "₹11,999 / year",
+    description: "Best value. Unlimited access to everything — gym floor, all classes, and 12 personal training sessions included.",
+    image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80",
+  },
+]
+
+const GYM_TEMPLATE_TRAINERS: TrainerItem[] = [
+  {
+    id: "trainer-1",
+    name: "Trainer Name",
+    specialization: "Strength & Conditioning",
+    experience: "5+ years experience",
+    bio: "Certified personal trainer specializing in strength training and weight management. Tap to update details.",
+    photo: undefined,
+  },
+  {
+    id: "trainer-2",
+    name: "Trainer Name",
+    specialization: "Yoga & Flexibility",
+    experience: "3+ years experience",
+    bio: "Experienced yoga instructor focused on improving flexibility, posture, and mental wellness. Tap to update details.",
+    photo: undefined,
+  },
+]
 
 export const generateSiteJob = inngest.createFunction(
   {
@@ -124,6 +181,8 @@ export const generateSiteJob = inngest.createFunction(
     await step.run("publish-preview-site", async () => {
       try {
         console.log(`\n▶️ [${jobId}] Step 4: Mapping Business Dataset...`)
+        const isGym = detectGym(parsedData.businessInfo.categories || [])
+
         const businessData: BusinessData = {
           id: btoa(url).slice(0, 12).replace(/[^a-zA-Z0-9]/g, "x"),
           name: parsedData.businessInfo.title || "Unknown Business",
@@ -138,9 +197,12 @@ export const generateSiteJob = inngest.createFunction(
             facebook: "",
             twitter: "",
           },
-          pages: { services: true, products: true, contact: true },
-          services: [],
+          pages: { services: true, products: !isGym, contact: true, trainers: isGym },
+          services: isGym ? GYM_TEMPLATE_SERVICES : [],
           products: [],
+          isGym,
+          trainers: isGym ? GYM_TEMPLATE_TRAINERS : [],
+          showTrainersSection: isGym,
           heroImage: parsedData.photos[0] || "/placeholder.jpg",
           hours: parsedData.businessInfo.openingHours
             ? parsedData.businessInfo.openingHours.map((h: any) => ({ day: h.day, hours: h.hours }))

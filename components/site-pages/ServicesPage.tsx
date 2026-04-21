@@ -3,14 +3,14 @@
 import { useState, useRef } from "react"
 import { BusinessData, ServiceItem, ColorScheme } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
-import { Calendar, Plus, ImagePlus, Check, X, Trash2 } from "lucide-react"
-import { compressImage } from "@/lib/compress-image"
+import { Plus, ImagePlus, Check, X, Trash2, Dumbbell, Loader2, Calendar } from "lucide-react"
+import { compressImageToBlob } from "@/lib/compress-image"
 
 interface ServicesPageProps {
   business: BusinessData
   colorScheme: ColorScheme
   fontClass: string
-  onBook: (service: ServiceItem) => void
+  onBook: (svc: ServiceItem) => void
   onBusinessChange?: (b: BusinessData) => void
 }
 
@@ -22,6 +22,7 @@ export function ServicesPage({ business, colorScheme, fontClass, onBook, onBusin
   const services = business.services ?? []
   const [adding, setAdding] = useState(false)
   const [form, setForm] = useState({ ...EMPTY })
+  const [isUploading, setIsUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const set = (k: keyof typeof EMPTY, v: string) => setForm((f) => ({ ...f, [k]: v }))
@@ -29,7 +30,22 @@ export function ServicesPage({ business, colorScheme, fontClass, onBook, onBusin
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    set("image", await compressImage(file, 800, 800, 0.82))
+
+    setIsUploading(true)
+    try {
+      const { blob } = await compressImageToBlob(file, 1000, 1000, 0.82)
+      const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: "POST",
+        body: blob
+      })
+      if (!res.ok) throw new Error("Upload failed")
+      const data = await res.json()
+      set("image", data.url)
+    } catch (err) {
+      console.error("Upload failed:", err)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleSave = () => {
@@ -129,11 +145,20 @@ export function ServicesPage({ business, colorScheme, fontClass, onBook, onBusin
               <div className="rounded-2xl border-2 overflow-hidden flex flex-col" style={{ borderColor: colorScheme.primary + "40", backgroundColor: colorScheme.background }}>
                 {/* Image picker */}
                 <button
-                  onClick={() => fileRef.current?.click()}
-                  className="h-72 flex flex-col items-center justify-center gap-2 transition hover:opacity-80"
+                  onClick={() => !isUploading && fileRef.current?.click()}
+                  disabled={isUploading}
+                  className={cn(
+                    "h-80 flex flex-col items-center justify-center gap-2 transition",
+                    isUploading ? "opacity-50 cursor-not-allowed" : "hover:opacity-80 cursor-pointer"
+                  )}
                   style={{ backgroundColor: colorScheme.primary + "08" }}
                 >
-                  {form.image ? (
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="w-8 h-8 animate-spin" style={{ color: colorScheme.primary }} />
+                      <span className="text-sm font-medium" style={{ color: colorScheme.primary }}>Uploading...</span>
+                    </>
+                  ) : form.image ? (
                     <img src={form.image} alt="" className="w-full h-full object-contain" />
                   ) : (
                     <>
@@ -142,6 +167,7 @@ export function ServicesPage({ business, colorScheme, fontClass, onBook, onBusin
                     </>
                   )}
                 </button>
+
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
 
                 <div className="p-5 flex flex-col gap-3 flex-1">

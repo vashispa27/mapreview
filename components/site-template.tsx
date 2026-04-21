@@ -4,8 +4,10 @@ import { useRef, useState } from "react"
 import { BusinessData, SiteConfig, ColorScheme } from "@/lib/mock-data"
 import { Star, MapPin, Phone, Clock, Globe, Check, ChevronRight, ChevronDown, X, Instagram, Facebook, Twitter, UtensilsCrossed, ShoppingCart } from "lucide-react"
 import { ServicesPage } from "./site-pages/ServicesPage"
+import { MembershipPage } from "./site-pages/MembershipPage"
 import { ProductsPage } from "./site-pages/ProductsPage"
 import { ContactPage } from "./site-pages/ContactPage"
+import { TrainersPage } from "./site-pages/TrainersPage"
 import { CartDrawer, CartItem } from "./site-pages/CartDrawer"
 import { ServiceItem, ProductItem } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
@@ -52,7 +54,7 @@ function AnimatedDiv({
 
 // ─── Floating bottom page nav — shared by all templates ──────────────────────
 function FloatingPageNav({
-  activePage, onNavigate, pages, colorScheme, cartCount, onCartClick, isPreview,
+  activePage, onNavigate, pages, colorScheme, cartCount, onCartClick, isPreview, isGym,
 }: {
   activePage: string
   onNavigate: (page: string) => void
@@ -61,11 +63,13 @@ function FloatingPageNav({
   cartCount: number
   onCartClick: () => void
   isPreview?: boolean
+  isGym?: boolean
 }) {
   const tabs = [
     { key: "home", label: "Home" },
-    ...(pages.services ? [{ key: "services", label: "Services" }] : []),
+    ...(pages.services ? [{ key: "services", label: isGym ? "Memberships" : "Services" }] : []),
     ...(pages.products ? [{ key: "products", label: "Products" }] : []),
+    ...((pages as any).trainers ? [{ key: "trainers", label: "Our Trainers" }] : []),
     ...(pages.contact ? [{ key: "contact", label: "Contact" }] : []),
   ]
 
@@ -183,7 +187,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
   const { colorScheme, layout, fontStyle, animations } = config
   const isDark = colorScheme.id === "midnight"
 
-  type Page = "home" | "services" | "products" | "contact"
+  type Page = "home" | "services" | "products" | "contact" | "trainers"
   const [activePage, setActivePage] = useState<Page>("home")
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [cartOpen, setCartOpen] = useState(false)
@@ -249,7 +253,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
     rounded: "font-sans tracking-wide",
   }[fontStyle]
 
-  const hasPages = !!(pages.services || pages.products || pages.contact)
+  const hasPages = !!(pages.services || pages.products || pages.contact || pages.trainers)
 
   const navigate = (p: string) => {
     setActivePage(p as Page)
@@ -265,6 +269,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       cartCount={cartCount}
       onCartClick={() => setCartOpen(true)}
       isPreview={isPreview}
+      isGym={!!business.isGym}
     />
   ) : null
 
@@ -277,10 +282,15 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
     return (
       <div className={cn("min-h-screen", fontClass)} style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}>
         {activePage === "services" && pages.services && (
-          <ServicesPage business={business} colorScheme={colorScheme} fontClass={fontClass} onBook={bookService} onBusinessChange={onBusinessChange} />
+          business.isGym
+            ? <MembershipPage business={business} colorScheme={colorScheme} fontClass={fontClass} onEnquire={bookService} onBusinessChange={onBusinessChange} />
+            : <ServicesPage business={business} colorScheme={colorScheme} fontClass={fontClass} onBook={bookService} onBusinessChange={onBusinessChange} />
         )}
         {activePage === "products" && pages.products && (
           <ProductsPage business={business} colorScheme={colorScheme} fontClass={fontClass} cartItems={cartItems} onAddToCart={isPreview ? undefined : addToCart} onBusinessChange={onBusinessChange} />
+        )}
+        {activePage === "trainers" && (pages as any).trainers && (
+          <TrainersPage business={business} colorScheme={colorScheme} fontClass={fontClass} onBusinessChange={onBusinessChange} />
         )}
         {activePage === "contact" && pages.contact && (
           <ContactPage business={business} colorScheme={colorScheme} fontClass={fontClass} prefilledService={prefilledService} />

@@ -3,8 +3,8 @@
 import { useState, useRef } from "react"
 import { BusinessData, ProductItem, ColorScheme } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
-import { ShoppingBag, Plus, ImagePlus, Check, X, Trash2 } from "lucide-react"
-import { compressImage } from "@/lib/compress-image"
+import { ShoppingBag, Plus, ImagePlus, Check, X, Trash2, Loader2 } from "lucide-react"
+import { compressImageToBlob } from "@/lib/compress-image"
 
 interface ProductsPageProps {
   business: BusinessData
@@ -25,6 +25,7 @@ export function ProductsPage({ business, colorScheme, fontClass, cartItems, onAd
 
   const [adding, setAdding] = useState(false)
   const [form, setForm] = useState({ ...EMPTY })
+  const [isUploading, setIsUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const set = (k: keyof typeof EMPTY, v: string) => setForm((f) => ({ ...f, [k]: v }))
@@ -32,7 +33,27 @@ export function ProductsPage({ business, colorScheme, fontClass, cartItems, onAd
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    set("image", await compressImage(file, 800, 800, 0.82))
+    
+    setIsUploading(true)
+    try {
+      // 1. Compress
+      const { blob } = await compressImageToBlob(file, 800, 800, 0.82)
+      
+      // 2. Upload to Vercel Blob
+      const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: "POST",
+        body: blob,
+      })
+
+      if (!response.ok) throw new Error("Upload failed")
+      
+      const data = await response.json()
+      set("image", data.url)
+    } catch (err) {
+      console.error("Image upload failed:", err)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleSave = () => {
@@ -146,11 +167,20 @@ export function ProductsPage({ business, colorScheme, fontClass, cartItems, onAd
               <div className="rounded-2xl border-2 overflow-hidden flex flex-col" style={{ borderColor: colorScheme.primary + "40", backgroundColor: colorScheme.background }}>
                 {/* Image picker */}
                 <button
-                  onClick={() => fileRef.current?.click()}
-                  className="h-80 flex flex-col items-center justify-center gap-2 transition hover:opacity-80"
+                  onClick={() => !isUploading && fileRef.current?.click()}
+                  disabled={isUploading}
+                  className={cn(
+                    "h-80 flex flex-col items-center justify-center gap-2 transition",
+                    isUploading ? "opacity-50 cursor-not-allowed" : "hover:opacity-80 cursor-pointer"
+                  )}
                   style={{ backgroundColor: colorScheme.primary + "08" }}
                 >
-                  {form.image ? (
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="w-8 h-8 animate-spin" style={{ color: colorScheme.primary }} />
+                      <span className="text-sm font-medium" style={{ color: colorScheme.primary }}>Uploading...</span>
+                    </>
+                  ) : form.image ? (
                     <img src={form.image} alt="" className="w-full h-full object-contain" />
                   ) : (
                     <>
