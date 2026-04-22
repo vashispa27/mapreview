@@ -16,10 +16,10 @@ export function ShowcaseSection() {
         >
           <span className="text-primary font-semibold mb-2 block">Showcase</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">
-            Websites created with MapToSite
+            Gym websites built with MapToSite
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Real businesses, real results. See what others have built in seconds.
+            Real gyms, real results. Each one took under 60 seconds to go live.
           </p>
         </motion.div>
 

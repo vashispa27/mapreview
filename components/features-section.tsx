@@ -1,52 +1,52 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Star, Camera, Globe, Zap, ShoppingBag, Users, FileText, Receipt } from "lucide-react"
+import { Star, Zap, ShoppingBag, Users, FileText, Receipt, Bell } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { MiniMascot } from "@/components/mascot"
 
 const features = [
   {
     icon: Zap,
-    title: "Full website in 60 seconds",
-    description: "Paste your Google Maps link and your website is built automatically — real photos, reviews, services, and products. No configuration, no developer needed.",
+    title: "Gym website in 60 seconds",
+    description: "Paste your Google Maps link. We pull your real photos, reviews, and location — and build a full gym website automatically. No designer. No developer.",
     color: "text-amber-500",
     bgColor: "bg-amber-500/10",
   },
   {
-    icon: ShoppingBag,
-    title: "Ecommerce built-in",
-    description: "Sell products and services with a cart, checkout, and WhatsApp order flow. Add photos, prices, and descriptions in seconds — no page builder required.",
-    color: "text-pink-500",
-    bgColor: "bg-pink-500/10",
-  },
-  {
     icon: Users,
-    title: "Gym member management",
-    description: "Full member console — track memberships, expiry dates, billing history, and send automated renewal reminders. Built for gym owners, not spreadsheet jockeys.",
+    title: "Member management console",
+    description: "Add members, track their membership duration, view expiry dates, and renew with one click. No Excel sheets, no chasing people on WhatsApp.",
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
   },
   {
-    icon: FileText,
-    title: "Diet & workout planner",
-    description: "Create reusable workout and diet plans with sessions, exercises, sets, reps, weight, and macros. Assign to members with one click — emailed instantly.",
-    color: "text-green-500",
-    bgColor: "bg-green-500/10",
-  },
-  {
     icon: Receipt,
     title: "GST billing & invoices",
-    description: "Auto-generate GST-compliant invoices (SAC 999723, 5% rate) for every membership. Export GSTR-1 CSV and print professional invoices in one click.",
+    description: "Every membership auto-generates a GST-compliant invoice (SAC 999723, 5% rate). Print or email it. Export GSTR-1 CSV for your CA in one click.",
     color: "text-orange-500",
     bgColor: "bg-orange-500/10",
   },
   {
-    icon: Star,
-    title: "Your reviews sell for you",
-    description: "73% of customers trust a business more when they see reviews on a website. Yours are already on Google — we put them front and centre where they convert.",
+    icon: FileText,
+    title: "Diet & workout planner",
+    description: "Build workout plans once — sessions, exercises, sets, reps, weight. Build diet plans with macros and meals. Assign to any member and email it instantly.",
+    color: "text-green-500",
+    bgColor: "bg-green-500/10",
+  },
+  {
+    icon: Bell,
+    title: "Automatic renewal reminders",
+    description: "Members get email reminders 7 days and 1 day before their membership expires. You don't have to remember or chase anyone. It just happens.",
     color: "text-violet-500",
     bgColor: "bg-violet-500/10",
+  },
+  {
+    icon: ShoppingBag,
+    title: "Sell supplements & gear",
+    description: "Add products — protein, gear, apparel — with photos and prices. Members can order directly from your gym website with a WhatsApp checkout.",
+    color: "text-pink-500",
+    bgColor: "bg-pink-500/10",
   },
 ]
 
@@ -70,10 +70,10 @@ export function FeaturesSection() {
             <MiniMascot className="w-16 h-20 mx-auto" />
           </motion.div>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">
-            Not just a website — a full management platform, built in 60 seconds
+            Not just a website — everything a gym owner actually needs
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Website, ecommerce, gym member console, diet & workout planner, GST billing — all from one Google Maps link. Everything your business needs, nothing it doesn't.
+            Members, billing, workout plans, diet plans, renewal reminders, ecommerce — all from one Google Maps link. Built in 60 seconds, runs itself after that.
           </p>
         </motion.div>
 

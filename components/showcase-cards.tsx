@@ -6,34 +6,34 @@ import { Card } from "@/components/ui/card"
 
 const showcaseWebsites = [
   {
-    name: "4p's pizza",
-    rating: 4.9,
-    reviews: 850,
-    image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=250&fit=crop",
-    category: "Indian Restaurant",
-    location: "AECS Layout, Bangalore",
-    color: "from-orange-500 to-red-400",
-    href: "https://maptosite.app/site/pizza-4p-s-indiranagar"
-  },
-  {
-    name: "Shawarma cart",
-    rating: 4.7,
-    reviews: 420,
-    image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=250&fit=crop",
-    category: "Cafe",
-    location: "Bangalore, India",
-    color: "from-yellow-500 to-amber-400",
-    href: "https://maptosite.app/site/shawarmakart"
-  },
-  {
-    name: "Fitflix gym",
-    rating: 4.7,
-    reviews: 521,
+    name: "Fitness Empire",
+    rating: 4.8,
+    reviews: 320,
     image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop",
-    category: "Fitness",
-    location: "Bangalore india",
-    color: "from-blue-500 to-indigo-400",
-    href: "https://maptosite.app/site/fitflixgym"
+    category: "Gym & Fitness",
+    location: "Bengaluru, India",
+    color: "from-blue-600 to-cyan-400",
+    href: "https://maptosite.app/site/fitness-empire?published=true"
+  },
+  {
+    name: "Tiger Fitness",
+    rating: 4.9,
+    reviews: 450,
+    image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=400&h=250&fit=crop",
+    category: "Gym & Fitness",
+    location: "Bengaluru, India",
+    color: "from-orange-600 to-yellow-400",
+    href: "https://maptosite.app/site/tigerfitness?published=true"
+  },
+  {
+    name: "Dynamo Fitness",
+    rating: 4.7,
+    reviews: 405,
+    image: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400&h=250&fit=crop",
+    category: "Gym & Fitness",
+    location: "Dehradun, India",
+    color: "from-red-600 to-rose-400",
+    href: "https://maptosite.app/site/dynamo-fitness-gym?published=true"
   }
 ]
 

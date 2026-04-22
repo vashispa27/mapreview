@@ -25,7 +25,7 @@ interface SearchResult {
   url: string
 }
 
-const businessTypes = ["Live in 60 seconds", "Gym management software", "Member billing & GST invoices", "Diet & workout planner", "Ecommerce built-in", "No drag and drop. Ever.", "Restaurants & dhabas", "Zero coding required"]
+const businessTypes = ["Live in 60 seconds", "Member billing & GST invoices", "Diet & workout plans", "Expiry reminders on autopilot", "Ecommerce for supplements & gear", "Website from Google Maps", "No developers needed", "Zero drag and drop"]
 
 export function HeroSection() {
   const { data: session } = useSession()
@@ -283,9 +283,9 @@ export function HeroSection() {
                 transition={{ delay: 0.3 }}
                 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6"
               >
-                <span className="text-balance">Your business, fully managed.</span>{" "}
+                <span className="text-balance">Your gym, fully managed.</span>{" "}
                 <span className="text-primary relative">
-                  Built in 60 seconds.
+                  Live in 60 seconds.
                   <motion.svg
                     className="absolute -bottom-2 left-0 w-full"
                     viewBox="0 0 200 12"
@@ -311,8 +311,8 @@ export function HeroSection() {
                 transition={{ delay: 0.4 }}
                 className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 text-pretty"
               >
-                Paste your Google Maps link and we build your website, ecommerce store, gym member console, diet & workout planner, and GST billing system — all in one.{" "}
-                <span className="text-foreground font-medium">No developers. No drag and drop. Just 60 seconds.</span>
+                Paste your gym's Google Maps link. We instantly build your website, member management console, GST billing, and diet & workout planner.{" "}
+                <span className="text-foreground font-medium">Everything a gym needs — no developers, no hassle.</span>
               </motion.p>
 
               {/* URL Input Area */}

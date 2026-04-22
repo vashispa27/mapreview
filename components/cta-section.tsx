@@ -57,11 +57,11 @@ export function CTASection() {
           </motion.div>
 
           <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6 text-balance">
-            Your full website — products, services &amp; prices — live in 60 seconds.
+            Your gym website, member console &amp; billing — live in 60 seconds.
           </h2>
 
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
-            No drag and drop. No page builder. No developer. Paste your Google Maps link, add what you sell, and you&apos;re live with a real business website — right now.
+            Paste your gym's Google Maps link. We build your website, set up your member management console, and configure GST billing — all automatically. No developer, no setup call, no waiting.
           </p>
 
           {/* CTA Form */}
@@ -100,7 +100,7 @@ export function CTASection() {
             transition={{ delay: 0.4 }}
             className="mt-6 text-sm text-muted-foreground"
           >
-            Under 60 seconds • No drag and drop • Products &amp; services included
+            Under 60 seconds • Members + billing + website • No developers needed
           </motion.p>
         </motion.div>
       </div>
