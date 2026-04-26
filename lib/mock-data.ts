@@ -78,7 +78,7 @@ export interface BusinessData {
 
 export interface SiteConfig {
   colorScheme: ColorScheme
-  layout: "modern" | "classic" | "minimal" | "luxury" | "bold" | "executive"
+  layout: "modern" | "classic" | "minimal" | "luxury" | "bold" | "executive" | "neon" | "sport" | "editorial" | "dark-power" | "sunrise"
   fontStyle: "sans" | "serif" | "rounded"
   animations: boolean
 }
@@ -124,6 +124,41 @@ export const layoutOptions = [
     name: "Executive",
     description: "Split-screen, corporate clean",
     icon: "briefcase",
+    isPro: true,
+  },
+  {
+    id: "neon" as const,
+    name: "Neon",
+    description: "Electric glow, dark gym energy",
+    icon: "zap",
+    isPro: true,
+  },
+  {
+    id: "sport" as const,
+    name: "Sport",
+    description: "Diagonal cuts, high-octane",
+    icon: "activity",
+    isPro: true,
+  },
+  {
+    id: "editorial" as const,
+    name: "Editorial",
+    description: "Magazine-style, large type",
+    icon: "newspaper",
+    isPro: true,
+  },
+  {
+    id: "dark-power" as const,
+    name: "Dark Power",
+    description: "Raw concrete, heavyweight feel",
+    icon: "dumbbell",
+    isPro: true,
+  },
+  {
+    id: "sunrise" as const,
+    name: "Sunrise",
+    description: "Warm gradient, welcoming energy",
+    icon: "sun",
     isPro: true,
   },
 ]

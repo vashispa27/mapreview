@@ -357,6 +357,41 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {cartDrawer}
     </>
   )
+  if (layout === "neon") return (
+    <>
+      <NeonTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      {floatingNav}
+      {cartDrawer}
+    </>
+  )
+  if (layout === "sport") return (
+    <>
+      <SportTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      {floatingNav}
+      {cartDrawer}
+    </>
+  )
+  if (layout === "editorial") return (
+    <>
+      <EditorialTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      {floatingNav}
+      {cartDrawer}
+    </>
+  )
+  if (layout === "dark-power") return (
+    <>
+      <DarkPowerTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      {floatingNav}
+      {cartDrawer}
+    </>
+  )
+  if (layout === "sunrise") return (
+    <>
+      <SunriseTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      {floatingNav}
+      {cartDrawer}
+    </>
+  )
 
   // Layout-specific styles
   const layoutStyles = {
@@ -1868,6 +1903,1045 @@ function ExecutiveTemplate({ business, config, isPreview = false, onBusinessChan
             </div>
           )}
         </div>
+      </footer>
+      <MenuFloater business={business} colorScheme={colorScheme} />
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// TEMPLATE: NEON
+// Pitch-black background, electric glowing accents, gym-rave energy.
+// ─────────────────────────────────────────────
+function NeonTemplate({ business, config, isPreview = false, onBusinessChange }: SiteTemplateProps) {
+  const { colorScheme, fontStyle, animations } = config
+  const fontClass = { sans: "font-sans", serif: "font-serif", rounded: "font-sans tracking-wide" }[fontStyle]
+  const fadeIn = animations ? { initial: { opacity: 0, y: 28 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-60px" as any }, transition: { duration: 0.55 } } : {}
+
+  const handleUpdateDescription = (val: string) => { if (onBusinessChange) onBusinessChange({ ...business, description: val }) }
+  const handleUpdateFeature = (i: number, val: string) => {
+    if (onBusinessChange) { const f = [...business.features]; f[i] = val; onBusinessChange({ ...business, features: f }) }
+  }
+  const handleUpdatePhotos = (p: any[]) => { if (onBusinessChange) onBusinessChange({ ...business, photos: p }) }
+  const handleRemovePhoto = (i: number) => { if (onBusinessChange) onBusinessChange({ ...business, photos: business.photos.filter((_, idx) => idx !== i) }) }
+
+  const glow = `0 0 20px ${colorScheme.primary}88, 0 0 60px ${colorScheme.primary}33`
+
+  return (
+    <div className={cn("min-h-screen", fontClass)} style={{ backgroundColor: "#080808", color: "#f0f0f0" }}>
+
+      {/* HERO */}
+      <header className="relative h-screen min-h-[620px] overflow-hidden">
+        {isPreview && onBusinessChange && (
+          <div className="absolute top-6 right-6 z-20">
+            <HeroBackgroundModal currentHero={business.heroImage || business.photos[0]?.url || ""} photos={business.photos} availablePhotos={business.availablePhotos} onChange={(url) => onBusinessChange({ ...business, heroImage: url })} />
+          </div>
+        )}
+        <img src={business.heroImage || business.photos[0]?.url || "/placeholder.jpg"} alt={business.name}
+          className="absolute inset-0 w-full h-full object-cover opacity-30" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, #080808 0%, transparent 30%, transparent 60%, #080808 100%)" }} />
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.5) 2px, rgba(255,255,255,0.5) 4px)" }} />
+
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+          <AnimatedDiv animate={animations} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7 }}>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs tracking-[0.3em] uppercase font-bold mb-8"
+              style={{ borderColor: colorScheme.primary, color: colorScheme.primary, boxShadow: glow }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: colorScheme.primary }} />
+              {business.category}
+            </div>
+            <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none text-white mb-6"
+              style={{ textShadow: glow }}>
+              {business.name}
+            </h1>
+            <div className="flex items-center justify-center gap-3 text-sm text-white/50">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-4 h-4" fill={i < Math.floor(business.rating) ? colorScheme.primary : "transparent"} stroke={i < Math.floor(business.rating) ? colorScheme.primary : "#555"} />
+              ))}
+              <span className="font-bold text-white/80">{business.rating}</span>
+              <span>·</span>
+              <span>{business.totalReviews} reviews</span>
+            </div>
+          </AnimatedDiv>
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${colorScheme.primary}, transparent)`, boxShadow: glow }} />
+      </header>
+
+      {/* STICKY BAR */}
+      <div className="sticky top-0 z-10 border-b" style={{ backgroundColor: "#080808ee", borderColor: colorScheme.primary + "40", backdropFilter: "blur(12px)" }}>
+        <div className="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-5">
+            <a href={`tel:${business.phone}`} className="flex items-center gap-2 text-sm font-bold tracking-wider transition-all hover:opacity-80" style={{ color: colorScheme.primary }}>
+              <Phone className="w-3.5 h-3.5" />{business.phone}
+            </a>
+            <div className="hidden sm:flex items-center gap-2 text-sm text-white/40">
+              <MapPin className="w-3.5 h-3.5" />{business.address}
+            </div>
+          </div>
+          <a href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`} target="_blank" rel="noopener noreferrer"
+            className="px-5 py-1.5 text-xs font-bold tracking-[0.15em] uppercase rounded-full border transition-all hover:bg-primary/10"
+            style={{ borderColor: colorScheme.primary, color: colorScheme.primary, boxShadow: `0 0 12px ${colorScheme.primary}44` }}>
+            Directions
+          </a>
+        </div>
+      </div>
+
+      <main className="max-w-6xl mx-auto px-4 py-20 space-y-28">
+
+        {/* ABOUT */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="grid lg:grid-cols-5 gap-12 items-center">
+            <div className="lg:col-span-3">
+              <p className="text-xs tracking-[0.3em] uppercase font-bold mb-4" style={{ color: colorScheme.primary }}>About Us</p>
+              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-white mb-6 leading-none">Who We Are</h2>
+              <InlineTextArea value={business.description} onChange={handleUpdateDescription} disabled={!isPreview || !onBusinessChange}
+                className="text-base leading-relaxed text-white/60" />
+            </div>
+            <div className="lg:col-span-2 grid grid-cols-2 gap-4">
+              {[
+                { label: "Rating", value: `${business.rating}/5` },
+                { label: "Reviews", value: `${business.totalReviews}+` },
+                { label: "Years", value: "5+" },
+                { label: "Members", value: "500+" },
+              ].map((stat) => (
+                <div key={stat.label} className="p-5 rounded-2xl border text-center" style={{ backgroundColor: "#111", borderColor: colorScheme.primary + "30", boxShadow: `inset 0 0 30px ${colorScheme.primary}08` }}>
+                  <p className="text-3xl font-black text-white mb-1" style={{ textShadow: `0 0 10px ${colorScheme.primary}88` }}>{stat.value}</p>
+                  <p className="text-xs tracking-widest uppercase text-white/40">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </AnimatedDiv>
+
+        {/* FEATURES */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <p className="text-xs tracking-[0.3em] uppercase font-bold mb-3" style={{ color: colorScheme.primary }}>What We Offer</p>
+          <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-white mb-10">Our Facilities</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...(business.features || []), "Edit Feature...", "Edit Feature...", "Edit Feature...", "Edit Feature..."].slice(0, 4).map((f, i) => (
+              <div key={i} className="p-6 rounded-2xl border group relative overflow-hidden" style={{ backgroundColor: "#0e0e0e", borderColor: colorScheme.primary + "25" }}>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle at 50% 0%, ${colorScheme.primary}15 0%, transparent 70%)` }} />
+                <div className="w-10 h-10 rounded-xl mb-4 flex items-center justify-center" style={{ backgroundColor: colorScheme.primary + "20", boxShadow: `0 0 15px ${colorScheme.primary}30` }}>
+                  <Check className="w-5 h-5" style={{ color: colorScheme.primary }} />
+                </div>
+                <InlineTextArea value={f} rows={3} onChange={(v) => handleUpdateFeature(i, v)} disabled={!isPreview || !onBusinessChange}
+                  className="text-sm font-semibold text-white/80 leading-relaxed" />
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* GALLERY */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <p className="text-xs tracking-[0.3em] uppercase font-bold mb-2" style={{ color: colorScheme.primary }}>Visual</p>
+              <h2 className="text-3xl font-black uppercase text-white">Gallery</h2>
+            </div>
+            {isPreview && onBusinessChange && <PhotoManagerModal photos={business.photos} availablePhotos={business.availablePhotos} onChange={handleUpdatePhotos} />}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {business.photos.slice(0, 8).map((photo, i) => (
+              <div key={i} className="relative aspect-square rounded-xl overflow-hidden group" style={{ border: `1px solid ${colorScheme.primary}20` }}>
+                <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(to top, ${colorScheme.primary}60, transparent)` }} />
+                {isPreview && onBusinessChange && (
+                  <button onClick={() => handleRemovePhoto(i)} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive z-20">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* REVIEWS */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <p className="text-xs tracking-[0.3em] uppercase font-bold mb-3" style={{ color: colorScheme.primary }}>Testimonials</p>
+          <h2 className="text-3xl font-black uppercase text-white mb-10">What They Say</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {business.reviews.slice(0, 6).map((review, i) => (
+              <div key={i} className="p-6 rounded-2xl border relative overflow-hidden" style={{ backgroundColor: "#0e0e0e", borderColor: colorScheme.primary + "20" }}>
+                <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${colorScheme.primary}60, transparent)` }} />
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5" fill={j < review.rating ? colorScheme.primary : "transparent"} stroke={j < review.rating ? colorScheme.primary : "#333"} />)}
+                </div>
+                <p className="text-sm text-white/55 leading-[1.8] mb-5">"{review.text}"</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-bold text-white/80">{review.author}</p>
+                  <p className="text-xs text-white/30">{review.date}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* HOURS */}
+        <AnimatedDiv animate={animations} {...fadeIn} className="max-w-xl mx-auto">
+          <p className="text-xs tracking-[0.3em] uppercase font-bold mb-3 text-center" style={{ color: colorScheme.primary }}>Schedule</p>
+          <h2 className="text-3xl font-black uppercase text-white mb-8 text-center">Opening Hours</h2>
+          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: colorScheme.primary + "30", backgroundColor: "#0e0e0e" }}>
+            {business.hours.map((item, i) => (
+              <div key={item.day} className={cn("flex justify-between items-center px-6 py-4", i !== business.hours.length - 1 && "border-b")} style={{ borderColor: "#1a1a1a" }}>
+                <span className="text-sm font-bold text-white/70 uppercase tracking-wider">{item.day}</span>
+                <span className="text-sm font-semibold" style={{ color: colorScheme.primary }}>{item.hours}</span>
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* CTA */}
+        <AnimatedDiv animate={animations} {...fadeIn} className="relative rounded-3xl overflow-hidden px-8 md:px-16 py-16 text-center border" style={{ backgroundColor: "#0a0a0a", borderColor: colorScheme.primary + "40" }}>
+          <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at center top, ${colorScheme.primary}18 0%, transparent 65%)` }} />
+          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${colorScheme.primary}, transparent)`, boxShadow: glow }} />
+          <div className="relative z-10">
+            <h2 className="text-3xl md:text-5xl font-black uppercase text-white mb-4 tracking-tight" style={{ textShadow: `0 0 30px ${colorScheme.primary}66` }}>Join The Grind</h2>
+            <p className="text-white/50 mb-10 max-w-lg mx-auto">Ready to start your fitness journey? Walk in or call us now.</p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <a href={`tel:${business.phone}`} className="px-8 py-3.5 rounded-full font-bold text-sm uppercase tracking-wider text-black transition-all hover:opacity-90"
+                style={{ backgroundColor: colorScheme.primary, boxShadow: glow }}>
+                <Phone className="inline-block w-4 h-4 mr-2 -mt-0.5" />Call Now
+              </a>
+              <a href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`} target="_blank" rel="noopener noreferrer"
+                className="px-8 py-3.5 rounded-full font-bold text-sm uppercase tracking-wider border-2 text-white transition-all hover:bg-white/5"
+                style={{ borderColor: colorScheme.primary + "60" }}>
+                <MapPin className="inline-block w-4 h-4 mr-2 -mt-0.5" />Directions
+              </a>
+            </div>
+          </div>
+        </AnimatedDiv>
+      </main>
+
+      <footer className="border-t py-10 text-center" style={{ borderColor: colorScheme.primary + "20", backgroundColor: "#060606" }}>
+        <p className="font-bold text-white mb-1">{business.name}</p>
+        <p className="text-sm text-white/30">{business.address}</p>
+        {business.website && <a href={business.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-2 text-sm hover:underline" style={{ color: colorScheme.primary }}><Globe className="w-3.5 h-3.5" />{business.website.replace(/^https?:\/\//, "")}</a>}
+        {business.socials && (
+          <div className="flex items-center justify-center gap-5 mt-4">
+            {business.socials.instagram && <a href={business.socials.instagram} target="_blank" rel="noopener noreferrer" className="hover:opacity-75 transition-opacity" style={{ color: colorScheme.primary }}><Instagram className="w-4 h-4" /></a>}
+            {business.socials.facebook && <a href={business.socials.facebook} target="_blank" rel="noopener noreferrer" className="hover:opacity-75 transition-opacity" style={{ color: colorScheme.primary }}><Facebook className="w-4 h-4" /></a>}
+          </div>
+        )}
+        {!isPreview && <p className="mt-6 text-xs text-white/20">Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
+      </footer>
+      <MenuFloater business={business} colorScheme={colorScheme} />
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// TEMPLATE: SPORT
+// Diagonal clip-path hero, bold stats bar, aggressive energy.
+// ─────────────────────────────────────────────
+function SportTemplate({ business, config, isPreview = false, onBusinessChange }: SiteTemplateProps) {
+  const { colorScheme, fontStyle, animations } = config
+  const fontClass = { sans: "font-sans", serif: "font-serif", rounded: "font-sans tracking-wide" }[fontStyle]
+  const fadeIn = animations ? { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-60px" as any }, transition: { duration: 0.5 } } : {}
+  const isDark = colorScheme.id === "midnight"
+  const bg = isDark ? "#111" : "#f5f5f7"
+  const cardBg = isDark ? "#1a1a1e" : "#ffffff"
+  const border = isDark ? "#2a2a30" : "#e0e0e6"
+  const muted = isDark ? "#888" : "#666"
+  const textColor = isDark ? "#f0f0f0" : "#111"
+
+  const handleUpdateDescription = (val: string) => { if (onBusinessChange) onBusinessChange({ ...business, description: val }) }
+  const handleUpdateFeature = (i: number, val: string) => {
+    if (onBusinessChange) { const f = [...business.features]; f[i] = val; onBusinessChange({ ...business, features: f }) }
+  }
+  const handleUpdatePhotos = (p: any[]) => { if (onBusinessChange) onBusinessChange({ ...business, photos: p }) }
+  const handleRemovePhoto = (i: number) => { if (onBusinessChange) onBusinessChange({ ...business, photos: business.photos.filter((_, idx) => idx !== i) }) }
+
+  return (
+    <div className={cn("min-h-screen", fontClass)} style={{ backgroundColor: bg, color: textColor }}>
+
+      {/* HERO */}
+      <header className="relative overflow-hidden" style={{ height: "100vh", minHeight: 580 }}>
+        {isPreview && onBusinessChange && (
+          <div className="absolute top-6 right-6 z-20">
+            <HeroBackgroundModal currentHero={business.heroImage || business.photos[0]?.url || ""} photos={business.photos} availablePhotos={business.availablePhotos} onChange={(url) => onBusinessChange({ ...business, heroImage: url })} />
+          </div>
+        )}
+        <img src={business.heroImage || business.photos[0]?.url || "/placeholder.jpg"} alt={business.name}
+          className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/55" />
+        <div className="absolute bottom-0 left-0 right-0 h-40 origin-bottom-left" style={{ backgroundColor: colorScheme.primary, clipPath: "polygon(0 100%, 100% 40%, 100% 100%)" }} />
+        <div className="absolute bottom-0 left-0 right-0 h-40 opacity-30 origin-bottom-left" style={{ backgroundColor: bg, clipPath: "polygon(0 100%, 100% 55%, 100% 100%)" }} />
+
+        <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 pb-24">
+          <AnimatedDiv animate={animations} initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
+            <span className="inline-block px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-white mb-5" style={{ backgroundColor: colorScheme.primary }}>
+              {business.category}
+            </span>
+            <h1 className="text-5xl md:text-8xl font-black uppercase text-white leading-none tracking-tighter mb-4">
+              {business.name}
+            </h1>
+            <div className="flex flex-wrap items-center gap-4 text-white/70 text-sm">
+              <div className="flex items-center gap-1.5">
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4" fill={i < Math.floor(business.rating) ? "#fbbf24" : "transparent"} stroke={i < Math.floor(business.rating) ? "#fbbf24" : "rgba(255,255,255,0.4)"} />)}
+                <span className="text-white font-bold ml-1">{business.rating}</span>
+              </div>
+              <span className="opacity-40">|</span>
+              <span>{business.totalReviews} reviews</span>
+            </div>
+          </AnimatedDiv>
+        </div>
+      </header>
+
+      {/* STATS BAR */}
+      <div style={{ backgroundColor: colorScheme.primary }}>
+        <div className="max-w-6xl mx-auto px-4 py-4 grid grid-cols-3 divide-x divide-white/20">
+          {[
+            { icon: Phone, label: "Call Us", value: business.phone, href: `tel:${business.phone}` },
+            { icon: Star, label: "Rating", value: `${business.rating} Stars` },
+            { icon: MapPin, label: "Find Us", value: "Get Directions", href: `https://maps.google.com/?q=${encodeURIComponent(business.address)}` },
+          ].map(({ icon: Icon, label, value, href }) => (
+            <div key={label} className="px-4 text-center">
+              {href ? (
+                <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className="group">
+                  <Icon className="w-4 h-4 text-white/70 mx-auto mb-1" />
+                  <p className="text-[10px] uppercase tracking-widest text-white/60 font-bold">{label}</p>
+                  <p className="text-sm font-black text-white truncate group-hover:underline">{value}</p>
+                </a>
+              ) : (
+                <>
+                  <Icon className="w-4 h-4 text-white/70 mx-auto mb-1" />
+                  <p className="text-[10px] uppercase tracking-widest text-white/60 font-bold">{label}</p>
+                  <p className="text-sm font-black text-white">{value}</p>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <main className="max-w-6xl mx-auto px-4 py-16 space-y-20">
+
+        {/* ABOUT */}
+        <AnimatedDiv animate={animations} {...fadeIn} className="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-1.5 rounded-full" style={{ backgroundColor: colorScheme.primary }} />
+              <span className="text-xs font-black uppercase tracking-[0.25em]" style={{ color: colorScheme.primary }}>About</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black uppercase leading-tight mb-5">Who We Are</h2>
+            <InlineTextArea value={business.description} onChange={handleUpdateDescription} disabled={!isPreview || !onBusinessChange}
+              className="text-base leading-[1.8]" style={{ color: muted }} />
+          </div>
+          {business.photos[1] && (
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden" style={{ clipPath: "polygon(0 0, 100% 0, 100% 88%, 88% 100%, 0 100%)" }}>
+              <img src={business.photos[1].url} alt="" className="w-full h-full object-cover" />
+              <div className="absolute bottom-4 right-6 flex items-center gap-2 bg-black/60 backdrop-blur px-4 py-2 rounded-full">
+                <Star className="w-4 h-4" fill={colorScheme.primary} stroke={colorScheme.primary} />
+                <span className="text-white font-bold text-sm">{business.rating}</span>
+              </div>
+            </div>
+          )}
+        </AnimatedDiv>
+
+        {/* FEATURES */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-1.5 rounded-full" style={{ backgroundColor: colorScheme.primary }} />
+            <h2 className="text-2xl font-black uppercase">Our Facilities</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...(business.features || []), "Edit Feature...", "Edit Feature...", "Edit Feature...", "Edit Feature..."].slice(0, 4).map((f, i) => (
+              <div key={i} className="p-6 rounded-xl relative" style={{ backgroundColor: cardBg, border: `1px solid ${border}`, borderLeft: `4px solid ${colorScheme.primary}` }}>
+                <span className="text-4xl font-black text-right block mb-3 opacity-10" style={{ color: colorScheme.primary }}>0{i + 1}</span>
+                <InlineTextArea value={f} rows={3} onChange={(v) => handleUpdateFeature(i, v)} disabled={!isPreview || !onBusinessChange}
+                  className="text-sm font-semibold leading-relaxed" style={{ color: textColor }} />
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* GALLERY */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-1.5 rounded-full" style={{ backgroundColor: colorScheme.primary }} />
+              <h2 className="text-2xl font-black uppercase">Gallery</h2>
+            </div>
+            {isPreview && onBusinessChange && <PhotoManagerModal photos={business.photos} availablePhotos={business.availablePhotos} onChange={handleUpdatePhotos} />}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {business.photos.slice(0, 6).map((photo, i) => (
+              <div key={i} className={cn("relative overflow-hidden rounded-xl group", i === 0 ? "row-span-2 aspect-[3/4]" : "aspect-square")} style={{ border: `1px solid ${border}` }}>
+                <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
+                {isPreview && onBusinessChange && (
+                  <button onClick={() => handleRemovePhoto(i)} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive z-20">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* REVIEWS */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-1.5 rounded-full" style={{ backgroundColor: colorScheme.primary }} />
+            <h2 className="text-2xl font-black uppercase">Reviews</h2>
+            <div className="ml-auto flex items-center gap-2">
+              <Star className="w-5 h-5" fill="#fbbf24" stroke="#fbbf24" />
+              <span className="text-xl font-black">{business.rating}</span>
+              <span style={{ color: muted }}>({business.totalReviews})</span>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {business.reviews.slice(0, 6).map((review, i) => (
+              <div key={i} className="p-6 rounded-xl" style={{ backgroundColor: cardBg, border: `1px solid ${border}` }}>
+                <div className="flex gap-1 mb-3">
+                  {[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5" fill={j < review.rating ? "#fbbf24" : "transparent"} stroke={j < review.rating ? "#fbbf24" : "#d1d5db"} />)}
+                </div>
+                <p className="text-sm leading-[1.8] mb-4" style={{ color: muted }}>"{review.text}"</p>
+                <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: border }}>
+                  <span className="font-bold text-sm">{review.author}</span>
+                  <span className="text-xs" style={{ color: muted }}>{review.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* HOURS */}
+        <AnimatedDiv animate={animations} {...fadeIn} className="grid md:grid-cols-2 gap-8 items-start">
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-1.5 rounded-full" style={{ backgroundColor: colorScheme.primary }} />
+              <h2 className="text-2xl font-black uppercase">Hours</h2>
+            </div>
+            <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${border}` }}>
+              {business.hours.map((item, i) => (
+                <div key={item.day} className={cn("flex justify-between items-center px-5 py-3.5", i !== business.hours.length - 1 && "border-b")} style={{ backgroundColor: cardBg, borderColor: border }}>
+                  <span className="font-bold text-sm uppercase tracking-wide">{item.day}</span>
+                  <span className="text-sm font-semibold" style={{ color: colorScheme.primary }}>{item.hours}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="p-8 rounded-xl text-white" style={{ backgroundColor: colorScheme.primary, clipPath: "polygon(0 0, 100% 0, 100% 88%, 92% 100%, 0 100%)" }}>
+            <h3 className="text-xl font-black uppercase mb-3">Ready to Start?</h3>
+            <p className="text-white/80 mb-6 text-sm">Walk in or call us. No appointment needed.</p>
+            <a href={`tel:${business.phone}`} className="inline-flex items-center gap-2 px-6 py-3 bg-white rounded-xl font-black text-sm uppercase tracking-wide transition hover:opacity-90"
+              style={{ color: colorScheme.primary }}>
+              <Phone className="w-4 h-4" />Call Now
+            </a>
+          </div>
+        </AnimatedDiv>
+      </main>
+
+      <footer className="border-t py-10" style={{ borderColor: border, backgroundColor: bg }}>
+        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="font-black text-lg uppercase">{business.name}</p>
+            <p className="text-sm" style={{ color: muted }}>{business.address}</p>
+          </div>
+          <div className="flex items-center gap-5">
+            {business.socials?.instagram && <a href={business.socials.instagram} target="_blank" rel="noopener noreferrer" style={{ color: colorScheme.primary }}><Instagram className="w-5 h-5" /></a>}
+            {business.socials?.facebook && <a href={business.socials.facebook} target="_blank" rel="noopener noreferrer" style={{ color: colorScheme.primary }}><Facebook className="w-5 h-5" /></a>}
+          </div>
+        </div>
+        {!isPreview && <p className="text-center text-xs mt-6" style={{ color: muted }}>Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
+      </footer>
+      <MenuFloater business={business} colorScheme={colorScheme} />
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// TEMPLATE: EDITORIAL
+// Magazine-style. Large bold type, asymmetric layout, pull-quotes.
+// ─────────────────────────────────────────────
+function EditorialTemplate({ business, config, isPreview = false, onBusinessChange }: SiteTemplateProps) {
+  const { colorScheme, fontStyle, animations } = config
+  const fontClass = { sans: "font-sans", serif: "font-serif", rounded: "font-sans tracking-wide" }[fontStyle]
+  const fadeIn = animations ? { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-60px" as any }, transition: { duration: 0.6 } } : {}
+  const isDark = colorScheme.id === "midnight"
+  const bg = isDark ? "#0f0f11" : "#fafaf8"
+  const cardBg = isDark ? "#17171a" : "#ffffff"
+  const border = isDark ? "#252528" : "#e8e8e4"
+  const muted = isDark ? "#888" : "#777"
+  const textColor = isDark ? "#f0f0ee" : "#111"
+
+  const handleUpdateDescription = (val: string) => { if (onBusinessChange) onBusinessChange({ ...business, description: val }) }
+  const handleUpdateFeature = (i: number, val: string) => {
+    if (onBusinessChange) { const f = [...business.features]; f[i] = val; onBusinessChange({ ...business, features: f }) }
+  }
+  const handleUpdatePhotos = (p: any[]) => { if (onBusinessChange) onBusinessChange({ ...business, photos: p }) }
+  const handleRemovePhoto = (i: number) => { if (onBusinessChange) onBusinessChange({ ...business, photos: business.photos.filter((_, idx) => idx !== i) }) }
+
+  return (
+    <div className={cn("min-h-screen", fontClass)} style={{ backgroundColor: bg, color: textColor }}>
+
+      {/* HERO — full bleed, text overlay left */}
+      <header className="relative h-[90vh] min-h-[560px] overflow-hidden">
+        {isPreview && onBusinessChange && (
+          <div className="absolute top-6 right-6 z-20">
+            <HeroBackgroundModal currentHero={business.heroImage || business.photos[0]?.url || ""} photos={business.photos} availablePhotos={business.availablePhotos} onChange={(url) => onBusinessChange({ ...business, heroImage: url })} />
+          </div>
+        )}
+        <img src={business.heroImage || business.photos[0]?.url || "/placeholder.jpg"} alt={business.name}
+          className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/10" />
+
+        <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-16 max-w-3xl">
+          <AnimatedDiv animate={animations} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="h-px w-12" style={{ backgroundColor: colorScheme.primary }} />
+              <span className="text-xs tracking-[0.3em] uppercase font-semibold text-white/60">{business.category}</span>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-black text-white leading-[0.95] tracking-tight mb-6">
+              {business.name}
+            </h1>
+            <div className="flex items-center gap-3 text-sm text-white/60">
+              <div className="flex gap-1">
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5" fill={i < Math.floor(business.rating) ? colorScheme.primary : "transparent"} stroke={i < Math.floor(business.rating) ? colorScheme.primary : "rgba(255,255,255,0.3)"} />)}
+              </div>
+              <span className="text-white font-bold">{business.rating}</span>
+              <span>·</span>
+              <span>{business.totalReviews} reviews</span>
+            </div>
+          </AnimatedDiv>
+        </div>
+
+        <div className="absolute bottom-0 right-0 left-0 border-t border-white/10 backdrop-blur-sm bg-black/40">
+          <div className="max-w-6xl mx-auto px-8 md:px-16 py-4 flex flex-wrap items-center justify-between gap-3">
+            <a href={`tel:${business.phone}`} className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors" style={{ color: colorScheme.primary }}>
+              <Phone className="w-3.5 h-3.5" />{business.phone}
+            </a>
+            <span className="text-white/30 hidden sm:block">·</span>
+            <div className="hidden sm:flex items-center gap-2 text-sm text-white/50">
+              <MapPin className="w-3.5 h-3.5" />{business.address}
+            </div>
+            <a href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`} target="_blank" rel="noopener noreferrer"
+              className="text-xs font-semibold uppercase tracking-wider border-b-2 text-white transition-colors hover:opacity-70"
+              style={{ borderColor: colorScheme.primary }}>
+              Get Directions →
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-4 md:px-8 py-16 space-y-24">
+
+        {/* ABOUT */}
+        <AnimatedDiv animate={animations} {...fadeIn} className="grid lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-7">
+            <h2 className="text-4xl md:text-5xl font-black leading-tight tracking-tight mb-8">
+              About<br /><span style={{ color: colorScheme.primary }}>{business.name}</span>
+            </h2>
+            <InlineTextArea value={business.description} onChange={handleUpdateDescription} disabled={!isPreview || !onBusinessChange}
+              className="text-lg leading-[1.85]" style={{ color: muted }} />
+          </div>
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            <blockquote className="border-l-4 pl-6 py-2" style={{ borderColor: colorScheme.primary }}>
+              <p className="text-xl md:text-2xl font-bold leading-snug italic" style={{ color: textColor }}>
+                "Rated {business.rating}/5 by {business.totalReviews}+ members"
+              </p>
+            </blockquote>
+            {business.photos[2] && (
+              <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
+                <img src={business.photos[2].url} alt="" className="w-full h-full object-cover" />
+              </div>
+            )}
+          </div>
+        </AnimatedDiv>
+
+        {/* FEATURES */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="border-t-4 pt-8 mb-10" style={{ borderColor: textColor }}>
+            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">What We Offer</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-6">
+            {[...(business.features || []), "Edit Feature...", "Edit Feature...", "Edit Feature...", "Edit Feature..."].slice(0, 4).map((f, i) => (
+              <div key={i} className="flex gap-6 items-start p-6 rounded-2xl" style={{ backgroundColor: cardBg, border: `1px solid ${border}` }}>
+                <span className="text-5xl font-black leading-none opacity-15 flex-shrink-0" style={{ color: colorScheme.primary }}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="flex-1 pt-1">
+                  <InlineTextArea value={f} rows={3} onChange={(v) => handleUpdateFeature(i, v)} disabled={!isPreview || !onBusinessChange}
+                    className="text-sm font-semibold leading-[1.7]" style={{ color: textColor }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* GALLERY */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="border-t-4 pt-8 mb-8 flex items-center justify-between" style={{ borderColor: textColor }}>
+            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">Gallery</h2>
+            {isPreview && onBusinessChange && <PhotoManagerModal photos={business.photos} availablePhotos={business.availablePhotos} onChange={handleUpdatePhotos} />}
+          </div>
+          <div className="columns-2 md:columns-3 gap-4 space-y-4">
+            {business.photos.slice(0, 9).map((photo, i) => (
+              <div key={i} className="relative break-inside-avoid rounded-xl overflow-hidden group" style={{ border: `1px solid ${border}` }}>
+                <img src={photo.url} alt={photo.caption} className="w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                {isPreview && onBusinessChange && (
+                  <button onClick={() => handleRemovePhoto(i)} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive z-20">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* REVIEWS */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="border-t-4 pt-8 mb-10 flex items-baseline justify-between" style={{ borderColor: textColor }}>
+            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">Reviews</h2>
+            <div className="flex items-center gap-2">
+              <Star className="w-5 h-5" fill="#fbbf24" stroke="#fbbf24" />
+              <span className="text-2xl font-black">{business.rating}</span>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {business.reviews.slice(0, 4).map((review, i) => (
+              <div key={i} className={cn("p-8 rounded-2xl", i === 0 && "md:row-span-2")} style={{ backgroundColor: cardBg, border: `1px solid ${border}` }}>
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4" fill={j < review.rating ? "#fbbf24" : "transparent"} stroke={j < review.rating ? "#fbbf24" : "#d1d5db"} />)}
+                </div>
+                <p className={cn("leading-[1.9] mb-6", i === 0 ? "text-lg" : "text-sm")} style={{ color: muted }}>"{review.text}"</p>
+                <div className="pt-4 border-t flex items-center justify-between" style={{ borderColor: border }}>
+                  <span className="font-bold text-sm">{review.author}</span>
+                  <span className="text-xs" style={{ color: muted }}>{review.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* HOURS + CTA */}
+        <AnimatedDiv animate={animations} {...fadeIn} className="grid md:grid-cols-2 gap-8">
+          <div>
+            <div className="border-t-4 pt-8 mb-6" style={{ borderColor: textColor }}>
+              <h2 className="text-2xl font-black uppercase">Opening Hours</h2>
+            </div>
+            <div className="space-y-1">
+              {business.hours.map((item) => (
+                <div key={item.day} className="flex justify-between py-3 border-b" style={{ borderColor: border }}>
+                  <span className="font-semibold text-sm">{item.day}</span>
+                  <span className="text-sm" style={{ color: muted }}>{item.hours}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col justify-center p-8 rounded-2xl" style={{ backgroundColor: colorScheme.primary }}>
+            <h3 className="text-2xl font-black text-white mb-3 uppercase">Come Train With Us</h3>
+            <p className="text-white/75 mb-6 text-sm leading-relaxed">No excuses. Walk in, ask questions, start your journey.</p>
+            <div className="flex flex-col gap-3">
+              <a href={`tel:${business.phone}`} className="flex items-center justify-center gap-2 px-6 py-3 bg-white rounded-xl font-bold text-sm transition hover:opacity-90"
+                style={{ color: colorScheme.primary }}>
+                <Phone className="w-4 h-4" />Call Now
+              </a>
+              <a href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`} target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-6 py-3 border-2 border-white/40 rounded-xl font-bold text-sm text-white transition hover:bg-white/10">
+                <MapPin className="w-4 h-4" />Get Directions
+              </a>
+            </div>
+          </div>
+        </AnimatedDiv>
+      </main>
+
+      <footer className="border-t py-10" style={{ borderColor: border, backgroundColor: bg }}>
+        <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="font-black text-xl">{business.name}</p>
+          <p className="text-sm" style={{ color: muted }}>{business.address}</p>
+          <div className="flex items-center gap-4">
+            {business.socials?.instagram && <a href={business.socials.instagram} target="_blank" rel="noopener noreferrer" style={{ color: colorScheme.primary }}><Instagram className="w-4 h-4" /></a>}
+            {business.socials?.facebook && <a href={business.socials.facebook} target="_blank" rel="noopener noreferrer" style={{ color: colorScheme.primary }}><Facebook className="w-4 h-4" /></a>}
+          </div>
+        </div>
+        {!isPreview && <p className="text-center text-xs mt-6" style={{ color: muted }}>Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
+      </footer>
+      <MenuFloater business={business} colorScheme={colorScheme} />
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// TEMPLATE: DARK POWER
+// Raw industrial feel. Textured dark background, brutalist type, iron-gym aesthetic.
+// ─────────────────────────────────────────────
+function DarkPowerTemplate({ business, config, isPreview = false, onBusinessChange }: SiteTemplateProps) {
+  const { colorScheme, fontStyle, animations } = config
+  const fontClass = { sans: "font-sans", serif: "font-serif", rounded: "font-sans tracking-wide" }[fontStyle]
+  const fadeIn = animations ? { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-60px" as any }, transition: { duration: 0.5 } } : {}
+
+  const handleUpdateDescription = (val: string) => { if (onBusinessChange) onBusinessChange({ ...business, description: val }) }
+  const handleUpdateFeature = (i: number, val: string) => {
+    if (onBusinessChange) { const f = [...business.features]; f[i] = val; onBusinessChange({ ...business, features: f }) }
+  }
+  const handleUpdatePhotos = (p: any[]) => { if (onBusinessChange) onBusinessChange({ ...business, photos: p }) }
+  const handleRemovePhoto = (i: number) => { if (onBusinessChange) onBusinessChange({ ...business, photos: business.photos.filter((_, idx) => idx !== i) }) }
+
+  return (
+    <div className={cn("min-h-screen", fontClass)} style={{ backgroundColor: "#141414", color: "#e8e8e4" }}>
+
+      {/* HERO */}
+      <header className="relative h-screen min-h-[600px] overflow-hidden">
+        {isPreview && onBusinessChange && (
+          <div className="absolute top-6 right-6 z-20">
+            <HeroBackgroundModal currentHero={business.heroImage || business.photos[0]?.url || ""} photos={business.photos} availablePhotos={business.availablePhotos} onChange={(url) => onBusinessChange({ ...business, heroImage: url })} />
+          </div>
+        )}
+        <img src={business.heroImage || business.photos[0]?.url || "/placeholder.jpg"} alt={business.name}
+          className="absolute inset-0 w-full h-full object-cover opacity-40" />
+        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E\")" }} />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
+        <div className="absolute inset-y-0 left-0 w-2" style={{ backgroundColor: colorScheme.primary }} />
+
+        <div className="absolute inset-0 flex flex-col justify-center px-10 md:px-20">
+          <AnimatedDiv animate={animations} initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
+            <p className="text-xs font-black tracking-[0.4em] uppercase mb-8" style={{ color: colorScheme.primary }}>
+              // {business.category}
+            </p>
+            <h1 className="text-6xl md:text-9xl font-black uppercase text-white leading-none tracking-tighter mb-6">
+              {business.name}
+            </h1>
+            <div className="h-px w-24 mb-6" style={{ backgroundColor: colorScheme.primary }} />
+            <div className="flex flex-wrap items-center gap-4 text-sm text-white/50">
+              <div className="flex gap-1">
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5" fill={i < Math.floor(business.rating) ? colorScheme.primary : "transparent"} stroke={i < Math.floor(business.rating) ? colorScheme.primary : "#444"} />)}
+              </div>
+              <span className="font-bold text-white">{business.rating}</span>
+              <span>·</span>
+              <span>{business.totalReviews} reviews</span>
+            </div>
+          </AnimatedDiv>
+        </div>
+
+        <div className="absolute bottom-8 left-10 md:left-20">
+          <a href={`tel:${business.phone}`} className="flex items-center gap-3 text-sm font-bold tracking-wider transition-opacity hover:opacity-70" style={{ color: colorScheme.primary }}>
+            <Phone className="w-4 h-4" />{business.phone}
+          </a>
+        </div>
+      </header>
+
+      {/* NAV BAR */}
+      <div className="sticky top-0 z-10 border-b border-white/5" style={{ backgroundColor: "#0e0e0e" }}>
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-3 flex items-center justify-between gap-4">
+          <p className="font-black text-sm uppercase tracking-widest text-white/70">{business.name}</p>
+          <a href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-black transition-all hover:opacity-90"
+            style={{ backgroundColor: colorScheme.primary }}>
+            <MapPin className="w-3.5 h-3.5" />Directions
+          </a>
+        </div>
+      </div>
+
+      <main className="max-w-6xl mx-auto px-6 md:px-10 py-20 space-y-28">
+
+        {/* ABOUT */}
+        <AnimatedDiv animate={animations} {...fadeIn} className="grid lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <p className="text-xs font-black tracking-[0.4em] uppercase mb-6" style={{ color: colorScheme.primary }}>// About</p>
+            <h2 className="text-4xl md:text-5xl font-black uppercase text-white leading-tight tracking-tight mb-6">The<br />Gym</h2>
+            <InlineTextArea value={business.description} onChange={handleUpdateDescription} disabled={!isPreview || !onBusinessChange}
+              className="text-base leading-[1.85] text-white/55" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {business.photos.slice(0, 4).map((photo, i) => (
+              <div key={i} className="relative aspect-square rounded-lg overflow-hidden group" style={{ outline: `1px solid ${colorScheme.primary}20` }}>
+                <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                {isPreview && onBusinessChange && (
+                  <button onClick={() => handleRemovePhoto(i)} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive z-20">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* FEATURES */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <p className="text-xs font-black tracking-[0.4em] uppercase mb-6" style={{ color: colorScheme.primary }}>// Facilities</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px" style={{ backgroundColor: colorScheme.primary + "30" }}>
+            {[...(business.features || []), "Edit Feature...", "Edit Feature...", "Edit Feature...", "Edit Feature..."].slice(0, 4).map((f, i) => (
+              <div key={i} className="p-8 flex flex-col gap-4" style={{ backgroundColor: "#141414" }}>
+                <div className="w-8 h-0.5" style={{ backgroundColor: colorScheme.primary }} />
+                <InlineTextArea value={f} rows={3} onChange={(v) => handleUpdateFeature(i, v)} disabled={!isPreview || !onBusinessChange}
+                  className="text-sm font-semibold text-white/70 leading-[1.7]" />
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* REVIEWS */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <p className="text-xs font-black tracking-[0.4em] uppercase mb-6" style={{ color: colorScheme.primary }}>// Testimonials</p>
+          <div className="grid md:grid-cols-3 gap-4">
+            {business.reviews.slice(0, 6).map((review, i) => (
+              <div key={i} className="p-6 border-l-2" style={{ borderColor: colorScheme.primary, backgroundColor: "#1a1a1a" }}>
+                <div className="flex gap-1 mb-3">
+                  {[...Array(5)].map((_, j) => <Star key={j} className="w-3 h-3" fill={j < review.rating ? colorScheme.primary : "transparent"} stroke={j < review.rating ? colorScheme.primary : "#333"} />)}
+                </div>
+                <p className="text-sm text-white/50 leading-[1.8] mb-4">"{review.text}"</p>
+                <p className="text-xs font-black uppercase tracking-wider text-white/40">{review.author}</p>
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* HOURS */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <p className="text-xs font-black tracking-[0.4em] uppercase mb-6" style={{ color: colorScheme.primary }}>// Hours</p>
+          <div className="grid md:grid-cols-2 gap-px" style={{ backgroundColor: "#2a2a2a" }}>
+            {business.hours.map((item) => (
+              <div key={item.day} className="flex justify-between items-center px-8 py-5" style={{ backgroundColor: "#141414" }}>
+                <span className="text-sm font-black uppercase tracking-widest text-white/60">{item.day}</span>
+                <span className="text-sm font-bold" style={{ color: colorScheme.primary }}>{item.hours}</span>
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* CTA */}
+        <AnimatedDiv animate={animations} {...fadeIn} className="border-l-4 pl-8 py-4" style={{ borderColor: colorScheme.primary }}>
+          <p className="text-xs font-black tracking-[0.4em] uppercase mb-4" style={{ color: colorScheme.primary }}>// Visit Us</p>
+          <h2 className="text-3xl md:text-5xl font-black uppercase text-white mb-8 tracking-tight leading-none">Start<br />Training.</h2>
+          <div className="flex flex-wrap gap-4">
+            <a href={`tel:${business.phone}`} className="flex items-center gap-2 px-8 py-4 text-sm font-black uppercase tracking-wider text-black transition-all hover:opacity-90"
+              style={{ backgroundColor: colorScheme.primary }}>
+              <Phone className="w-4 h-4" />Call Us
+            </a>
+            <a href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-2 px-8 py-4 text-sm font-black uppercase tracking-wider text-white border-2 border-white/20 transition-all hover:border-white/50">
+              <MapPin className="w-4 h-4" />Get Directions
+            </a>
+          </div>
+        </AnimatedDiv>
+      </main>
+
+      <footer className="border-t py-10 border-white/5" style={{ backgroundColor: "#0e0e0e" }}>
+        <div className="max-w-6xl mx-auto px-6 md:px-10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="font-black text-white uppercase tracking-widest text-sm">{business.name}</p>
+          <p className="text-sm text-white/30">{business.address}</p>
+        </div>
+        {!isPreview && <p className="text-center text-xs mt-6 text-white/20">Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
+      </footer>
+      <MenuFloater business={business} colorScheme={colorScheme} />
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// TEMPLATE: SUNRISE
+// Warm gradient, welcoming and approachable. Great for yoga, women's fitness, wellness gyms.
+// ─────────────────────────────────────────────
+function SunriseTemplate({ business, config, isPreview = false, onBusinessChange }: SiteTemplateProps) {
+  const { colorScheme, fontStyle, animations } = config
+  const fontClass = { sans: "font-sans", serif: "font-serif", rounded: "font-sans tracking-wide" }[fontStyle]
+  const fadeIn = animations ? { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-60px" as any }, transition: { duration: 0.6 } } : {}
+  const isDark = colorScheme.id === "midnight"
+  const bg = isDark ? "#0f0f12" : "#fffcf8"
+  const cardBg = isDark ? "#17161a" : "#ffffff"
+  const border = isDark ? "#2a2830" : "#ede8e0"
+  const muted = isDark ? "#888" : "#888"
+  const textColor = isDark ? "#f0eeee" : "#1a1a1a"
+
+  const sunriseGradient = isDark
+    ? `linear-gradient(135deg, #0f0f12 0%, ${colorScheme.primary}18 50%, ${colorScheme.primary}08 100%)`
+    : `linear-gradient(135deg, ${colorScheme.primary}08 0%, #fff8ef 50%, ${colorScheme.primary}12 100%)`
+
+  const handleUpdateDescription = (val: string) => { if (onBusinessChange) onBusinessChange({ ...business, description: val }) }
+  const handleUpdateFeature = (i: number, val: string) => {
+    if (onBusinessChange) { const f = [...business.features]; f[i] = val; onBusinessChange({ ...business, features: f }) }
+  }
+  const handleUpdatePhotos = (p: any[]) => { if (onBusinessChange) onBusinessChange({ ...business, photos: p }) }
+  const handleRemovePhoto = (i: number) => { if (onBusinessChange) onBusinessChange({ ...business, photos: business.photos.filter((_, idx) => idx !== i) }) }
+
+  return (
+    <div className={cn("min-h-screen", fontClass)} style={{ backgroundColor: bg, color: textColor, background: sunriseGradient }}>
+
+      {/* HERO */}
+      <header className="relative overflow-hidden" style={{ height: "85vh", minHeight: 560 }}>
+        {isPreview && onBusinessChange && (
+          <div className="absolute top-6 right-6 z-20">
+            <HeroBackgroundModal currentHero={business.heroImage || business.photos[0]?.url || ""} photos={business.photos} availablePhotos={business.availablePhotos} onChange={(url) => onBusinessChange({ ...business, heroImage: url })} />
+          </div>
+        )}
+        <img src={business.heroImage || business.photos[0]?.url || "/placeholder.jpg"} alt={business.name}
+          className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.85) 100%)" }} />
+        <div className="absolute bottom-0 left-0 right-0 h-24 rounded-t-[50%]" style={{ background: sunriseGradient }} />
+
+        <div className="absolute inset-x-0 bottom-16 text-center px-6">
+          <AnimatedDiv animate={animations} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-5 text-white/80 border border-white/20 backdrop-blur-sm bg-white/10">
+              {business.category}
+            </div>
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-4 tracking-tight leading-tight">
+              {business.name}
+            </h1>
+            <div className="flex items-center justify-center gap-2 text-sm text-white/70">
+              <div className="flex gap-1">
+                {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4" fill={i < Math.floor(business.rating) ? "#fbbf24" : "transparent"} stroke={i < Math.floor(business.rating) ? "#fbbf24" : "rgba(255,255,255,0.4)"} />)}
+              </div>
+              <span className="font-bold text-white">{business.rating}</span>
+              <span>·</span>
+              <span>{business.totalReviews} reviews</span>
+            </div>
+          </AnimatedDiv>
+        </div>
+      </header>
+
+      {/* QUICK ACTIONS */}
+      <div className="max-w-2xl mx-auto px-4 -mt-8 relative z-10 mb-16">
+        <div className="flex flex-wrap gap-3 justify-center">
+          <a href={`tel:${business.phone}`} className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl"
+            style={{ backgroundColor: colorScheme.primary }}>
+            <Phone className="w-4 h-4" />Call Us
+          </a>
+          <a href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold border-2 transition-all hover:shadow-md"
+            style={{ borderColor: colorScheme.primary, color: colorScheme.primary, backgroundColor: cardBg }}>
+            <MapPin className="w-4 h-4" />Get Directions
+          </a>
+        </div>
+      </div>
+
+      <main className="max-w-5xl mx-auto px-4 pb-20 space-y-20">
+
+        {/* ABOUT */}
+        <AnimatedDiv animate={animations} {...fadeIn} className="text-center max-w-3xl mx-auto">
+          <span className="text-sm font-semibold tracking-widest uppercase mb-4 block" style={{ color: colorScheme.primary }}>About Us</span>
+          <h2 className="text-3xl md:text-4xl font-black mb-6 leading-tight">Welcome to {business.name}</h2>
+          <InlineTextArea value={business.description} onChange={handleUpdateDescription} disabled={!isPreview || !onBusinessChange}
+            className="text-lg leading-[1.9] text-center" style={{ color: muted }} />
+        </AnimatedDiv>
+
+        {/* STATS */}
+        <AnimatedDiv animate={animations} {...fadeIn} className="grid grid-cols-3 gap-6">
+          {[
+            { value: `${business.rating}★`, label: "Star Rating" },
+            { value: `${business.totalReviews}+`, label: "Happy Members" },
+            { value: "24/7", label: "Support" },
+          ].map((stat) => (
+            <div key={stat.label} className="text-center p-6 rounded-3xl" style={{ backgroundColor: cardBg, border: `1px solid ${border}`, boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
+              <p className="text-3xl md:text-4xl font-black mb-1" style={{ color: colorScheme.primary }}>{stat.value}</p>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: muted }}>{stat.label}</p>
+            </div>
+          ))}
+        </AnimatedDiv>
+
+        {/* FEATURES */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="text-center mb-10">
+            <span className="text-sm font-semibold tracking-widest uppercase mb-4 block" style={{ color: colorScheme.primary }}>What We Offer</span>
+            <h2 className="text-3xl font-black">Everything You Need</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[...(business.features || []), "Edit Feature...", "Edit Feature...", "Edit Feature...", "Edit Feature..."].slice(0, 4).map((f, i) => (
+              <div key={i} className="p-7 rounded-3xl text-center group hover:shadow-lg transition-shadow" style={{ backgroundColor: cardBg, border: `1px solid ${border}` }}>
+                <div className="w-12 h-12 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${colorScheme.primary}20, ${colorScheme.primary}35)` }}>
+                  <Check className="w-6 h-6" style={{ color: colorScheme.primary }} />
+                </div>
+                <InlineTextArea value={f} rows={3} onChange={(v) => handleUpdateFeature(i, v)} disabled={!isPreview || !onBusinessChange}
+                  className="text-sm font-semibold leading-[1.7] text-center" style={{ color: textColor }} />
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* GALLERY */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="text-center mb-8 flex flex-col items-center">
+            <span className="text-sm font-semibold tracking-widest uppercase mb-3 block" style={{ color: colorScheme.primary }}>Gallery</span>
+            <h2 className="text-3xl font-black">Our Space</h2>
+            {isPreview && onBusinessChange && <div className="mt-4"><PhotoManagerModal photos={business.photos} availablePhotos={business.availablePhotos} onChange={handleUpdatePhotos} /></div>}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {business.photos.slice(0, 6).map((photo, i) => (
+              <div key={i} className="relative rounded-3xl overflow-hidden group aspect-square" style={{ border: `1px solid ${border}` }}>
+                <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-3xl" />
+                {isPreview && onBusinessChange && (
+                  <button onClick={() => handleRemovePhoto(i)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive z-20">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* REVIEWS */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="text-center mb-10">
+            <span className="text-sm font-semibold tracking-widests uppercase mb-3 block" style={{ color: colorScheme.primary }}>Reviews</span>
+            <h2 className="text-3xl font-black">What Members Say</h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {business.reviews.slice(0, 6).map((review, i) => (
+              <div key={i} className="p-6 rounded-3xl" style={{ backgroundColor: cardBg, border: `1px solid ${border}` }}>
+                <div className="flex gap-1 mb-3">
+                  {[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4" fill={j < review.rating ? "#fbbf24" : "transparent"} stroke={j < review.rating ? "#fbbf24" : "#d1d5db"} />)}
+                </div>
+                <p className="text-sm leading-[1.85] mb-4" style={{ color: muted }}>"{review.text}"</p>
+                <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: border }}>
+                  <span className="font-bold text-sm">{review.author}</span>
+                  <span className="text-xs" style={{ color: muted }}>{review.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* HOURS */}
+        <AnimatedDiv animate={animations} {...fadeIn} className="max-w-lg mx-auto">
+          <div className="text-center mb-8">
+            <span className="text-sm font-semibold tracking-widest uppercase mb-3 block" style={{ color: colorScheme.primary }}>Schedule</span>
+            <h2 className="text-3xl font-black">Opening Hours</h2>
+          </div>
+          <div className="rounded-3xl overflow-hidden" style={{ backgroundColor: cardBg, border: `1px solid ${border}`, boxShadow: "0 8px 40px rgba(0,0,0,0.08)" }}>
+            {business.hours.map((item, i) => (
+              <div key={item.day} className={cn("flex justify-between items-center px-6 py-4", i !== business.hours.length - 1 && "border-b")} style={{ borderColor: border }}>
+                <span className="font-semibold text-sm">{item.day}</span>
+                <span className="text-sm font-bold" style={{ color: colorScheme.primary }}>{item.hours}</span>
+              </div>
+            ))}
+          </div>
+        </AnimatedDiv>
+
+        {/* CTA */}
+        <AnimatedDiv animate={animations} {...fadeIn}>
+          <div className="relative rounded-3xl overflow-hidden px-8 md:px-16 py-14 text-center" style={{ background: `linear-gradient(135deg, ${colorScheme.primary}, ${colorScheme.primary}cc)` }}>
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 0%, transparent 50%), radial-gradient(circle at 80% 20%, white 0%, transparent 50%)" }} />
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-black text-white mb-3">Start Your Journey Today</h2>
+              <p className="text-white/75 mb-8 max-w-md mx-auto">Every great transformation begins with a single step. Come say hi.</p>
+              <div className="flex flex-wrap justify-center gap-4">
+                <a href={`tel:${business.phone}`} className="flex items-center gap-2 px-8 py-3.5 bg-white rounded-full font-bold text-sm transition-all hover:shadow-lg hover:scale-105"
+                  style={{ color: colorScheme.primary }}>
+                  <Phone className="w-4 h-4" />Call Now
+                </a>
+                <a href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-8 py-3.5 border-2 border-white/40 rounded-full font-bold text-sm text-white transition-all hover:bg-white/10">
+                  <MapPin className="w-4 h-4" />Directions
+                </a>
+              </div>
+            </div>
+          </div>
+        </AnimatedDiv>
+      </main>
+
+      <footer className="border-t py-10 text-center" style={{ borderColor: border }}>
+        <p className="font-black text-lg mb-1">{business.name}</p>
+        <p className="text-sm" style={{ color: muted }}>{business.address}</p>
+        {business.website && <a href={business.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-2 text-sm hover:underline" style={{ color: colorScheme.primary }}><Globe className="w-3.5 h-3.5" />{business.website.replace(/^https?:\/\//, "")}</a>}
+        {business.socials && (
+          <div className="flex items-center justify-center gap-5 mt-4">
+            {business.socials.instagram && <a href={business.socials.instagram} target="_blank" rel="noopener noreferrer" className="hover:opacity-75 transition-opacity" style={{ color: colorScheme.primary }}><Instagram className="w-4 h-4" /></a>}
+            {business.socials.facebook && <a href={business.socials.facebook} target="_blank" rel="noopener noreferrer" className="hover:opacity-75 transition-opacity" style={{ color: colorScheme.primary }}><Facebook className="w-4 h-4" /></a>}
+          </div>
+        )}
+        {!isPreview && <p className="mt-6 text-xs" style={{ color: muted }}>Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
     </div>
