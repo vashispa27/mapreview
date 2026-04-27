@@ -10,7 +10,7 @@ import { PurchaseModal } from "@/components/purchase-modal"
 import { cn } from "@/lib/utils"
 import {
   Loader2, Globe, Monitor, Tablet, Smartphone,
-  LayoutGrid, Paintbrush, Sparkles, Phone, ChevronDown,
+  LayoutGrid, Paintbrush, Sparkles, Phone,
   Plus, Check, ExternalLink, Copy, QrCode, AlertCircle,
 } from "lucide-react"
 
@@ -49,9 +49,9 @@ export default function PreviewPage({ params }: PreviewPageProps) {
   const [slugError, setSlugError]               = useState("")
 
   // ── Local UI state ─────────────────────────────────────────────────────────
-  const [device, setDevice]     = useState<"mobile" | "tablet" | "desktop">("desktop")
-  const [rightTab, setRightTab] = useState<"design" | "content" | "publish">("design")
-  const [copied, setCopied]     = useState(false)
+  const [device, setDevice]           = useState<"mobile" | "tablet" | "desktop">("desktop")
+  const [rightTab, setRightTab]       = useState<"design" | "content" | "publish">("design")
+  const [copied, setCopied]           = useState(false)
 
   // ── Iframe for accurate mobile/tablet preview ──────────────────────────────
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -360,6 +360,9 @@ export default function PreviewPage({ params }: PreviewPageProps) {
     editorial:    { header: "#111",    hero: "#222",    card: "#f7f7f7" },
     "dark-power": { header: "#e63946", hero: "#111",    card: "#1a1a1a", dark: true },
     sunrise:      { header: "#f97316", hero: "#fb923c", card: "#fff7ed" },
+    glass:        { header: "#7c3aed", hero: "#070b14", card: "#0d1220", dark: true },
+    retro:        { header: "#c9a84c", hero: "#2C1A0E", card: "#FBF6EE", dark: false },
+    coastal:      { header: "#0891b2", hero: "#06b6d4", card: "#e0f7fa" },
   }
   const TemplateThumbnail = ({ tid, active }: { tid: string; active: boolean }) => {
     const t = TEMPLATE_ACCENTS[tid] ?? { header: "#6366f1", hero: "#818cf8", card: "#eef2ff" }
@@ -412,19 +415,6 @@ export default function PreviewPage({ params }: PreviewPageProps) {
               <Globe className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-sm tracking-tight text-gray-900">MapToSite</span>
-          </div>
-
-          <div className="w-px h-5 flex-shrink-0 bg-gray-200" />
-
-          {/* Template picker */}
-          <div className="flex items-center gap-2 overflow-x-auto flex-1 min-w-0" style={{ scrollbarWidth: "none" }}>
-            {layoutOptions.map(opt => (
-              <button key={opt.id}
-                onClick={() => handleConfigChange({ ...config, layout: opt.id as SiteConfig["layout"] })}
-                className="flex-shrink-0" title={opt.name}>
-                <TemplateThumbnail tid={opt.id} active={config.layout === opt.id} />
-              </button>
-            ))}
           </div>
 
           <div className="w-px h-5 flex-shrink-0 bg-gray-200" />
@@ -490,39 +480,6 @@ export default function PreviewPage({ params }: PreviewPageProps) {
                     {page.label}
                   </div>
                 ))}
-              </div>
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-300">Add Page</p>
-                <div className="space-y-0.5">
-                  {!pages.services && (
-                    <button
-                      onClick={() => handleBusinessChange({ ...business, pages: { ...pages, services: true } })}
-                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-left transition-colors text-slate-400 hover:text-slate-700 hover:bg-slate-50">
-                      <Plus className="w-3 h-3" />{isGym ? "Memberships" : "Services"}
-                    </button>
-                  )}
-                  {!pages.products && (
-                    <button
-                      onClick={() => handleBusinessChange({ ...business, pages: { ...pages, products: true } })}
-                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-left transition-colors text-slate-400 hover:text-slate-700 hover:bg-slate-50">
-                      <Plus className="w-3 h-3" />Products
-                    </button>
-                  )}
-                  {!pages.contact && (
-                    <button
-                      onClick={() => handleBusinessChange({ ...business, pages: { ...pages, contact: true } })}
-                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-left transition-colors text-slate-400 hover:text-slate-700 hover:bg-slate-50">
-                      <Plus className="w-3 h-3" />Contact
-                    </button>
-                  )}
-                  {!(pages as any).trainers && isGym && (
-                    <button
-                      onClick={() => handleBusinessChange({ ...business, pages: { ...pages, trainers: true } as any })}
-                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-left transition-colors text-slate-400 hover:text-slate-700 hover:bg-slate-50">
-                      <Plus className="w-3 h-3" />Trainers
-                    </button>
-                  )}
-                </div>
               </div>
             </div>
           </div>
@@ -637,6 +594,50 @@ export default function PreviewPage({ params }: PreviewPageProps) {
               {/* ── DESIGN TAB ─────────────────────────────────────────── */}
               {rightTab === "design" && (
                 <div className="space-y-6">
+
+                  {/* Template picker */}
+                  <section>
+                    <p className="text-[10px] font-bold uppercase tracking-widest mb-3 text-slate-400">Template</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {layoutOptions.map(opt => {
+                        const active = config.layout === opt.id
+                        return (
+                          <button key={opt.id}
+                            onClick={() => handleConfigChange({ ...config, layout: opt.id as SiteConfig["layout"] })}
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all"
+                            style={{
+                              borderColor: active ? "#7C3AED" : "#E2E8F0",
+                              background: active ? "#F5F3FF" : "#fff",
+                              boxShadow: active ? "0 0 0 3px rgba(124,58,237,0.12)" : "none",
+                            }}>
+                            <TemplateThumbnail tid={opt.id} active={active} />
+                            <p className="text-[9px] font-bold leading-tight text-center truncate w-full" style={{ color: active ? "#6D28D9" : "#64748B" }}>{opt.name}</p>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </section>
+
+                  {/* Theme toggle */}
+                  <section>
+                    <p className="text-[10px] font-bold uppercase tracking-widest mb-3 text-slate-400">Theme</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(["light", "dark"] as const).map(t => (
+                        <button key={t}
+                          onClick={() => handleConfigChange({ ...config, theme: t })}
+                          className="flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-xs font-semibold transition-all capitalize"
+                          style={{
+                            borderColor: config.theme === t ? "#7C3AED" : "#E2E8F0",
+                            background: config.theme === t ? "#F5F3FF" : t === "dark" ? "#111" : "#fff",
+                            color: config.theme === t ? "#6D28D9" : t === "dark" ? "#e0e0e0" : "#374151",
+                            boxShadow: config.theme === t ? "0 0 0 3px rgba(124,58,237,0.12)" : "none",
+                          }}>
+                          {t === "light" ? "☀️ Light" : "🌙 Dark"}
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+
                   <section>
                     <p className="text-[10px] font-bold uppercase tracking-widest mb-3 text-slate-400">Color Scheme</p>
                     <div className="grid grid-cols-3 gap-1.5">
@@ -745,6 +746,30 @@ export default function PreviewPage({ params }: PreviewPageProps) {
                             placeholder="URL"
                             className="flex-1 bg-transparent outline-none text-gray-700 placeholder-slate-300 text-xs" />
                         </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section>
+                    <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Add Page</p>
+                    <div className="space-y-1">
+                      {([
+                        { key: "services", label: isGym ? "Memberships" : "Services", enabled: !!pages.services },
+                        { key: "products", label: "Products",  enabled: !!pages.products },
+                        { key: "contact",  label: "Contact",   enabled: !!pages.contact  },
+                        ...(isGym ? [{ key: "trainers", label: "Trainers", enabled: !!(pages as any).trainers }] : []),
+                      ]).map(({ key, label, enabled }) => (
+                        <button key={key}
+                          onClick={() => !enabled && handleBusinessChange({ ...business, pages: { ...pages, [key]: true } })}
+                          disabled={enabled}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all"
+                          style={enabled
+                            ? { background: "#EDE9FE", color: "#6D28D9", cursor: "default" }
+                            : { color: "#64748B", border: "1px dashed #E2E8F0" }}>
+                          {enabled ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                          {label}
+                          {enabled && <span className="ml-auto text-[10px] text-violet-400">Active</span>}
+                        </button>
                       ))}
                     </div>
                   </section>

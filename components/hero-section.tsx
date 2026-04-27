@@ -3,11 +3,15 @@
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, Sparkles, MapPin, Loader2, HelpCircle, X, Search } from "lucide-react"
+import { ArrowRight, Sparkles, MapPin, Loader2, HelpCircle, X, Search, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Mascot } from "@/components/mascot"
-import { SpeedChallengeHeroCard } from "@/components/speed-challenge-section"
+import dynamic from "next/dynamic"
+const InteractiveConsoleWidget = dynamic(
+  () => import("@/components/interactive-console-widget").then(m => m.InteractiveConsoleWidget),
+  { ssr: false }
+)
 import { useSession, signIn } from "next-auth/react"
 import { useToast } from "@/hooks/use-toast"
 import { LoginModal } from "@/components/login-modal"
@@ -25,7 +29,7 @@ interface SearchResult {
   url: string
 }
 
-const businessTypes = ["Live in 60 seconds", "Member billing & GST invoices", "Diet & workout plans", "Expiry reminders on autopilot", "Ecommerce for supplements & gear", "Website from Google Maps", "No developers needed", "Zero drag and drop"]
+const businessTypes = ["Free gym website", "Private member dashboard", "Simple bills (No GST needed)", "Workout & diet plans", "Sell protein online", "Auto renewal reminders", "Live in 60 seconds", "No tech skills required"]
 
 export function HeroSection() {
   const { data: session } = useSession()
@@ -241,22 +245,22 @@ export function HeroSection() {
 
       <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen} />
 
-      <section className="relative min-h-screen flex items-center justify-center px-4 py-20 overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center px-4 py-12 md:py-20 overflow-hidden">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-10 md:gap-12 items-center">
             {/* Left side - Content */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center lg:text-left"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="text-center lg:text-left pt-10 lg:pt-0 min-w-0"
             >
               {/* Badge */}
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-2 mb-6 h-10"
+                className="inline-flex items-center gap-2 mb-4 h-10"
               >
                 <span className="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 shrink-0" />
@@ -273,7 +277,30 @@ export function HeroSection() {
                     </motion.span>
                   </AnimatePresence>
                 </span>
-                <span className="text-sm text-muted-foreground font-medium">— no page builder needed.</span>
+                <span className="text-sm text-muted-foreground font-medium">— zero setup time.</span>
+              </motion.div>
+
+              {/* Quick Features Row */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="flex flex-wrap justify-center lg:justify-start gap-x-4 gap-y-2 mb-6"
+              >
+                {[
+                  "Auto WhatsApp Reminders",
+                  "Unlimited Members",
+                  "GST Billing",
+                  "Workout & Diet Plans",
+                  "Track PT Sessions",
+                  "Free Marketing Website",
+                  "100+ Templates",
+                ].map((f) => (
+                  <div key={f} className="flex items-center gap-1.5 shrink-0">
+                    <Check className="w-3.5 h-3.5 text-[#22c55e] stroke-[3]" />
+                    <span className="text-[11px] font-bold text-[#64748b]">{f}</span>
+                  </div>
+                ))}
               </motion.div>
 
               {/* Headline */}
@@ -283,9 +310,9 @@ export function HeroSection() {
                 transition={{ delay: 0.3 }}
                 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6"
               >
-                <span className="text-balance">Your gym, fully managed.</span>{" "}
+                <span className="text-balance">Get a Free Gym Website + </span>{" "}
                 <span className="text-primary relative">
-                  Live in 60 seconds.
+                  Software in 60s.
                   <motion.svg
                     className="absolute -bottom-2 left-0 w-full"
                     viewBox="0 0 200 12"
@@ -311,8 +338,8 @@ export function HeroSection() {
                 transition={{ delay: 0.4 }}
                 className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 text-pretty"
               >
-                Paste your gym's Google Maps link. We instantly build your website, member management console, GST billing, and diet & workout planner.{" "}
-                <span className="text-foreground font-medium">Everything a gym needs — no developers, no hassle.</span>
+                Stop using messy WhatsApp groups and paper registers. Paste your gym's Google Maps link to get a professional website to attract members, and a private dashboard to manage them.{" "}
+                <span className="text-foreground font-medium">Everything you need to run your gym — simple & automatic.</span>
               </motion.p>
 
               {/* URL Input Area */}
@@ -441,17 +468,17 @@ export function HeroSection() {
               )}
             </motion.div>
 
-            {/* Right side - Speed Challenge Card */}
+            {/* Right side - Interactive Widget */}
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="relative"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="relative w-full min-w-0"
             >
-              <SpeedChallengeHeroCard className="w-full max-w-md mx-auto" />
+              <InteractiveConsoleWidget />
 
               <motion.div
-                className="absolute -left-16 bottom-0 hidden lg:block"
+                className="absolute -left-16 -bottom-10 hidden lg:block z-20"
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.8, type: "spring" }}

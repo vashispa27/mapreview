@@ -78,9 +78,10 @@ export interface BusinessData {
 
 export interface SiteConfig {
   colorScheme: ColorScheme
-  layout: "modern" | "classic" | "minimal" | "luxury" | "bold" | "executive" | "neon" | "sport" | "editorial" | "dark-power" | "sunrise"
+  layout: "modern" | "classic" | "minimal" | "luxury" | "bold" | "executive" | "neon" | "sport" | "editorial" | "dark-power" | "sunrise" | "glass" | "retro" | "coastal"
   fontStyle: "sans" | "serif" | "rounded"
   animations: boolean
+  theme?: "light" | "dark"
 }
 
 export const layoutOptions = [
@@ -159,6 +160,27 @@ export const layoutOptions = [
     name: "Sunrise",
     description: "Warm gradient, welcoming energy",
     icon: "sun",
+    isPro: true,
+  },
+  {
+    id: "glass" as const,
+    name: "Glass",
+    description: "Cinematic blur, frosted depth",
+    icon: "layers",
+    isPro: true,
+  },
+  {
+    id: "retro" as const,
+    name: "Retro",
+    description: "Vintage warmth, timeless feel",
+    icon: "clock",
+    isPro: true,
+  },
+  {
+    id: "coastal" as const,
+    name: "Coastal",
+    description: "Airy blues, fresh energy",
+    icon: "wind",
     isPro: true,
   },
 ]

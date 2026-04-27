@@ -8,9 +8,9 @@ const demos = [
   {
     id: "website",
     icon: Globe,
-    label: "Website & Ecommerce",
-    title: "A full gym website — your photos, reviews & products, live in 60 seconds",
-    description: "Paste your Google Maps link. We pull your real photos, reviews, trainers, and location — and build a professional gym website automatically. Add products like protein or gear and sell directly via WhatsApp checkout.",
+    label: "Website & Online Store",
+    title: "A free gym website — your photos, reviews & products, live in 60 seconds",
+    description: "Paste your Google Maps link. We pull your real photos, reviews, trainers, and location — and build a professional gym website automatically. Sell supplements or gear directly with WhatsApp checkout.",
     gif: "/website-demo.gif",
     video: "/ecommerce.mp4",
     color: "text-primary",
@@ -21,9 +21,9 @@ const demos = [
   {
     id: "members",
     icon: Users,
-    label: "Member Console",
-    title: "Track every member, expiry, and payment — in one place",
-    description: "Add a new member in seconds. See who's active, who's expiring this week, and who's lapsed. Renew with one click. No spreadsheets, no sticky notes.",
+    label: "Private Gym Dashboard",
+    title: "Track every member, expiry, and payment — in one simple place",
+    description: "Add a new member in seconds. See who's active, who's expiring this week, and who's late on payments. Renew with one click. No messy registers, no lost data.",
     gif: "/console-members.gif",
     image: "/members.png",
     color: "text-blue-600",
@@ -36,7 +36,7 @@ const demos = [
     icon: FileText,
     label: "Workout & Diet Plans",
     title: "Build plans once, assign to any member, email instantly",
-    description: "Create a \"Beginner Strength\" workout with sessions, exercises, sets, reps, and rest. Build a diet plan with macros and meals. Pick a member from a dropdown — plan sent to their inbox.",
+    description: "Create a \"Beginner Strength\" workout with sessions, exercises, sets, and reps. Build a diet plan with simple meal guides. Pick a member — plan sent to their inbox automatically.",
     gif: "/console-workout.gif",
     image: "/workouts.png",
     color: "text-green-600",
@@ -47,9 +47,9 @@ const demos = [
   {
     id: "billing",
     icon: Receipt,
-    label: "GST Billing",
-    title: "Auto-generated GST invoices — print or email in one click",
-    description: "Every membership creates a proper GST invoice (SAC 999723, 5% rate, CGST + SGST). View all payments, filter by financial year, and export GSTR-1 CSV for your CA.",
+    label: "Professional Bills",
+    title: "Beautiful bills — print or email in one click",
+    description: "Every membership creates a professional bill automatically. View all payments, filter by month, and keep your accounts clean without any math.",
     gif: "/console-billing.gif",
     image: "/earnings.png",
     color: "text-orange-600",
@@ -170,10 +170,10 @@ export function ConsoleDemoSection() {
 
               <ul className="space-y-2 pt-2">
                 {active === "website" && [
-                  "Hero section with your real gym photos from Google Maps",
+                  "Professional design using your real gym photos",
                   "Google reviews displayed front and centre",
-                  "Membership plans, trainer profiles, and contact form",
-                  "Sell supplements & gear — cart + WhatsApp checkout built-in",
+                  "Membership plans, trainer profiles, and location map",
+                  "Sell supplements & gear — simple WhatsApp checkout",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
                     <span className="mt-1 w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 text-[10px] font-black">✓</span>
@@ -181,10 +181,10 @@ export function ConsoleDemoSection() {
                   </li>
                 ))}
                 {active === "members" && [
-                  "Add members with name, phone, email",
-                  "Set duration (1, 3, 6, 12 months) and price per month",
-                  "See active, expiring, and expired members at a glance",
-                  "One-click renewal with automatic GST invoice",
+                  "Add members with name and phone number",
+                  "Set duration (1, 3, 6, 12 months) and price",
+                  "See active, expiring, and late members at a glance",
+                  "One-click renewal with automatic receipt",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
                     <span className="mt-1 w-4 h-4 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-[10px] font-black">✓</span>
@@ -192,9 +192,9 @@ export function ConsoleDemoSection() {
                   </li>
                 ))}
                 {active === "workout" && [
-                  "Create named sessions: Chest Day, Back Day, Leg Day",
-                  "Add exercises with sets, reps, weight, and rest time",
-                  "Build diet plans with macros and per-meal breakdown",
+                  "Create sessions like: Chest Day, Back Day, Leg Day",
+                  "Add simple exercises with sets and reps",
+                  "Build diet plans with easy-to-follow meal guides",
                   "Assign to any member — emailed to them instantly",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -203,10 +203,10 @@ export function ConsoleDemoSection() {
                   </li>
                 ))}
                 {active === "billing" && [
-                  "Auto invoice number with your prefix (e.g. GYM/2025-26/0001)",
-                  "CGST + SGST breakdown on every invoice",
-                  "Filter by financial year (April–March)",
-                  "Export GSTR-1 CSV for your chartered accountant",
+                  "Automatic bill numbers for your accounts",
+                  "Professional design with your gym logo",
+                  "See total earnings by month or year",
+                  "Easy to print or send via WhatsApp",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
                     <span className="mt-1 w-4 h-4 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 text-[10px] font-black">✓</span>

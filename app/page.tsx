@@ -1,8 +1,7 @@
 import { AnnouncementBanner } from "@/components/announcement-banner"
 import { Navbar } from "@/components/navbar"
 import { HeroSection } from "@/components/hero-section"
-import { FeaturesSection } from "@/components/features-section"
-import { ConsoleDemoSection } from "@/components/console-demo-section"
+import { WhyBothSection } from "@/components/why-both-section"
 import { ShowcaseSection } from "@/components/showcase-section"
 import { PricingSection } from "@/components/pricing-section"
 import { CTASection } from "@/components/cta-section"
@@ -19,7 +18,7 @@ export default function LandingPage() {
       <main className="relative z-10">
         <HeroSection />
 
-        <ConsoleDemoSection />
+        <WhyBothSection />
 
         <ShowcaseSection />
 
