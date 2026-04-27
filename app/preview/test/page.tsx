@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useSearchParams } from "next/navigation"
 import {
   BusinessData, SiteConfig, colorSchemes, layoutOptions,
   generateMockBusinessData,
@@ -133,20 +132,22 @@ const BUSINESS_TYPES = [
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function TestPreviewPage() {
-  const searchParams = useSearchParams()
-  const isGymPreset  = searchParams.get("preset") === "gym"
+  const [business, setBusiness] = useState<BusinessData>(generateMockBusinessData("test"))
+  const [config, setConfig]     = useState<SiteConfig>({
+    colorScheme: colorSchemes[0],
+    layout: "modern",
+    fontStyle: "sans",
+    animations: true,
+  })
 
-  const [business, setBusiness] = useState<BusinessData>(
-    isGymPreset ? GYM_BUSINESS : generateMockBusinessData("test")
-  )
-  const [config, setConfig] = useState<SiteConfig>(
-    isGymPreset ? GYM_CONFIG : {
-      colorScheme: colorSchemes[0],
-      layout: "modern",
-      fontStyle: "sans",
-      animations: true,
+  // Apply preset from URL query param (client-only, avoids Suspense requirement)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("preset") === "gym") {
+      setBusiness(GYM_BUSINESS)
+      setConfig(GYM_CONFIG)
     }
-  )
+  }, [])
   const [device, setDevice]               = useState<"mobile" | "tablet" | "desktop">("desktop")
   const [rightTab, setRightTab]           = useState<"design" | "content">("design")
   const [loadingData, setLoadingData] = useState(false)
