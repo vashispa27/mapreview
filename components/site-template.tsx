@@ -392,13 +392,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {cartDrawer}
     </>
   )
-  if (layout === "ambrsia") return (
-    <>
-      <AmbrsiaTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
-      {floatingNav}
-      {cartDrawer}
-    </>
-  )
 
   // Layout-specific styles
   const layoutStyles = {
@@ -406,7 +399,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       sectionGap: "mb-20",
       headingSize: "text-3xl md:text-4xl",
       cardStyle: "rounded-2xl",
-      heroHeight: "h-[60vh] min-h-[500px]",
+      heroHeight: "h-[80vh] min-h-[580px]",
     },
     classic: {
       sectionGap: "mb-16",
@@ -460,71 +453,108 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
             />
           </div>
         )}
-        <img
-          src={business.heroImage || business.photos[0]?.url || "/placeholder.jpg"}
-          alt={business.name}
-          className={cn(
-            "w-full h-full object-cover",
-            animations && "transition-transform duration-700 hover:scale-105"
-          )}
-        />
+        {/* Hero image — zoom-in on load for Modern */}
+        {animations && layout === "modern" ? (
+          <motion.img
+            src={business.heroImage || business.photos[0]?.url || "/placeholder.jpg"}
+            alt={business.name}
+            className="w-full h-full object-cover"
+            initial={{ scale: 1.06 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 2, ease: "easeOut" }}
+          />
+        ) : (
+          <img
+            src={business.heroImage || business.photos[0]?.url || "/placeholder.jpg"}
+            alt={business.name}
+            className={cn(
+              "w-full h-full object-cover",
+              animations && "transition-transform duration-700 hover:scale-105"
+            )}
+          />
+        )}
+
+        {/* Gradient overlay */}
         <div
-          className={cn(
-            "absolute inset-0",
-            layout === "minimal"
-              ? "bg-black/60"
-              : "bg-gradient-to-t from-black/80 via-black/40 to-black/20"
-          )}
+          className="absolute inset-0"
+          style={
+            layout === "modern"
+              ? { background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)" }
+              : layout === "minimal"
+              ? { background: "rgba(0,0,0,0.6)" }
+              : { background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.15) 100%)" }
+          }
         />
-        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12">
+
+        {/* Hero content */}
+        <div className={cn("absolute inset-0 flex flex-col justify-end", layout === "modern" ? "p-8 md:p-14" : "p-6 md:p-12")}>
           <AnimatedDiv
             animate={animations}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 28 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-4xl"
           >
             {layout !== "minimal" && (
-              <span
+              <motion.span
                 className={cn(
-                  "inline-block px-3 py-1 text-sm font-medium mb-4",
+                  "inline-block px-4 py-1.5 text-xs font-bold uppercase tracking-widest mb-5",
                   layout === "modern" ? "rounded-full" : "rounded"
                 )}
                 style={{ backgroundColor: colorScheme.primary, color: "#fff" }}
+                {...(animations ? { initial: { opacity: 0, scale: 0.8 }, animate: { opacity: 1, scale: 1 }, transition: { duration: 0.5, delay: 0.4 } } : {})}
               >
                 {business.category}
-              </span>
+              </motion.span>
             )}
             <h1
               className={cn(
-                "font-bold text-white mb-4",
-                layout === "modern" && "text-4xl md:text-6xl",
-                layout === "classic" && "text-3xl md:text-5xl",
-                layout === "minimal" && "text-2xl md:text-4xl"
+                "font-bold text-white",
+                layout === "modern" && "text-4xl md:text-6xl lg:text-7xl mb-5 leading-[1.05]",
+                layout === "classic" && "text-3xl md:text-5xl mb-4",
+                layout === "minimal" && "text-2xl md:text-4xl mb-4"
               )}
+              style={layout === "modern" ? { textShadow: "0 2px 20px rgba(0,0,0,0.4)" } : {}}
             >
               {business.name}
             </h1>
             <div className="flex flex-wrap items-center gap-4 text-white/90">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={cn(
-                      layout === "minimal" ? "w-4 h-4" : "w-5 h-5"
-                    )}
+                    className={cn(layout === "minimal" ? "w-4 h-4" : "w-5 h-5")}
                     fill={i < Math.floor(business.rating) ? "#fbbf24" : "transparent"}
                     stroke={i < Math.floor(business.rating) ? "#fbbf24" : "currentColor"}
                   />
                 ))}
-                <span className="ml-2 font-semibold">{business.rating}</span>
-                <span className="text-white/70">({business.totalReviews} reviews)</span>
+                <span className="ml-1 font-bold">{business.rating}</span>
+                <span className="text-white/65">({business.totalReviews.toLocaleString()} reviews)</span>
               </div>
               {layout !== "minimal" && (
-                <span className="text-white/70">{business.priceLevel}</span>
+                <span className="text-white/65">{business.priceLevel}</span>
               )}
             </div>
           </AnimatedDiv>
+
+          {/* Scroll indicator — Modern only */}
+          {layout === "modern" && animations && (
+            <motion.div
+              className="absolute bottom-8 right-12 flex flex-col items-center gap-2 text-white/50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2, duration: 0.6 }}
+            >
+              <span className="text-[10px] tracking-[0.2em] uppercase font-medium">Scroll</span>
+              <motion.div
+                className="w-px h-8 rounded-full"
+                style={{ background: "linear-gradient(to bottom, rgba(255,255,255,0.6), transparent)" }}
+                animate={{ scaleY: [1, 0.5, 1] }}
+                transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+              />
+            </motion.div>
+          )}
         </div>
       </header>
 
@@ -647,39 +677,85 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
             )}
           </div>
           {business.photos.length > 0 ? (
-            <Carousel
-              opts={{
-                align: "start",
-                loop: true,
-              }}
-              className="w-full"
-            >
-              <CarouselContent className="-ml-4">
-                {business.photos.map((photo, index) => (
-                  <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/4">
-                    <AnimatedDiv
-                      animate={animations}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
+            layout === "modern" ? (
+              /* ── Modern: bento masonry grid ── */
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3" style={{ gridAutoRows: "180px" }}>
+                {business.photos.slice(0, 6).map((photo, index) => (
+                  <AnimatedDiv
+                    key={index}
+                    animate={animations}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.07, duration: 0.5 }}
+                    className={cn(
+                      "relative overflow-hidden rounded-2xl group cursor-zoom-in",
+                      index === 0 && "col-span-2 row-span-2"
+                    )}
+                  >
+                    <img
+                      src={photo.url}
+                      alt={photo.caption}
                       className={cn(
-                        "relative overflow-hidden group",
-                        layoutStyles.cardStyle,
-                        layout === "modern" && "aspect-[4/3]",
-                        layout === "classic" && "aspect-square",
-                        layout === "minimal" && "aspect-[3/2]"
+                        "w-full h-full object-cover",
+                        animations && "transition-transform duration-700 group-hover:scale-110"
+                      )}
+                    />
+                    <div
+                      className={cn(
+                        "absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent flex items-end p-4",
+                        animations ? "opacity-0 group-hover:opacity-100 transition-opacity duration-300" : "opacity-100"
                       )}
                     >
-                      <img
-                        src={photo.url}
-                        alt={photo.caption}
+                      {photo.caption && (
+                        <span className="text-white font-medium text-sm drop-shadow">{photo.caption}</span>
+                      )}
+                    </div>
+                    {isPreview && onBusinessChange && (
+                      <button
+                        onClick={() => handleRemovePhoto(index)}
+                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm"
+                        title="Remove photo"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </AnimatedDiv>
+                ))}
+              </div>
+            ) : (
+              /* ── Classic / Minimal: carousel ── */
+              <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                <CarouselContent className="-ml-4">
+                  {business.photos.map((photo, index) => (
+                    <CarouselItem
+                      key={index}
+                      className={cn(
+                        "pl-4",
+                        layout === "classic" ? "basis-full sm:basis-1/2 lg:basis-1/3" : "basis-full sm:basis-1/2"
+                      )}
+                    >
+                      <AnimatedDiv
+                        animate={animations}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.08 }}
                         className={cn(
-                          "w-full h-full object-cover",
-                          animations && "transition-transform duration-500 group-hover:scale-110"
+                          "relative overflow-hidden group",
+                          layoutStyles.cardStyle,
+                          layout === "classic" && "aspect-square",
+                          layout === "minimal" && "aspect-[3/2]"
                         )}
-                      />
-                      {layout !== "minimal" && (
+                      >
+                        <img
+                          src={photo.url}
+                          alt={photo.caption}
+                          className={cn(
+                            "w-full h-full object-cover",
+                            animations && "transition-transform duration-500 group-hover:scale-110"
+                          )}
+                        />
                         <div
                           className={cn(
                             "absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4",
@@ -688,27 +764,25 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
                         >
                           <span className="text-white font-medium text-sm truncate">{photo.caption}</span>
                         </div>
-                      )}
-
-                      {/* Delete Overlay */}
-                      {isPreview && onBusinessChange && (
-                        <button
-                          onClick={() => handleRemovePhoto(index)}
-                          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm"
-                          title="Remove photo"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
-                    </AnimatedDiv>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <div className="flex items-center justify-end gap-2 mt-6">
-                <CarouselPrevious className="static translate-y-0 relative border-2" />
-                <CarouselNext className="static translate-y-0 relative border-2" />
-              </div>
-            </Carousel>
+                        {isPreview && onBusinessChange && (
+                          <button
+                            onClick={() => handleRemovePhoto(index)}
+                            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm"
+                            title="Remove photo"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </AnimatedDiv>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="flex items-center justify-end gap-2 mt-6">
+                  <CarouselPrevious className="static translate-y-0 relative border-2" />
+                  <CarouselNext className="static translate-y-0 relative border-2" />
+                </div>
+              </Carousel>
+            )
           ) : (
             <p style={{ color: colorScheme.muted }} className="text-sm">No photos available.</p>
           )}
