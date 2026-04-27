@@ -2,29 +2,25 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { 
-  Users, 
-  Dumbbell, 
-  Activity, 
-  IndianRupee, 
-  Settings, 
-  Search, 
-  Plus, 
-  Check, 
-  Clock, 
-  AlertCircle, 
-  ChevronRight, 
+import {
+  Users,
+  Dumbbell,
+  Activity,
+  IndianRupee,
+  Settings,
+  Search,
+  Plus,
+  Check,
+  Clock,
+  AlertCircle,
+  ChevronRight,
   ChevronLeft,
   X,
-  FileText,
   Download,
   AlertTriangle,
   Trash2,
   Send,
   Bell,
-  Palette,
-  Layout,
-  Type,
   Globe,
   Monitor,
   Smartphone
@@ -71,31 +67,46 @@ export function InteractiveConsoleWidget() {
           className="bg-[#f8fafc] border-border shadow-2xl overflow-hidden border-2 min-h-[500px] md:min-h-[600px] flex flex-col"
         >
           {/* Top Header */}
-          <div className="bg-white px-3 md:px-4 py-3 border-b border-border flex items-center justify-between">
-            <div className="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-[13px] font-medium text-muted-foreground">
-              <ChevronLeft className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">My Sites</span>
-              <span className="text-border hidden sm:inline">/</span>
-              <div className="flex items-center gap-1.5 md:gap-2 text-foreground text-nowrap">
-                <div className="w-5 h-5 md:w-6 md:h-6 rounded bg-[#22c55e] flex items-center justify-center text-white">
-                  <Dumbbell className="w-3 md:w-4 h-3 md:h-4" />
+          <div className="bg-white px-3 md:px-4 py-3 border-b border-border flex items-center justify-between gap-3">
+            {/* Left: gym identity + description */}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-[#22c55e] flex items-center justify-center text-white shrink-0">
+                <Dumbbell className="w-4 h-4 md:w-5 md:h-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-[13px] md:text-sm text-foreground truncate">Dynamo Fitness Gym</span>
+                  <Badge className="bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0] text-[8px] font-bold shrink-0 shadow-none px-1.5">FREE</Badge>
                 </div>
-                <span className="font-bold truncate max-w-[100px] md:max-w-none">Dynamo Fitness Gym</span>
-                <Badge variant="secondary" className="bg-[#f1f5f9] text-[#64748b] font-bold border-none text-[8px] md:text-[10px] px-1 md:px-1.5 h-4 md:h-5 uppercase tracking-wider">Console</Badge>
+                <p className="text-[10px] text-muted-foreground truncate">Members · Earnings · Billing · All in one place</p>
               </div>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <Button 
-                onClick={() => setIsWebsiteView(true)}
-                variant="outline" 
-                size="sm" 
-                className="h-8 text-[10px] font-bold border-primary/20 text-primary hover:bg-primary hover:text-white transition-all rounded-lg flex items-center gap-1.5 shadow-sm"
-              >
-                <Globe className="w-3 h-3" /> View Website
-              </Button>
-              <Badge variant="outline" className="bg-[#22c55e]/10 text-[#22c55e] border-[#22c55e]/20 font-bold text-[9px] md:text-[10px] hidden sm:flex">Demo</Badge>
-            </div>
+
+            {/* Right: mini browser preview CTA */}
+            <button
+              onClick={() => setIsWebsiteView(true)}
+              className="shrink-0 flex flex-col rounded-xl overflow-hidden border-2 border-[#22c55e] shadow-lg shadow-[#22c55e]/20 hover:shadow-[#22c55e]/40 hover:scale-[1.03] active:scale-95 transition-all group"
+              style={{ width: 120 }}
+            >
+              {/* Browser chrome */}
+              <div className="bg-[#f1f5f9] px-2 py-1 flex items-center gap-1 border-b border-[#e2e8f0]">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
+                <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#22c55e] shrink-0" />
+                <div className="flex-1 bg-white rounded text-[7px] text-[#94a3b8] px-1.5 py-px ml-1 truncate">dynamofitness.in</div>
+              </div>
+              {/* Mini website preview */}
+              <div className="bg-gradient-to-b from-[#1e293b] to-[#0f172a] px-2 py-2 flex flex-col gap-1">
+                <div className="w-3/4 h-1 bg-white/50 rounded-full" />
+                <div className="w-1/2 h-0.5 bg-white/30 rounded-full" />
+                <div className="w-1/3 h-3 bg-[#22c55e]/80 rounded mt-0.5" />
+              </div>
+              {/* Label */}
+              <div className="bg-[#22c55e] px-2 py-1.5 flex items-center justify-center gap-1">
+                <span className="text-[10px] font-bold text-white">See free website</span>
+                <ChevronRight className="w-3 h-3 text-white group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </button>
           </div>
 
           {/* Navigation Tabs */}
@@ -105,7 +116,6 @@ export function InteractiveConsoleWidget() {
                 { id: "members", label: "Members", icon: Users },
                 { id: "workouts", label: "Workouts", icon: Activity },
                 { id: "earnings", label: "Earnings", icon: IndianRupee },
-                { id: "editor", label: "Editor", icon: Palette },
                 { id: "gst", label: "GST", icon: Settings },
               ].map((tab) => (
                 <button
@@ -374,75 +384,6 @@ export function InteractiveConsoleWidget() {
                           </div>
                         </div>
                       ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {activeTab === "editor" && (
-                <motion.div
-                  key="editor"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex flex-col gap-4 md:gap-6"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="min-w-0">
-                      <h3 className="text-base md:text-lg font-bold text-[#1e293b] truncate">Website Editor</h3>
-                      <p className="text-[10px] md:text-xs text-muted-foreground truncate">Customize your gym website instantly</p>
-                    </div>
-                    <Button className="bg-[#22c55e] text-white hover:bg-[#16a34a] rounded-lg font-bold h-8 md:h-9 text-xs shrink-0">
-                      <span className="hidden sm:inline">Publish Changes</span><span className="sm:hidden">Publish</span>
-                    </Button>
-                  </div>
-
-                  <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
-                    {/* Sidebar */}
-                    <div className="w-full lg:w-1/4 space-y-3 md:space-y-4 order-2 lg:order-1">
-                      <div className="bg-white p-3 md:p-4 rounded-xl md:rounded-2xl border border-border space-y-3 md:space-y-4 shadow-sm">
-                        <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Styles</p>
-                        <div className="grid grid-cols-3 lg:grid-cols-1 gap-2">
-                           {[
-                             { icon: Palette, label: "Colors", color: "text-primary", bg: "bg-primary/10" },
-                             { icon: Type, label: "Fonts", color: "text-blue-600", bg: "bg-blue-500/10" },
-                             { icon: Layout, label: "Sections", color: "text-orange-600", bg: "bg-orange-500/10" },
-                           ].map((item) => (
-                             <div key={item.label} className="flex flex-col lg:flex-row items-center gap-1.5 p-2 rounded-lg bg-muted/20 lg:bg-transparent cursor-pointer group">
-                               <div className={`w-7 h-7 md:w-8 md:h-8 rounded-lg ${item.bg} flex items-center justify-center ${item.color}`}>
-                                 <item.icon className="w-3.5 md:w-4 h-3.5 md:h-4" />
-                               </div>
-                               <span className="text-[10px] md:text-xs font-semibold">{item.label}</span>
-                               <ChevronRight className="hidden lg:block ml-auto w-3 h-3 text-muted-foreground group-hover:text-primary" />
-                             </div>
-                           ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Preview */}
-                    <div className="w-full lg:w-3/4 bg-white rounded-2xl border-2 border-dashed border-border p-3 md:p-4 relative overflow-hidden group order-1 lg:order-2 min-h-[300px]">
-                       <div className="absolute inset-0 bg-muted/5 opacity-50" />
-                       <div className="relative z-10 space-y-4">
-                          <div className="h-6 md:h-8 w-full bg-[#f1f5f9] rounded-lg flex items-center px-3 justify-between">
-                             <div className="w-12 md:w-16 h-2 bg-muted rounded" />
-                             <div className="flex gap-1.5">
-                                <div className="w-6 h-1.5 bg-muted rounded" />
-                                <div className="w-6 h-1.5 bg-muted rounded" />
-                             </div>
-                          </div>
-                          <div className="h-32 md:h-48 w-full bg-[#f1f5f9] rounded-xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all relative">
-                             <div className="w-32 md:w-48 h-4 bg-muted rounded animate-pulse" />
-                             <div className="w-20 md:w-32 h-7 md:h-10 bg-primary/20 rounded-full" />
-                          </div>
-                       </div>
-                       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#1e293b]/90 backdrop-blur-md text-white px-4 py-2 rounded-xl flex items-center gap-4 shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Layout className="w-3.5 h-3.5" />
-                          <div className="w-px h-4 bg-white/10" />
-                          <Palette className="w-3.5 h-3.5" />
-                          <div className="w-px h-4 bg-white/10" />
-                          <Type className="w-3.5 h-3.5" />
-                       </div>
                     </div>
                   </div>
                 </motion.div>

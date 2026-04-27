@@ -255,51 +255,36 @@ export function HeroSection() {
               transition={{ duration: 0.7 }}
               className="text-center lg:text-left pt-10 lg:pt-0 min-w-0"
             >
-              {/* Badge */}
+              {/* Eyebrow */}
               <motion.div
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-2 mb-4 h-10"
+                transition={{ delay: 0.1 }}
+                className="inline-flex items-center gap-2 mb-5"
               >
-                <span className="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={businessTypeIndex}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      transition={{ duration: 0.25 }}
-                      className="inline-block"
-                    >
-                      {businessTypes[businessTypeIndex]}
-                    </motion.span>
-                  </AnimatePresence>
+                <span className="bg-[#22c55e]/10 text-[#16a34a] px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 border border-[#22c55e]/20">
+                  <Sparkles className="w-3 h-3" /> For Gym Owners · 100% Free
                 </span>
-                <span className="text-sm text-muted-foreground font-medium">— zero setup time.</span>
               </motion.div>
 
-              {/* Quick Features Row */}
+              {/* Pain pills */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-                className="flex flex-wrap justify-center lg:justify-start gap-x-4 gap-y-2 mb-6"
+                transition={{ delay: 0.15 }}
+                className="flex flex-wrap justify-center lg:justify-start gap-2 mb-6"
               >
                 {[
-                  "Auto WhatsApp Reminders",
-                  "Unlimited Members",
-                  "GST Billing",
-                  "Workout & Diet Plans",
-                  "Track PT Sessions",
-                  "Free Marketing Website",
-                  "100+ Templates",
-                ].map((f) => (
-                  <div key={f} className="flex items-center gap-1.5 shrink-0">
-                    <Check className="w-3.5 h-3.5 text-[#22c55e] stroke-[3]" />
-                    <span className="text-[11px] font-bold text-[#64748b]">{f}</span>
-                  </div>
+                  "Members not renewing?",
+                  "New people can't find your gym?",
+                  "Doing everything on WhatsApp?",
+                ].map((p) => (
+                  <span
+                    key={p}
+                    className="flex items-center gap-1.5 bg-red-50 text-red-500 border border-red-100 px-3 py-1 rounded-full text-[11px] font-semibold"
+                  >
+                    <X className="w-3 h-3 stroke-[3]" /> {p}
+                  </span>
                 ))}
               </motion.div>
 
@@ -307,40 +292,91 @@ export function HeroSection() {
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6"
+                transition={{ delay: 0.25 }}
+                className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-[1.1] tracking-tight mb-5"
               >
-                <span className="text-balance">Get a Free Gym Website + </span>{" "}
-                <span className="text-primary relative">
-                  Software in 60s.
+                Your gym is great.
+                <br />
+                <span className="text-primary relative inline-block">
+                  Stop running it
                   <motion.svg
-                    className="absolute -bottom-2 left-0 w-full"
-                    viewBox="0 0 200 12"
+                    className="absolute -bottom-1 left-0 w-full"
+                    viewBox="0 0 200 8"
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: 1 }}
-                    transition={{ delay: 0.8, duration: 0.8 }}
+                    transition={{ delay: 0.9, duration: 0.7 }}
                   >
                     <motion.path
-                      d="M2 8 Q100 2 198 8"
+                      d="M2 6 Q100 2 198 6"
                       stroke="currentColor"
                       strokeWidth="3"
                       fill="none"
                       strokeLinecap="round"
                     />
                   </motion.svg>
-                </span>
+                </span>{" "}
+                <span className="text-muted-foreground/60">on WhatsApp.</span>
               </motion.h1>
 
               {/* Subheadline */}
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 text-pretty"
+                transition={{ delay: 0.35 }}
+                className="text-base md:text-lg text-muted-foreground mb-6 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               >
-                Stop using messy WhatsApp groups and paper registers. Paste your gym's Google Maps link to get a professional website to attract members, and a private dashboard to manage them.{" "}
-                <span className="text-foreground font-medium">Everything you need to run your gym — simple & automatic.</span>
+                Members stop paying and you find out too late. People search for gyms nearby and go to someone else — because your gym has no website.{" "}
+                <span className="text-foreground font-semibold">We fix both. Free. In 60 seconds.</span>
               </motion.p>
+
+              {/* Problem → Solution trio */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.42 }}
+                className="space-y-3 mb-7 max-w-xl mx-auto lg:mx-0"
+              >
+                {[
+                  { prob: "Members stop renewing",          sol: "We remind them automatically before they leave" },
+                  { prob: "New people can't find your gym", sol: "Your gym gets a free website in 60 seconds"   },
+                  { prob: "You track everything manually",  sol: "See all members and money in one place"       },
+                ].map(({ prob, sol }) => (
+                  <div key={prob} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm">
+                    <div className="flex items-center gap-1.5 text-muted-foreground/50 line-through min-w-0">
+                      <X className="w-3 h-3 text-red-400 stroke-[3] shrink-0" />
+                      <span className="truncate">{prob}</span>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0 hidden sm:block" />
+                    <div className="flex items-center gap-1.5 text-[#16a34a] font-semibold min-w-0 pl-[18px] sm:pl-0">
+                      <Check className="w-3.5 h-3.5 stroke-[2.5] shrink-0" />
+                      <span className="truncate">{sol}</span>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+
+              {/* Outcomes */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="grid grid-cols-3 gap-2 mb-7 max-w-xl mx-auto lg:mx-0"
+              >
+                {[
+                  { emoji: "📈", result: "More people join your gym",    sub: "They find you online" },
+                  { emoji: "💰", result: "More money every month",       sub: "Fewer renewals missed" },
+                  { emoji: "😌", result: "Less work for you",            sub: "It runs on its own" },
+                ].map(({ emoji, result, sub }) => (
+                  <div
+                    key={result}
+                    className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-3 text-center flex flex-col items-center gap-1"
+                  >
+                    <span className="text-xl leading-none">{emoji}</span>
+                    <p className="text-[11px] font-bold text-[#166534] leading-tight">{result}</p>
+                    <p className="text-[10px] text-[#16a34a]/70 leading-tight hidden sm:block">{sub}</p>
+                  </div>
+                ))}
+              </motion.div>
 
               {/* URL Input Area */}
               <motion.div
