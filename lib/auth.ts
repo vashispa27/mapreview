@@ -11,6 +11,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin"
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
   secret: process.env.AUTH_SECRET,
+  trustHost: true,
   session: { strategy: "jwt" },
   providers: [
     Google({

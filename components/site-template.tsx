@@ -392,6 +392,13 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {cartDrawer}
     </>
   )
+  if (layout === "ambrsia") return (
+    <>
+      <AmbrsiaTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      {floatingNav}
+      {cartDrawer}
+    </>
+  )
 
   // Layout-specific styles
   const layoutStyles = {
