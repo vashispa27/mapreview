@@ -325,8 +325,8 @@ export function HeroSection() {
                 transition={{ delay: 0.35 }}
                 className="text-base md:text-lg text-muted-foreground mb-6 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               >
-                Members stop paying and you find out too late. People search for gyms nearby and go to someone else — because your gym has no website.{" "}
-                <span className="text-foreground font-semibold">We fix both. Free. In 60 seconds.</span>
+                Members stop paying and you find out too late. New people search for a gym and go somewhere else.{" "}
+                <span className="text-foreground font-semibold">We give you gym software + a free website — both ready in 60 seconds.</span>
               </motion.p>
 
               {/* Problem → Solution trio */}
@@ -523,6 +523,39 @@ export function HeroSection() {
               </motion.div>
             </motion.div>
           </div>
+
+          {/* Feature strip — visible without scrolling on desktop */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.65 }}
+            className="mt-10 md:mt-14"
+          >
+            <p className="text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">
+              Everything included · 100% free
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {[
+                { emoji: "💪", title: "Gym Software",       desc: "Manage all members & money" },
+                { emoji: "🌐", title: "Free Website",       desc: "People find your gym online" },
+                { emoji: "📱", title: "WhatsApp/Email Reminders", desc: "Auto alerts before renewal" },
+                { emoji: "🧾", title: "GST Bills",          desc: "Send receipts in one click" },
+                { emoji: "🥗", title: "Diet & Workout",     desc: "Send plans to members" },
+                { emoji: "🏋️", title: "PT Sessions",        desc: "Track training & payments" },
+              ].map(({ emoji, title, desc }) => (
+                <div
+                  key={title}
+                  className="flex flex-col items-center text-center gap-2 bg-white border border-border rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-primary/20 transition-all"
+                >
+                  <span className="text-2xl leading-none">{emoji}</span>
+                  <div>
+                    <p className="text-xs font-bold text-foreground">{title}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
         </div>
       </section>
     </>
