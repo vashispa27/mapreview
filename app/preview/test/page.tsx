@@ -7,8 +7,9 @@ import {
 } from "@/lib/mock-data"
 import { GYM_BUSINESS, GYM_CONFIG } from "@/lib/gym-data"
 import { PageManager } from "@/components/page-manager"
+import { SiteTemplate } from "@/components/site-template"
 import {
-  Monitor, Tablet, Smartphone, Database, Sparkles, Globe,
+  Monitor, Tablet, Smartphone, Database, Sparkles, Globe, ArrowLeft,
   Plus, LayoutGrid, Paintbrush, ChevronDown, Phone, Loader2,
   Check,
 } from "lucide-react"
@@ -150,17 +151,17 @@ export default function TestPreviewPage() {
   }, [])
   const [device, setDevice]               = useState<"mobile" | "tablet" | "desktop">("desktop")
   const [rightTab, setRightTab]           = useState<"design" | "content">("design")
+  const [mobileTab, setMobileTab]         = useState<"preview" | "design" | "content">("preview")
   const [loadingData, setLoadingData] = useState(false)
   const [dataLoaded, setDataLoaded]   = useState(false)
-  // Iframe canvas
-  const iframeRef = useRef<HTMLIFrameElement>(null)
+  // Iframe canvas (desktop builder only)
+  const iframeRef    = useRef<HTMLIFrameElement>(null)
   const iframeHeight = device === "mobile" ? 812 : device === "tablet" ? 1024 : 900
 
-  // Sync business/config to iframe whenever they change
+  // Sync business/config to both iframes whenever they change
   useEffect(() => {
     iframeRef.current?.contentWindow?.postMessage(
-      { type: "CANVAS_UPDATE", business, config },
-      "*",
+      { type: "CANVAS_UPDATE", business, config }, "*",
     )
   }, [business, config])
 
@@ -206,16 +207,280 @@ export default function TestPreviewPage() {
 
   return (
     <>
-      {/* ── Mobile-not-supported overlay ──────────────────────────────────── */}
-      <div className="md:hidden fixed inset-0 z-[100] flex flex-col items-center justify-center text-center p-8 bg-slate-50">
-        <div className="w-16 h-16 rounded-2xl mb-6 flex items-center justify-center shadow-lg"
-          style={{ background: "linear-gradient(135deg, #7C3AED, #6D28D9)" }}>
-          <Monitor className="w-8 h-8 text-white" />
+      {/* ── Mobile Builder ────────────────────────────────────────────────── */}
+      <div className="md:hidden flex flex-col h-screen bg-white text-gray-900 overflow-hidden">
+
+        {/* Top bar */}
+        <div className="flex-shrink-0 h-12 flex items-center gap-3 px-4 border-b bg-white border-gray-200 shadow-sm z-30">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)" }}>
+              <Globe className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="font-bold text-sm tracking-tight text-gray-900">MapToSite</span>
+          </div>
+          <div className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest"
+            style={{ background: "#FEF9C3", color: "#A16207", border: "1px solid #FDE68A" }}>
+            Test Mode
+          </div>
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Desktop Required</h2>
-        <p className="text-gray-500 text-sm max-w-xs">
-          The website builder is designed for desktop screens. Please open it on a larger display.
-        </p>
+
+        {/* Main area */}
+        <div className="flex-1 overflow-hidden relative">
+
+          {/* Preview — always in DOM, hidden when editing */}
+          <div className={cn("absolute inset-0 overflow-auto", mobileTab !== "preview" && "invisible")}>
+            <SiteTemplate business={business} config={config} isPreview={false} />
+          </div>
+
+          {/* Floating vertical pill — visible in preview mode */}
+          {mobileTab === "preview" && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
+              <div className="flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200"
+                style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.12)" }}>
+                {([
+                  { id: "design"  as const, label: "Style",   Icon: Paintbrush },
+                  { id: "content" as const, label: "Content", Icon: LayoutGrid  },
+                ] as const).map(({ id, label, Icon }, i) => (
+                  <button key={id}
+                    onClick={() => setMobileTab(id)}
+                    className={cn(
+                      "flex flex-col items-center gap-1 px-3.5 py-3 active:bg-purple-50 transition-colors",
+                      i > 0 && "border-t border-gray-100",
+                    )}
+                    style={{ color: "#7C3AED" }}>
+                    <Icon className="w-[18px] h-[18px]" />
+                    <span className="text-[9px] font-bold">{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Edit panel overlay */}
+          {mobileTab !== "preview" && (
+            <div className="absolute inset-0 bg-white flex flex-col z-10">
+
+              {/* Panel header */}
+              <div className="flex-shrink-0 flex items-center gap-3 px-3 h-11 border-b border-gray-200 bg-white">
+                <button
+                  onClick={() => setMobileTab("preview")}
+                  className="flex items-center gap-1 text-xs font-semibold text-gray-500 shrink-0">
+                  <ArrowLeft className="w-4 h-4" /> Preview
+                </button>
+                <div className="flex-1 flex justify-center">
+                  <div className="flex gap-0.5 p-0.5 bg-gray-100 rounded-lg">
+                    {([
+                      { id: "design"  as const, label: "Style"   },
+                      { id: "content" as const, label: "Content" },
+                    ] as const).map(({ id, label }) => (
+                      <button key={id}
+                        onClick={() => setMobileTab(id)}
+                        className="px-3 py-1 rounded-md text-[11px] font-semibold transition-all"
+                        style={mobileTab === id
+                          ? { background: "#fff", color: "#6D28D9", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }
+                          : { color: "#94A3B8" }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Panel body */}
+              <div className="flex-1 overflow-y-auto">
+
+                {mobileTab === "design" && (
+                  <div className="px-4 py-4 space-y-6">
+                    <section>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-3 text-slate-400">Template</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {layoutOptions.map(opt => {
+                          const active = config.layout === opt.id
+                          return (
+                            <button key={opt.id}
+                              onClick={() => setConfig(c => ({ ...c, layout: opt.id as SiteConfig["layout"] }))}
+                              className="flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all"
+                              style={{
+                                borderColor: active ? "#7C3AED" : "#E2E8F0",
+                                background: active ? "#F5F3FF" : "#fff",
+                                boxShadow: active ? "0 0 0 3px rgba(124,58,237,0.12)" : "none",
+                              }}>
+                              <TemplateThumbnail id={opt.id} active={active} />
+                              <p className="text-[9px] font-bold leading-tight text-center truncate w-full"
+                                style={{ color: active ? "#6D28D9" : "#64748B" }}>{opt.name}</p>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </section>
+
+                    <section>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-3 text-slate-400">Theme</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(["light", "dark"] as const).map(t => (
+                          <button key={t}
+                            onClick={() => setConfig(c => ({ ...c, theme: t }))}
+                            className="flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-semibold transition-all capitalize"
+                            style={{
+                              borderColor: config.theme === t ? "#7C3AED" : "#E2E8F0",
+                              background: config.theme === t ? "#F5F3FF" : t === "dark" ? "#111" : "#fff",
+                              color: config.theme === t ? "#6D28D9" : t === "dark" ? "#e0e0e0" : "#374151",
+                              boxShadow: config.theme === t ? "0 0 0 3px rgba(124,58,237,0.12)" : "none",
+                            }}>
+                            {t === "light" ? "☀️ Light" : "🌙 Dark"}
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+
+                    <section>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-3 text-slate-400">Color Scheme</p>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {colorSchemes.map(scheme => (
+                          <button key={scheme.id}
+                            onClick={() => setConfig(c => ({ ...c, colorScheme: scheme }))}
+                            className="p-2.5 rounded-xl border-2 transition-all text-left"
+                            style={{
+                              borderColor: config.colorScheme.id === scheme.id ? "#7C3AED" : "#E2E8F0",
+                              background: config.colorScheme.id === scheme.id ? "#F5F3FF" : "#fff",
+                              boxShadow: config.colorScheme.id === scheme.id ? "0 0 0 3px rgba(124,58,237,0.12)" : "none",
+                            }}>
+                            <div className="flex items-center gap-0.5 mb-1.5">
+                              {[scheme.primary, scheme.secondary, scheme.accent].map((c, i) => (
+                                <div key={i} className="w-3 h-3 rounded-full border border-black/10 shadow-sm" style={{ background: c }} />
+                              ))}
+                            </div>
+                            <p className="text-[9px] font-semibold leading-tight text-slate-500">{scheme.name}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+
+                    <section>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-3 text-slate-400">Font Style</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {([
+                          { id: "sans"    as const, name: "Clean",    cls: "" },
+                          { id: "serif"   as const, name: "Elegant",  cls: "font-serif" },
+                          { id: "rounded" as const, name: "Friendly", cls: "tracking-wide" },
+                        ]).map(f => (
+                          <button key={f.id}
+                            onClick={() => setConfig(c => ({ ...c, fontStyle: f.id }))}
+                            className="p-3 rounded-xl border-2 transition-all text-center"
+                            style={{
+                              borderColor: config.fontStyle === f.id ? "#7C3AED" : "#E2E8F0",
+                              background: config.fontStyle === f.id ? "#F5F3FF" : "#fff",
+                              boxShadow: config.fontStyle === f.id ? "0 0 0 3px rgba(124,58,237,0.12)" : "none",
+                            }}>
+                            <p className={cn("text-base font-bold text-gray-800 mb-0.5", f.cls)}>Aa</p>
+                            <p className="text-[9px] font-semibold text-slate-400">{f.name}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+
+                    <section>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-3 text-slate-400">Effects</p>
+                      <button
+                        onClick={() => setConfig(c => ({ ...c, animations: !c.animations }))}
+                        className="w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all"
+                        style={{
+                          borderColor: config.animations ? "#7C3AED" : "#E2E8F0",
+                          background: config.animations ? "#F5F3FF" : "#fff",
+                          boxShadow: config.animations ? "0 0 0 3px rgba(124,58,237,0.12)" : "none",
+                        }}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                            style={{ background: config.animations ? "#7C3AED" : "#F1F5F9" }}>
+                            <Sparkles className={cn("w-4 h-4", config.animations ? "text-white" : "text-slate-400")} />
+                          </div>
+                          <div className="text-left">
+                            <p className="text-sm font-semibold text-gray-800">Animations</p>
+                            <p className="text-[10px] text-slate-400">Scroll &amp; hover</p>
+                          </div>
+                        </div>
+                        <div className="relative w-10 h-5 rounded-full transition-all"
+                          style={{ background: config.animations ? "#7C3AED" : "#E2E8F0" }}>
+                          <div className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all"
+                            style={{ left: config.animations ? "calc(100% - 18px)" : "2px" }} />
+                        </div>
+                      </button>
+                    </section>
+                  </div>
+                )}
+
+                {mobileTab === "content" && (
+                  <div className="px-4 py-4 space-y-5">
+                    <section>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Contact Info</p>
+                      <div className="flex items-center gap-2 px-3 py-3 rounded-xl border border-gray-200 bg-gray-50">
+                        <Phone className="w-4 h-4 flex-shrink-0 text-slate-400" />
+                        <input
+                          value={business.phone}
+                          onChange={e => setBusiness(p => ({ ...p, phone: e.target.value }))}
+                          placeholder="Phone number"
+                          className="flex-1 bg-transparent outline-none text-gray-800 placeholder-slate-300 text-sm" />
+                      </div>
+                    </section>
+
+                    <section>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Social Links</p>
+                      <div className="space-y-2">
+                        {[
+                          { key: "instagram", label: "Instagram" },
+                          { key: "facebook",  label: "Facebook"  },
+                          { key: "twitter",   label: "Twitter/X" },
+                        ].map(s => (
+                          <div key={s.key}
+                            className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50">
+                            <span className="w-20 flex-shrink-0 text-[11px] font-semibold text-slate-400">{s.label}</span>
+                            <input
+                              value={(business.socials as any)?.[s.key] || ""}
+                              onChange={e => setBusiness(p => ({ ...p, socials: { ...p.socials, [s.key]: e.target.value } }))}
+                              placeholder="URL"
+                              className="flex-1 bg-transparent outline-none text-gray-700 placeholder-slate-300 text-sm" />
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+
+                    <section>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Add Page</p>
+                      <div className="space-y-2">
+                        {([
+                          { key: "services", label: business.isGym ? "Memberships" : "Services", enabled: !!pages.services },
+                          { key: "products", label: "Products", enabled: !!pages.products },
+                          { key: "contact",  label: "Contact",  enabled: !!pages.contact  },
+                          ...(business.isGym ? [{ key: "trainers", label: "Trainers", enabled: !!(pages as any).trainers }] : []),
+                        ]).map(({ key, label, enabled }) => (
+                          <button key={key}
+                            onClick={() => !enabled && setBusiness(p => ({ ...p, pages: { ...p.pages, [key]: true } }))}
+                            disabled={enabled}
+                            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-left transition-all"
+                            style={enabled
+                              ? { background: "#EDE9FE", color: "#6D28D9", cursor: "default" }
+                              : { color: "#64748B", border: "1px dashed #E2E8F0" }}>
+                            {enabled ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                            {label}
+                            {enabled && <span className="ml-auto text-xs text-violet-400">Active</span>}
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+
+                    <section>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Pages &amp; Content</p>
+                      <div className="rounded-2xl overflow-hidden border border-gray-100">
+                        <PageManager business={business} onChange={setBusiness} />
+                      </div>
+                    </section>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Builder shell ─────────────────────────────────────────────────── */}

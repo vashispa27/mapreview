@@ -48,6 +48,9 @@ export function HeroSection() {
   const [isSearching, setIsSearching] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
 
+  // Confirm generate modal
+  const [pendingResult, setPendingResult] = useState<SearchResult | null>(null)
+
   const inputRef = useRef<HTMLInputElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   // Client-side cache: query → results (lives for the page session)
@@ -128,12 +131,9 @@ export function HeroSection() {
   }
 
   const handleSelectResult = (result: SearchResult) => {
-    setUrl(result.url)
-    setError("")
     setSearchQuery("")
     setShowDropdown(false)
-    // Focus the main URL input so the user can immediately hit Generate
-    setTimeout(() => inputRef.current?.focus(), 50)
+    setPendingResult(result)
   }
 
   const handleGenerate = async (overrideUrl?: string) => {
@@ -239,6 +239,67 @@ export function HeroSection() {
                 Got it, I&apos;ll copy the right link!
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Generate Modal */}
+      <Dialog open={!!pendingResult} onOpenChange={(open) => { if (!open) setPendingResult(null) }}>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-none bg-transparent shadow-none z-[200]">
+          <div className="bg-card rounded-3xl overflow-hidden shadow-2xl border border-border">
+            <div className="p-6 border-b border-border bg-muted/30">
+              <DialogTitle className="text-lg font-bold text-foreground">Generate website for this gym?</DialogTitle>
+              <DialogDescription className="sr-only">Confirm gym selection</DialogDescription>
+            </div>
+            {pendingResult && (
+              <div className="p-6 flex flex-col gap-5">
+                <div className="flex items-start gap-3 bg-muted/40 rounded-2xl p-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <MapPin className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-foreground text-base leading-tight">{pendingResult.name}</p>
+                    {pendingResult.address && (
+                      <p className="text-sm text-muted-foreground mt-0.5 leading-snug">{pendingResult.address}</p>
+                    )}
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  We will pull your <span className="font-semibold text-foreground">photos, reviews, ratings &amp; hours</span> from Google Maps and build your free website in 60 seconds.
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    className="flex-1 h-12"
+                    onClick={() => setPendingResult(null)}
+                    disabled={isLoading}
+                  >
+                    Go back
+                  </Button>
+                  <Button
+                    className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md shadow-primary/20"
+                    onClick={() => {
+                      const url = pendingResult.url
+                      setPendingResult(null)
+                      handleGenerate(url)
+                    }}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 w-4 h-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        Yes, generate my website
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -383,15 +444,87 @@ export function HeroSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="flex flex-col gap-4 max-w-xl mx-auto lg:mx-0"
+                className="flex flex-col gap-3 max-w-xl mx-auto lg:mx-0"
               >
-                <div className="flex flex-col sm:flex-row gap-3">
+                {/* Auto-pull info banner */}
+                <div className="flex items-start gap-2.5 bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl px-3.5 py-2.5">
+                  <span className="text-base leading-none mt-0.5">🗺️</span>
+                  <p className="text-[12px] text-[#166534] leading-snug">
+                    <span className="font-semibold">We automatically pull your photos, reviews, ratings &amp; hours from Google Maps</span> — nothing to type manually.
+                  </p>
+                </div>
+
+                {/* Primary: Search your gym name */}
+                <div className="relative" ref={searchRef}>
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
+                  {isSearching && (
+                    <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground z-10" />
+                  )}
+                  <Input
+                    type="text"
+                    placeholder="Search your gym name..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      if (!session) { setIsLoginModalOpen(true); return }
+                      setSearchQuery(e.target.value)
+                    }}
+                    onFocus={() => {
+                      if (!session) { setIsLoginModalOpen(true); return }
+                      if (searchResults.length > 0) setShowDropdown(true)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setShowDropdown(false)
+                    }}
+                    className="pl-12 h-14 text-base bg-card border-border shadow-sm"
+                  />
+
+                  <AnimatePresence>
+                    {showDropdown && searchResults.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-xl z-50 overflow-y-auto max-h-60"
+                      >
+                        {searchResults.map((result, i) => (
+                          <button
+                            key={result.id}
+                            className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-muted/60 transition-colors ${i > 0 ? "border-t border-border/50" : ""}`}
+                            onMouseDown={(e) => {
+                              e.preventDefault()
+                              handleSelectResult(result)
+                            }}
+                          >
+                            <MapPin className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm text-foreground truncate">{result.name}</p>
+                              {result.address && (
+                                <p className="text-xs text-muted-foreground truncate">{result.address}</p>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Divider */}
+                <div className="relative flex items-center gap-4">
+                  <div className="flex-1 h-px bg-border/50"></div>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest whitespace-nowrap">or paste your Google Maps link</span>
+                  <div className="flex-1 h-px bg-border/50"></div>
+                </div>
+
+                {/* Secondary: Paste link + Generate button */}
+                <div className="flex flex-col sm:flex-row gap-2">
                   <div className="relative flex-1">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       ref={inputRef}
                       type="url"
-                      placeholder="Paste Google Maps link..."
+                      placeholder="Paste Google Maps link of your gym"
                       value={url}
                       onChange={(e) => {
                         setUrl(e.target.value)
@@ -403,93 +536,30 @@ export function HeroSection() {
                           handleGenerate()
                         }
                       }}
-                      className="pl-12 h-14 text-base bg-card border-border shadow-sm"
+                      className="pl-10 h-11 text-sm bg-muted/30 border-dashed border-border"
                       disabled={isLoading}
                     />
                   </div>
                   <Button
                     id="generate-btn"
-                    size="lg"
-                    className="h-14 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg shadow-primary/25"
+                    size="default"
+                    className="h-11 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-md shadow-primary/20 text-sm"
                     onClick={() => handleGenerate()}
                     disabled={isLoading}
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                        <Loader2 className="mr-2 w-4 h-4 animate-spin" />
                         Generating...
                       </>
                     ) : (
                       <>
                         Generate Site
-                        <ArrowRight className="ml-2 w-5 h-5" />
+                        <ArrowRight className="ml-2 w-4 h-4" />
                       </>
                     )}
                   </Button>
                 </div>
-
-                  <div className="relative py-2 flex items-center gap-4">
-                    <div className="flex-1 h-px bg-border/50"></div>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">or search directly</span>
-                    <div className="flex-1 h-px bg-border/50"></div>
-                  </div>
-
-                  {/* Inline search with autocomplete dropdown */}
-                  <div className="relative" ref={searchRef}>
-                    <Search className="absolute left-4 top-[18px] w-5 h-5 text-muted-foreground pointer-events-none z-10" />
-                    {isSearching && (
-                      <Loader2 className="absolute right-4 top-[18px] w-4 h-4 animate-spin text-muted-foreground z-10" />
-                    )}
-                    <Input
-                      type="text"
-                      placeholder="Search for your business name..."
-                      value={searchQuery}
-                      onChange={(e) => {
-                        if (!session) { setIsLoginModalOpen(true); return }
-                        setSearchQuery(e.target.value)
-                      }}
-                      onFocus={() => {
-                        if (!session) { setIsLoginModalOpen(true); return }
-                        if (searchResults.length > 0) setShowDropdown(true)
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Escape") setShowDropdown(false)
-                      }}
-                      className="pl-12 h-14 text-base bg-muted/30 border-dashed border-border"
-                    />
-
-                      <AnimatePresence>
-                        {showDropdown && searchResults.length > 0 && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -4 }}
-                            transition={{ duration: 0.15 }}
-                            className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-xl z-50 overflow-y-auto max-h-60"
-                          >
-                            {searchResults.map((result, i) => (
-                              <button
-                                key={result.id}
-                                className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-muted/60 transition-colors ${i > 0 ? "border-t border-border/50" : ""}`}
-                                onMouseDown={(e) => {
-                                  // onMouseDown fires before onBlur so the input doesn't lose focus first
-                                  e.preventDefault()
-                                  handleSelectResult(result)
-                                }}
-                              >
-                                <MapPin className="w-4 h-4 mt-0.5 text-primary shrink-0" />
-                                <div className="min-w-0">
-                                  <p className="font-medium text-sm text-foreground truncate">{result.name}</p>
-                                  {result.address && (
-                                    <p className="text-xs text-muted-foreground truncate">{result.address}</p>
-                                  )}
-                                </div>
-                              </button>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
               </motion.div>
 
               {/* Error message */}
@@ -532,7 +602,7 @@ export function HeroSection() {
             className="mt-10 md:mt-14"
           >
             <p className="text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">
-              Everything included · 100% free
+              Everything included in one package
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {[

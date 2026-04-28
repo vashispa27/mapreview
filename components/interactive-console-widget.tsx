@@ -75,10 +75,9 @@ export function InteractiveConsoleWidget() {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-[13px] md:text-sm text-foreground truncate">Dynamo Fitness Gym</span>
-                  <Badge className="bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0] text-[8px] font-bold shrink-0 shadow-none px-1.5">FREE</Badge>
+                  <span className="font-bold text-[13px] md:text-sm text-foreground truncate">Gym management app</span>
                 </div>
-                <p className="text-[10px] text-muted-foreground truncate">Members · Earnings · Billing · All in one place</p>
+                <p className="text-[10px] text-muted-foreground truncate">Members · Earnings · Billing · Workouts . All in one place</p>
               </div>
             </div>
 
