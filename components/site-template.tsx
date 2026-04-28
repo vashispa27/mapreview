@@ -1,6 +1,6 @@
 "use client"
 //hello;
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { BusinessData, SiteConfig, ColorScheme } from "@/lib/mock-data"
 import { Star, MapPin, Phone, Clock, Globe, Check, ChevronRight, ChevronDown, X, Instagram, Facebook, Twitter, UtensilsCrossed, ShoppingCart } from "lucide-react"
 import { ServicesPage } from "./site-pages/ServicesPage"
@@ -245,6 +245,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
   const bookService = (svc: ServiceItem) => {
     setPrefilledService(svc)
     setActivePage("contact")
+    document.getElementById("section-contact")?.scrollIntoView({ behavior: "smooth" })
   }
 
   const handleCartCheckout = () => {
@@ -252,6 +253,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
     setPrefilledService({ id: "cart", title: "Product Order", price: summary, description: summary })
     setCartOpen(false)
     setActivePage("contact")
+    document.getElementById("section-contact")?.scrollIntoView({ behavior: "smooth" })
   }
 
 
@@ -291,6 +293,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
   const navigate = (p: string) => {
     setActivePage(p as Page)
     if (p !== "contact") setPrefilledService(null)
+    document.getElementById(`section-${p}`)?.scrollIntoView({ behavior: "smooth" })
   }
 
   const floatingNav = hasPages ? (
@@ -310,107 +313,156 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
     <CartDrawer open={cartOpen} items={cartItems} colorScheme={colorScheme} onClose={() => setCartOpen(false)} onUpdateQty={updateQty} onCheckout={handleCartCheckout} />
   )
 
-  // For non-home pages: same content across all layouts
-  if (activePage !== "home") {
-    return (
-      <div className={cn("min-h-screen pb-16 sm:pb-0", fontClass)} style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}>
-        {activePage === "services" && pages.services && (
-          business.isGym
+  const subSections = hasPages ? (
+    <>
+      {pages.services && (
+        <div id="section-services" className={cn("min-h-screen pb-16 sm:pb-0", fontClass)} style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}>
+          {business.isGym
             ? <MembershipPage business={business} colorScheme={colorScheme} fontClass={fontClass} onEnquire={bookService} onBusinessChange={onBusinessChange} />
             : <ServicesPage business={business} colorScheme={colorScheme} fontClass={fontClass} onBook={bookService} onBusinessChange={onBusinessChange} />
-        )}
-        {activePage === "products" && pages.products && (
+          }
+        </div>
+      )}
+      {pages.products && (
+        <div id="section-products" className={cn("min-h-screen pb-16 sm:pb-0", fontClass)} style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}>
           <ProductsPage business={business} colorScheme={colorScheme} fontClass={fontClass} cartItems={cartItems} onAddToCart={isPreview ? undefined : addToCart} onBusinessChange={onBusinessChange} />
-        )}
-        {activePage === "trainers" && (pages as any).trainers && (
+        </div>
+      )}
+      {(pages as any).trainers && (
+        <div id="section-trainers" className={cn("min-h-screen pb-16 sm:pb-0", fontClass)} style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}>
           <TrainersPage business={business} colorScheme={colorScheme} fontClass={fontClass} onBusinessChange={onBusinessChange} />
-        )}
-        {activePage === "contact" && pages.contact && (
+        </div>
+      )}
+      {pages.contact && (
+        <div id="section-contact" className={cn("min-h-screen pb-16 sm:pb-0", fontClass)} style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}>
           <ContactPage business={business} colorScheme={colorScheme} fontClass={fontClass} prefilledService={prefilledService} />
-        )}
-        {floatingNav}
-        {cartDrawer}
-        <MenuFloater business={business} colorScheme={colorScheme} />
-      </div>
-    )
-  }
+        </div>
+      )}
+    </>
+  ) : null
 
-  // Route to pro templates (home page only)
+  // Scrollspy: track which section is in the viewport
+  useEffect(() => {
+    if (!hasPages) return
+    const order = ["home", "services", "products", "trainers", "contact"]
+    const visible = new Set<string>()
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const id = entry.target.id.replace("section-", "")
+          if (entry.isIntersecting) visible.add(id)
+          else visible.delete(id)
+        })
+        const topmost = order.find((id) => visible.has(id))
+        if (topmost) setActivePage(topmost as Page)
+      },
+      { rootMargin: "-20% 0px -20% 0px", threshold: 0 }
+    )
+    order.forEach((id) => {
+      const el = document.getElementById(`section-${id}`)
+      if (el) observer.observe(el)
+    })
+    return () => observer.disconnect()
+  }, [hasPages])
+
+  // Route to pro templates
   if (layout === "luxury") return (
     <>
-      <LuxuryTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      <div id="section-home"><LuxuryTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} /></div>
+      {subSections}
       {floatingNav}
       {cartDrawer}
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "bold") return (
     <>
-      <BoldTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      <div id="section-home"><BoldTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} /></div>
+      {subSections}
       {floatingNav}
       {cartDrawer}
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "executive") return (
     <>
-      <ExecutiveTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      <div id="section-home"><ExecutiveTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} /></div>
+      {subSections}
       {floatingNav}
       {cartDrawer}
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "neon") return (
     <>
-      <NeonTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      <div id="section-home"><NeonTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} /></div>
+      {subSections}
       {floatingNav}
       {cartDrawer}
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "sport") return (
     <>
-      <SportTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      <div id="section-home"><SportTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} /></div>
+      {subSections}
       {floatingNav}
       {cartDrawer}
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "editorial") return (
     <>
-      <EditorialTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      <div id="section-home"><EditorialTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} /></div>
+      {subSections}
       {floatingNav}
       {cartDrawer}
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "dark-power") return (
     <>
-      <DarkPowerTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      <div id="section-home"><DarkPowerTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} /></div>
+      {subSections}
       {floatingNav}
       {cartDrawer}
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "sunrise") return (
     <>
-      <SunriseTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      <div id="section-home"><SunriseTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} /></div>
+      {subSections}
       {floatingNav}
       {cartDrawer}
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "glass") return (
     <>
-      <GlassTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      <div id="section-home"><GlassTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} /></div>
+      {subSections}
       {floatingNav}
       {cartDrawer}
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "retro") return (
     <>
-      <RetroTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      <div id="section-home"><RetroTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} /></div>
+      {subSections}
       {floatingNav}
       {cartDrawer}
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "coastal") return (
     <>
-      <CoastalTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} />
+      <div id="section-home"><CoastalTemplate business={business} config={config} isPreview={isPreview} onBusinessChange={onBusinessChange} /></div>
+      {subSections}
       {floatingNav}
       {cartDrawer}
+      <MenuFloater business={business} colorScheme={colorScheme} />
     </>
   )
 
@@ -455,7 +507,9 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
     : {}
 
   return (
+    <>
     <div
+      id="section-home"
       className={cn("min-h-screen", fontClass)}
       style={{
         backgroundColor: colorScheme.background,
@@ -1026,10 +1080,12 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
         </div>
       </footer>
 
-      {floatingNav}
-      {cartDrawer}
-      <MenuFloater business={business} colorScheme={colorScheme} />
     </div>
+    {subSections}
+    {floatingNav}
+    {cartDrawer}
+    <MenuFloater business={business} colorScheme={colorScheme} />
+    </>
   )
 }
 
