@@ -1,0 +1,33 @@
+{
+  "name": "MapToSite Console",
+  "short_name": "Console",
+  "description": "Manage your gym members, payments and plans",
+  "start_url": "/my-sites",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#111827",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "My Sites",
+      "url": "/my-sites",
+      "description": "View all your sites"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import {
-  Users, Plus, RefreshCw, Trash2, ChevronLeft, Loader2,
+  Users, Plus, RefreshCw, Trash2, ChevronLeft, Loader2, X,
   Search, AlertCircle, CheckCircle, Clock, Dumbbell, Mail,
   Phone, Calendar, IndianRupee, FileText, Settings, Download,
   TrendingUp, Receipt,
@@ -167,6 +167,10 @@ export default function GymConsolePage() {
   // Earnings state
   const [selectedFY, setSelectedFY] = useState(getCurrentFY())
 
+  // PWA install prompt
+  const [installPrompt, setInstallPrompt] = useState<any>(null)
+  const [showInstallBanner, setShowInstallBanner] = useState(false)
+
   // Plans state
   interface WorkoutPlanItem { id: string; name: string; goal: string | null; notes: string | null; sessions: any[] }
   interface Exercise { name: string; sets: number; reps: string; weight: string; rest: string }
@@ -198,6 +202,14 @@ export default function GymConsolePage() {
   }
 
   useEffect(() => { if (authStatus === "unauthenticated") router.push("/") }, [authStatus])
+
+  useEffect(() => {
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone
+    if (isStandalone) return
+    const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); setShowInstallBanner(true) }
+    window.addEventListener("beforeinstallprompt", handler)
+    return () => window.removeEventListener("beforeinstallprompt", handler)
+  }, [])
 
   useEffect(() => {
     if (!session?.user?.id) return
@@ -369,6 +381,34 @@ export default function GymConsolePage() {
           </div>
         </div>
       </header>
+
+      {/* PWA install banner */}
+      {showInstallBanner && (
+        <div className="bg-primary text-primary-foreground px-4 py-2.5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+              <Dumbbell className="w-4 h-4" />
+            </div>
+            <p className="text-sm font-medium truncate">Add Console to your home screen for quick access</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={async () => {
+                if (!installPrompt) return
+                installPrompt.prompt()
+                const { outcome } = await installPrompt.userChoice
+                if (outcome === "accepted") setShowInstallBanner(false)
+              }}
+              className="px-3 py-1.5 bg-white text-primary text-xs font-semibold rounded-lg hover:bg-white/90 transition"
+            >
+              Install
+            </button>
+            <button onClick={() => setShowInstallBanner(false)} className="p-1.5 hover:bg-white/20 rounded-lg transition" aria-label="Dismiss">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="border-b border-border bg-background">
