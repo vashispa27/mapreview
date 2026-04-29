@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -45,7 +45,7 @@ interface Site {
   } | null
 }
 
-export default function MySitesPage() {
+function MySitesContent() {
   const { data: session, status } = useSession()
   const { isAdminMode } = useAdminMode()
   const router = useRouter()
@@ -332,5 +332,17 @@ export default function MySitesPage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function MySitesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    }>
+      <MySitesContent />
+    </Suspense>
   )
 }
