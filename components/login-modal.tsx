@@ -17,6 +17,7 @@ interface LoginModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onAdminLogin?: () => void
+  accent?: "red"
 }
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@maptosite.app"
@@ -25,7 +26,7 @@ function isAdminEmail(email: string) {
   return email === ADMIN_EMAIL || email === "admin"
 }
 
-export function LoginModal({ open, onOpenChange }: LoginModalProps) {
+export function LoginModal({ open, onOpenChange, accent }: LoginModalProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -79,9 +80,13 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-center">Welcome to MapToSite</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-center">
+            {accent === "red" ? "Get your restaurant online" : "Welcome to MapToSite"}
+          </DialogTitle>
           <DialogDescription className="text-center">
-            Sign in to generate beautiful websites from your Google Maps listing
+            {accent === "red"
+              ? "Sign in to build your restaurant website in 60 seconds"
+              : "Sign in to generate beautiful websites from your Google Maps listing"}
           </DialogDescription>
         </DialogHeader>
 
@@ -127,7 +132,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
             {error && <p className="text-destructive text-sm">{error}</p>}
 
             <Button
-              className="w-full"
+              className={accent === "red" ? "w-full bg-red-600 hover:bg-red-700 text-white" : "w-full"}
               onClick={handleEmailSubmit}
               disabled={isLoading || !email.trim()}
             >

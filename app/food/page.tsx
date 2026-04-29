@@ -2,33 +2,33 @@ import { Metadata } from "next"
 import { RestaurantLanding } from "./content"
 
 export const metadata: Metadata = {
-  title: "Restaurant Websites in 60 Seconds | MapToSite Food",
+  title: "Your Restaurant Is Invisible Online. Let's Fix That. | MapToSite Food",
   description:
-    "Turn your Google Maps listing into a professional restaurant website. Show your menu, get direct WhatsApp orders, and stop paying 25–30% commission to Zomato. Live in 60 seconds.",
+    "78% of diners research a restaurant online before visiting. If you don't have a website, they choose your competitor. Get your restaurant website, menu, table booking, and loyalty program live in 60 seconds.",
   keywords: [
     "restaurant website builder India",
     "restaurant website from Google Maps",
-    "Zomato alternative direct orders",
     "digital menu for restaurant",
-    "restaurant website free",
-    "online menu restaurant India",
+    "restaurant table booking website",
+    "restaurant loyalty program",
+    "restaurant website free India",
   ].join(", "),
   alternates: {
     canonical: "https://food.maptosite.app",
   },
   openGraph: {
-    title: "Restaurant Websites in 60 Seconds | MapToSite Food",
+    title: "Your Restaurant Is Invisible Online. Let's Fix That.",
     description:
-      "Turn your Google Maps listing into a professional restaurant website with your menu, reviews, and a direct WhatsApp order button. No designer, no code.",
+      "Get your restaurant website with menu, gallery, Google reviews, table booking, and loyalty programs — built from your Google Maps listing in 60 seconds.",
     url: "https://food.maptosite.app",
     siteName: "MapToSite Food",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Restaurant Websites in 60 Seconds | MapToSite Food",
+    title: "Your Restaurant Is Invisible Online. Let's Fix That.",
     description:
-      "Stop paying 25% to Zomato. Get a free restaurant website built from your Google Maps listing in 60 seconds.",
+      "Customers search 'restaurants near me' and go to your competitors who have websites. Get yours in 60 seconds.",
   },
 }
 
