@@ -7,9 +7,9 @@ export function middleware(request: NextRequest) {
 
   if (hostname === 'food.maptosite.app') {
     const url = request.nextUrl.clone()
-    // Rewrite root and any path that hasn't already been routed to /food
-    if (!url.pathname.startsWith('/food')) {
-      url.pathname = '/food' + (url.pathname === '/' ? '' : url.pathname)
+    // Only rewrite the root — everything else (my-sites, preview, api, static files) passes through
+    if (url.pathname === '/') {
+      url.pathname = '/food'
       return NextResponse.rewrite(url)
     }
   }
