@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   MapPin, ArrowRight, Check, X, Sparkles, Star,
-  UtensilsCrossed, Zap, Search, Loader2,
+  UtensilsCrossed, Zap, Search, Loader2, HelpCircle,
   BookOpen, Gift, Tag, CalendarCheck,
   LayoutGrid, LogOut, Menu as MenuIcon,
 } from "lucide-react"
@@ -87,7 +87,7 @@ function RestaurantNav() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/my-sites" className="flex items-center gap-2 cursor-pointer">
+                    <Link href="/my-sites?from=food" className="flex items-center gap-2 cursor-pointer">
                       <LayoutGrid className="w-4 h-4" /> My Sites
                     </Link>
                   </DropdownMenuItem>
@@ -137,7 +137,7 @@ function RestaurantNav() {
                     </div>
                   </div>
                   <Button variant="outline" size="sm" className="w-full justify-start gap-2" asChild>
-                    <Link href="/my-sites" onClick={() => setMobileOpen(false)}><LayoutGrid className="w-4 h-4" /> My Sites</Link>
+                    <Link href="/my-sites?from=food" onClick={() => setMobileOpen(false)}><LayoutGrid className="w-4 h-4" /> My Sites</Link>
                   </Button>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-destructive" onClick={() => signOut()}>
                     <LogOut className="w-4 h-4" /> Sign out
@@ -300,6 +300,7 @@ function Hero() {
   const [error, setError] = useState("")
   const [pendingResult, setPendingResult] = useState<SearchResult | null>(null)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false)
 
   const searchRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -340,6 +341,7 @@ function Hero() {
   }, [searchQuery])
 
   const validateUrl = (u: string) => {
+    if (u.trim().toLowerCase() === "admin") return null
     const valid = u.includes("maps.app.goo.gl") || u.includes("goo.gl/maps") || u.includes("google.com/maps") || u.includes("maps.google.com")
     return valid ? null : "invalid"
   }
@@ -348,7 +350,7 @@ function Hero() {
     const finalUrl = (overrideUrl || url).trim()
     if (!session) { setIsLoginModalOpen(true); return }
     if (!finalUrl) { setError("Please enter a Google Maps URL"); return }
-    if (validateUrl(finalUrl) === "invalid") { setError("That doesn't look like a Google Maps link. Try searching your restaurant name above."); return }
+    if (validateUrl(finalUrl) === "invalid") { setIsTutorialOpen(true); return }
     setError(""); setIsLoading(true)
     try {
       const res = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: finalUrl }) })
@@ -356,7 +358,7 @@ function Hero() {
       if (!res.ok) { setError(data.error || "Failed to generate site"); return }
       window.dispatchEvent(new Event("challenge-start"))
       toast({ title: "Site Generation Started!", description: "Your restaurant page is being built. Check your My Sites dashboard." })
-      router.push("/my-sites")
+      router.push("/my-sites?from=food")
     } catch { setError("Something went wrong. Please try again.") } finally { setIsLoading(false) }
   }
 
@@ -368,6 +370,36 @@ function Hero() {
   return (
     <>
       <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen} accent="red" />
+
+      {/* URL tutorial dialog */}
+      <Dialog open={isTutorialOpen} onOpenChange={setIsTutorialOpen}>
+        <DialogContent className="sm:max-w-xl p-0 overflow-hidden border-none bg-transparent shadow-none z-[200]">
+          <div className="bg-card rounded-3xl overflow-hidden shadow-2xl border border-border">
+            <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center text-destructive">
+                  <HelpCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-bold">Wrong Link Format</DialogTitle>
+                  <DialogDescription>The link you pasted isn&apos;t a Google Maps &quot;Share&quot; link.</DialogDescription>
+                </div>
+              </div>
+              <button onClick={() => setIsTutorialOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-2 bg-black">
+              <img src="/url-tutorial.gif" alt="How to copy Google Maps URL" loading="lazy" decoding="async" className="w-full h-auto rounded-xl shadow-inner" />
+            </div>
+            <div className="p-6 bg-muted/30 text-center">
+              <Button className="w-full h-12 text-base font-bold bg-red-600 hover:bg-red-700 text-white" onClick={() => setIsTutorialOpen(false)}>
+                Got it, I&apos;ll copy the right link!
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Confirm dialog */}
       <Dialog open={!!pendingResult} onOpenChange={(o) => { if (!o) setPendingResult(null) }}>

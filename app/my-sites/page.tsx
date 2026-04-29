@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   MapPin,
+  UtensilsCrossed,
   ExternalLink,
   Pencil,
   Trash2,
@@ -48,6 +49,14 @@ export default function MySitesPage() {
   const { data: session, status } = useSession()
   const { isAdminMode } = useAdminMode()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const fromFood = searchParams.get("from") === "food"
+  const [persistedSource, setPersistedSource] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (fromFood) localStorage.setItem("mts_source", "food")
+    setPersistedSource(localStorage.getItem("mts_source"))
+  }, [fromFood])
   const [sites, setSites] = useState<Site[]>([])
   const [totalActive, setTotalActive] = useState(0)
   const [userPlan, setUserPlan] = useState("base")
@@ -113,6 +122,15 @@ export default function MySitesPage() {
 
   const limit = userPlan === "base" ? 3 : userPlan === "pro" ? 10 : 1
 
+  const hasGymSites = sites.some(s => s.businessData?.isGym === true)
+  const hasRestaurantSites = sites.some(s => s.businessData && s.businessData.isGym !== true)
+  const showGymCTA = hasGymSites || (!hasGymSites && !hasRestaurantSites)
+  const showFoodCTA = hasRestaurantSites || (!hasGymSites && !hasRestaurantSites)
+
+  // Branding: food if they only have restaurant sites, or came from food page
+  const isFoodBranding = (hasRestaurantSites && !hasGymSites)
+    || (!hasGymSites && (fromFood || persistedSource === "food"))
+
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -126,18 +144,34 @@ export default function MySitesPage() {
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-lg sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-primary-foreground" />
+          <Link href={isFoodBranding ? "https://food.maptosite.app" : "/"} className="flex items-center gap-2">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isFoodBranding ? "bg-red-600" : "bg-primary"}`}>
+              {isFoodBranding
+                ? <UtensilsCrossed className="w-5 h-5 text-white" />
+                : <MapPin className="w-5 h-5 text-primary-foreground" />}
             </div>
-            <span className="text-lg font-bold text-foreground">MapToSite</span>
+            <span className="text-lg font-bold text-foreground">
+              MapToSite{isFoodBranding && <span className="text-red-600"> Food</span>}
+            </span>
           </Link>
-          <Button asChild>
-            <Link href="/">
-              <Plus className="w-4 h-4 mr-2" />
-              Create New Site
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            {showGymCTA && (
+              <Button asChild variant={showFoodCTA ? "outline" : "default"}>
+                <Link href="/">
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Gym Site
+                </Link>
+              </Button>
+            )}
+            {showFoodCTA && (
+              <Button asChild className="bg-red-600 hover:bg-red-700 text-white">
+                <Link href="https://food.maptosite.app">
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Restaurant Site
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -158,8 +192,8 @@ export default function MySitesPage() {
               </span>
             </div>
             <div className="w-12 h-1.5 bg-border rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-primary transition-all duration-500" 
+              <div
+                className={`h-full transition-all duration-500 ${isFoodBranding ? "bg-red-600" : "bg-primary"}`}
                 style={{ width: `${Math.min((totalActive / limit) * 100, 100)}%` }}
               />
             </div>
@@ -177,12 +211,20 @@ export default function MySitesPage() {
             <p className="text-muted-foreground mb-6">
               Create your first website from a Google Maps listing.
             </p>
-            <Button asChild>
-              <Link href="/">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Your First Site
-              </Link>
-            </Button>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button asChild variant="outline">
+                <Link href="/">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Gym Site
+                </Link>
+              </Button>
+              <Button asChild className="bg-red-600 hover:bg-red-700 text-white">
+                <Link href="https://food.maptosite.app">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Restaurant Site
+                </Link>
+              </Button>
+            </div>
           </motion.div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
