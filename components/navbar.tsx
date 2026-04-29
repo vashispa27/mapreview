@@ -60,10 +60,11 @@ function PlanBadge({ plan }: { plan: string }) {
 }
 
 const navLinks = [
-  { name: "Features", href: "#features" },
-  { name: "How it Works", href: "#how-it-works" },
-  { name: "Examples", href: "#examples" },
-  { name: "Pricing", href: "#pricing" },
+  { name: "Features", href: "/#features" },
+  { name: "How it Works", href: "/#how-it-works" },
+  { name: "Examples", href: "/#examples" },
+  { name: "Pricing", href: "/#pricing" },
+  { name: "Blog", href: "/blog" },
 ]
 export function Navbar() {
   const { data: session, status } = useSession()
