@@ -22,6 +22,7 @@ import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
 import { LoginModal } from "@/components/login-modal"
 import { GymSearchBlock } from "@/components/gym-search-block"
+import { GymHeroVisual } from "@/components/gym-hero-visual"
 import { PricingSection } from "@/components/pricing-section"
 import { Footer } from "@/components/footer"
 
@@ -160,85 +161,81 @@ function Hero() {
     <>
       <LoginModal open={loginModalOpen} onOpenChange={setLoginModalOpen} />
       <section className="pt-20 pb-12 px-4">
-        <div className="max-w-5xl mx-auto w-full">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
 
-          {/* Text + CTA — centered */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-            className="text-center mb-10"
-          >
-            <motion.span
-              initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20 mb-5"
-            >
-              <Zap className="w-3 h-3" /> For Gym Owners
-            </motion.span>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-[1.1] tracking-tight mb-5"
-            >
-              Turn Your Gym&apos;s{" "}
-              <span className="text-primary">Google Visitors</span>
-              <br className="hidden sm:block" />
-              {" "}into Paying Members
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-              className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed max-w-2xl mx-auto"
-            >
-              Most gyms get views on Google — but don&apos;t convert them.
-              MapToSite helps you turn those visitors into real enquiries and walk-ins.
-            </motion.p>
-
+            {/* Left — text + CTA */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}
-              className="flex flex-col items-center gap-4"
+              initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+              className="text-center md:text-left"
             >
-              {session ? (
-                <div className="w-full max-w-xl text-left">
-                  <GymSearchBlock />
-                </div>
-              ) : (
-                <>
-                  <Button
-                    size="lg"
-                    className="h-14 px-8 font-black text-base shadow-lg shadow-primary/25"
-                    onClick={() => setLoginModalOpen(true)}
-                  >
-                    Go Live Now
-                    <Zap className="ml-2 w-5 h-5" />
-                  </Button>
-                  <div className="flex items-center gap-3">
-                    <div className="flex -space-x-2">
-                      {["A", "R", "S", "M"].map((l, i) => (
-                        <div key={i} className="w-7 h-7 rounded-full bg-primary/10 border-2 border-white flex items-center justify-center text-[10px] font-black text-primary">
-                          {l}
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-sm text-muted-foreground font-medium">
-                      <span className="font-bold text-foreground">120+</span> gyms already converting more visitors
-                    </p>
+              <motion.span
+                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20 mb-5"
+              >
+                <Zap className="w-3 h-3" /> For Gym Owners
+              </motion.span>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-[1.1] tracking-tight mb-5"
+              >
+                Turn Your Gym&apos;s{" "}
+                <span className="text-primary">Google Visitors</span>
+                {" "}into Paying Members
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed"
+              >
+                Most gyms get views on Google — but don&apos;t convert them.
+                MapToSite helps you turn those visitors into real enquiries and walk-ins.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}
+                className="flex flex-col items-center md:items-start gap-4"
+              >
+                {session ? (
+                  <div className="w-full text-left">
+                    <GymSearchBlock />
                   </div>
-                </>
-              )}
+                ) : (
+                  <>
+                    <Button
+                      size="lg"
+                      className="h-14 px-8 font-black text-base shadow-lg shadow-primary/25"
+                      onClick={() => setLoginModalOpen(true)}
+                    >
+                      Go Live Now
+                      <Zap className="ml-2 w-5 h-5" />
+                    </Button>
+                    <div className="flex items-center gap-3">
+                      <div className="flex -space-x-2">
+                        {["A", "R", "S", "M"].map((l, i) => (
+                          <div key={i} className="w-7 h-7 rounded-full bg-primary/10 border-2 border-white flex items-center justify-center text-[10px] font-black text-primary">
+                            {l}
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-sm text-muted-foreground font-medium">
+                        <span className="font-bold text-foreground">120+</span> gyms already converting more visitors
+                      </p>
+                    </div>
+                  </>
+                )}
+              </motion.div>
             </motion.div>
-          </motion.div>
 
-          {/* Image — full section width */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.45 }}
-          >
-            <img
-              src="/image.png"
-              alt="From Google Maps to more gym customers in 60 seconds"
-              className="w-full h-auto object-contain"
-              loading="eager"
-            />
-          </motion.div>
+            {/* Right — visual */}
+            <motion.div
+              initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
+            >
+              <GymHeroVisual />
+            </motion.div>
 
+          </div>
         </div>
       </section>
     </>
