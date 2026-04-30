@@ -120,7 +120,7 @@ function MySitesContent() {
     return () => { if (pollTimer) clearTimeout(pollTimer) }
   }, [status, isLoggedIn, isAdminMode, router])
 
-  const limit = userPlan === "base" ? 3 : userPlan === "pro" ? 10 : 1
+  const limit = (userPlan === "base" || userPlan === "food-base") ? 3 : (userPlan === "pro" || userPlan === "food-pro") ? 10 : 1
 
   const hasGymSites = sites.some(s => s.businessData?.isGym === true)
   const hasRestaurantSites = sites.some(s => s.businessData && s.businessData.isGym !== true)
@@ -179,18 +179,30 @@ function MySitesContent() {
               Manage all your generated websites in one place.
             </p>
           </div>
-          <div className="bg-muted/50 px-4 py-2 rounded-lg border border-border flex items-center gap-3">
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground leading-none mb-1">Usage Limit</span>
-              <span className="text-sm font-bold">
-                {totalActive} / {limit === 100 ? "∞" : limit} <span className="text-muted-foreground font-medium">active sites</span>
-              </span>
+          <div className="flex items-center gap-3">
+            {/* Plan badge */}
+            <div className={`px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border ${
+              userPlan === "pro" || userPlan === "food-pro"
+                ? "bg-primary/10 text-primary border-primary/30"
+                : userPlan === "base" || userPlan === "food-base"
+                ? "bg-muted text-muted-foreground border-border"
+                : "bg-muted text-muted-foreground border-border"
+            }`}>
+              {userPlan === "pro" || userPlan === "food-pro" ? "✦ Pro Plan" : userPlan === "base" || userPlan === "food-base" ? "Base Plan" : "Free"}
             </div>
-            <div className="w-12 h-1.5 bg-border rounded-full overflow-hidden">
-              <div
-                className={`h-full transition-all duration-500 ${isFoodBranding ? "bg-red-600" : "bg-primary"}`}
-                style={{ width: `${Math.min((totalActive / limit) * 100, 100)}%` }}
-              />
+            <div className="bg-muted/50 px-4 py-2 rounded-lg border border-border flex items-center gap-3">
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground leading-none mb-1">Sites Used</span>
+                <span className="text-sm font-bold">
+                  {totalActive} / {limit} <span className="text-muted-foreground font-medium">active</span>
+                </span>
+              </div>
+              <div className="w-12 h-1.5 bg-border rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-500 ${isFoodBranding ? "bg-red-600" : "bg-primary"}`}
+                  style={{ width: `${Math.min((totalActive / limit) * 100, 100)}%` }}
+                />
+              </div>
             </div>
           </div>
         </div>

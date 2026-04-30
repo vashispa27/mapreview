@@ -26,7 +26,9 @@ export async function POST(req: NextRequest) {
       const amount = paymentData.total_amount
       const currency = paymentData.currency
       const userId = (paymentData.metadata as any)?.userId
-      const plan = (paymentData.metadata as any)?.plan as "base" | "pro"
+      const rawPlan = (paymentData.metadata as any)?.plan as string
+      // Normalize food plan IDs to base/pro so all plan checks work uniformly
+      const plan = rawPlan === "food-pro" ? "pro" : rawPlan === "food-base" ? "base" : (rawPlan as "base" | "pro")
       const subscriptionId = (paymentData as any).subscription_id ?? null
 
       if (userId) {

@@ -262,7 +262,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
     const userPlan = session?.user?.plan ?? "free"
     const planExpiresAt = session?.user?.planExpiresAt
     const isExpired = planExpiresAt ? new Date(planExpiresAt) < new Date() : false
-    const hasPlan = (userPlan === "base" || userPlan === "pro") && !isExpired
+    const hasPlan = (userPlan === "base" || userPlan === "pro" || userPlan === "food-base" || userPlan === "food-pro") && !isExpired
 
     if (!isAdminDemo && !hasPlan) {
       setPurchaseModalOpen(true)

@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         userId: session.user.id,
         plan: plan,
       },
-      return_url: `${process.env.REDIRECT_URL || 'http://localhost:3000'}/my-sites`,
+      return_url: `${plan.startsWith("food-") ? (process.env.FOOD_REDIRECT_URL || process.env.REDIRECT_URL || 'http://localhost:3000') : (process.env.REDIRECT_URL || 'http://localhost:3000')}/my-sites`,
     })
 
     return NextResponse.json({ url: checkoutSession.checkout_url })
