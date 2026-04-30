@@ -65,6 +65,7 @@ function RestaurantNav() {
 
           {/* Desktop right */}
           <div className="hidden md:flex items-center gap-3">
+            <a href="#examples" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">Examples</a>
             <a
               href="#pricing"
               className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
@@ -130,6 +131,7 @@ function RestaurantNav() {
               exit={{ opacity: 0, y: -8 }}
               className="md:hidden border-t border-border bg-background/95 backdrop-blur-lg px-4 py-4 flex flex-col gap-3"
             >
+              <a href="#examples" className="text-sm font-semibold py-2 border-b border-border" onClick={() => setMobileOpen(false)}>Examples</a>
               <a
                 href="#pricing"
                 className="text-sm font-semibold py-2 border-b border-border"
@@ -624,6 +626,86 @@ function Hero() {
         </div>
       </section>
     </>
+  )
+}
+
+// ─── Example Sites ────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  {
+    name: "The Pizza Bakery",
+    location: "HSR Layout, Bangalore",
+    cuisine: "🍕 Pizza & Bakery",
+    url: "https://maptosite.app/site/the-pizza-bakery-hsr-layout",
+    thumb: "/example-pizza-bakery.png",
+  },
+  {
+    name: "Desano Pizzeria Napoletana",
+    location: "",
+    cuisine: "🍕 Neapolitan Pizza",
+    url: "https://maptosite.app/site/desano-pizzeria-napoletana?published=true",
+    thumb: "/example-desano.png",
+  },
+  {
+    name: "Masa of Echo Park",
+    location: "",
+    cuisine: "☕ Bakery & Cafe",
+    url: "https://maptosite.app/site/masa-of-echo-park-bakery-cafe?published=true",
+    thumb: "/example-masa.png",
+  },
+]
+
+function ExampleSites() {
+  return (
+    <section id="examples" className="py-20 px-4 bg-gray-50 border-y border-border">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 bg-red-50 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-red-200 mb-4">
+            Live examples
+          </div>
+          <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">
+            See what your website could look like
+          </h2>
+          <p className="text-muted-foreground max-w-xl mx-auto text-base">
+            Real restaurants. Real websites. Built from their Google Maps listing in 60 seconds.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-5">
+          {EXAMPLES.map((ex) => (
+            <a
+              key={ex.name}
+              href={ex.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group bg-white border border-border hover:border-red-400 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 duration-200 flex flex-col"
+            >
+              {/* Thumbnail */}
+              <div className="relative w-full bg-gray-100 overflow-hidden" style={{ aspectRatio: "3/2" }}>
+                <img
+                  src={ex.thumb}
+                  alt={ex.name}
+                  className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-300"
+                  loading="lazy"
+                />
+              </div>
+
+              {/* Info */}
+              <div className="p-4 flex flex-col gap-2 flex-1">
+                <div>
+                  <p className="font-black text-sm leading-tight">{ex.name}</p>
+                  {ex.location && <p className="text-xs text-muted-foreground mt-0.5">{ex.location}</p>}
+                  <p className="text-xs text-muted-foreground">{ex.cuisine.split(" ").slice(1).join(" ")}</p>
+                </div>
+                <div className="flex items-center gap-1 text-xs font-bold text-red-600 mt-auto pt-1">
+                  View website <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -1231,6 +1313,7 @@ export function RestaurantLanding() {
     <div className="min-h-screen bg-background">
       <RestaurantNav />
       <Hero />
+      <ExampleSites />
       <TheCost />
       <WhatYouGet />
       <LoyaltySpotlight />
