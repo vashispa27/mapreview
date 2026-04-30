@@ -9,9 +9,10 @@ import { cn } from "@/lib/utils"
 interface PurchaseModalProps {
   open: boolean
   onClose: () => void
+  isFood?: boolean
 }
 
-export function PurchaseModal({ open, onClose }: PurchaseModalProps) {
+export function PurchaseModal({ open, onClose, isFood = false }: PurchaseModalProps) {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
   const handleCheckout = async (plan: string) => {
@@ -35,7 +36,36 @@ export function PurchaseModal({ open, onClose }: PurchaseModalProps) {
     }
   }
 
-  const tiers = [
+  const foodFeatures = [
+    "Manage up to 10 restaurant chains",
+    "Auto-sync photos & reviews from Google Maps",
+    "Free hosting — no extra cost",
+    "Unlimited campaigns & promotions on your page",
+    "Send rewards & coupons to customers",
+    "Free WhatsApp integration",
+    "Unlimited table bookings",
+  ]
+
+  const tiers = isFood ? [
+    {
+      id: "food-base",
+      name: "Base",
+      price: "₹149",
+      priceSuffix: "/month",
+      icon: Zap,
+      popular: false,
+      features: foodFeatures,
+    },
+    {
+      id: "food-pro",
+      name: "Pro",
+      price: "₹1,299",
+      priceSuffix: "/year",
+      icon: Sparkles,
+      popular: true,
+      features: ["Everything in Base — billed annually", ...foodFeatures],
+    },
+  ] : [
     {
       id: "base",
       name: "Base",
@@ -107,10 +137,10 @@ export function PurchaseModal({ open, onClose }: PurchaseModalProps) {
                 </div>
                 <div>
                   <h2 className="text-xl font-black uppercase italic tracking-tight">
-                    Purchase a Plan to Publish
+                    {isFood ? "Get Your Restaurant Online" : "Purchase a Plan to Publish"}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    One-time payment. Full access for 1 year.
+                    {isFood ? "₹149/mo or ₹1,299/year — cancel anytime." : "One-time payment. Full access for 1 year."}
                   </p>
                 </div>
               </div>

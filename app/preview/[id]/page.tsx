@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, use, useRef, useCallback } from "react"
+import { useEffect, useState, use, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { BusinessData, SiteConfig, colorSchemes, layoutOptions, generateMockBusinessData } from "@/lib/mock-data"
@@ -198,9 +198,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
     if (!business || device === "desktop") return
     const msg = { type: "CANVAS_UPDATE", business, config }
     try { sessionStorage.setItem("preview-canvas-data", JSON.stringify({ business, config })) } catch {}
-    if (device !== "desktop") {
-      iframeRef.current?.contentWindow?.postMessage(msg, "*")
-    }
+    iframeRef.current?.contentWindow?.postMessage(msg, "*")
   }, [business, config, device])
 
 
@@ -1321,6 +1319,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
       <PurchaseModal
         open={purchaseModalOpen}
         onClose={() => setPurchaseModalOpen(false)}
+        isFood={business?.isGym === false}
       />
     </>
   )

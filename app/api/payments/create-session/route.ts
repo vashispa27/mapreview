@@ -30,6 +30,10 @@ export async function POST(req: NextRequest) {
       ? isLive ? process.env.DODO_BASE_PRODUCT_ID_LIVE : process.env.DODO_BASE_PRODUCT_ID_TEST
       : plan === "pro"
       ? isLive ? process.env.DODO_PRO_PRODUCT_ID_LIVE : process.env.DODO_PRO_PRODUCT_ID_TEST
+      : plan === "food-base"
+      ? isLive ? process.env.DODO_BASE_PRODUCT_ID_LIVE_FOOD : process.env.DODO_BASE_PRODUCT_ID_TEST_FOOD
+      : plan === "food-pro"
+      ? isLive ? process.env.DODO_PRO_PRODUCT_ID_LIVE_FOOD : process.env.DODO_PRO_PRODUCT_ID_TEST_FOOD
       : undefined
 
     if (!productId) {
