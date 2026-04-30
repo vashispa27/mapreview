@@ -512,10 +512,12 @@ function Hero() {
                     type="text"
                     placeholder="Search your restaurant name..."
                     value={searchQuery}
+                    readOnly={!session}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => { if (searchResults.length > 0) setShowDropdown(true) }}
+                    onClick={() => { if (!session) setIsLoginModalOpen(true) }}
                     onKeyDown={(e) => { if (e.key === "Escape") setShowDropdown(false) }}
-                    className="pl-12 h-14 text-base bg-card border-border shadow-sm"
+                    className={cn("pl-12 h-14 text-base bg-card border-border shadow-sm", !session && "cursor-pointer")}
                   />
                   <AnimatePresence>
                     {showDropdown && searchResults.length > 0 && (
