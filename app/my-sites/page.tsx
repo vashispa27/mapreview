@@ -124,8 +124,6 @@ function MySitesContent() {
 
   const hasGymSites = sites.some(s => s.businessData?.isGym === true)
   const hasRestaurantSites = sites.some(s => s.businessData && s.businessData.isGym !== true)
-  const showGymCTA = hasGymSites || (!hasGymSites && !hasRestaurantSites)
-  const showFoodCTA = hasRestaurantSites || (!hasGymSites && !hasRestaurantSites)
 
   // Branding: food if they only have restaurant sites, or came from food page
   const isFoodBranding = (hasRestaurantSites && !hasGymSites)
@@ -154,24 +152,21 @@ function MySitesContent() {
               MapToSite{isFoodBranding && <span className="text-red-600"> Food</span>}
             </span>
           </Link>
-          <div className="flex items-center gap-2">
-            {showGymCTA && (
-              <Button asChild variant={showFoodCTA ? "outline" : "default"}>
-                <Link href="/">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Gym Site
-                </Link>
-              </Button>
-            )}
-            {showFoodCTA && (
-              <Button asChild className="bg-red-600 hover:bg-red-700 text-white">
-                <Link href="https://food.maptosite.app">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Restaurant Site
-                </Link>
-              </Button>
-            )}
-          </div>
+          {isFoodBranding ? (
+            <Button asChild className="bg-red-600 hover:bg-red-700 text-white">
+              <Link href="https://food.maptosite.app">
+                <Plus className="w-4 h-4 mr-2" />
+                New Restaurant Site
+              </Link>
+            </Button>
+          ) : (
+            <Button asChild>
+              <Link href="/">
+                <Plus className="w-4 h-4 mr-2" />
+                Create New Site
+              </Link>
+            </Button>
+          )}
         </div>
       </header>
 
@@ -211,20 +206,21 @@ function MySitesContent() {
             <p className="text-muted-foreground mb-6">
               Create your first website from a Google Maps listing.
             </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <Button asChild variant="outline">
-                <Link href="/">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Gym Site
-                </Link>
-              </Button>
+            {isFoodBranding ? (
               <Button asChild className="bg-red-600 hover:bg-red-700 text-white">
                 <Link href="https://food.maptosite.app">
                   <Plus className="w-4 h-4 mr-2" />
-                  Create Restaurant Site
+                  Create Your First Restaurant Site
                 </Link>
               </Button>
-            </div>
+            ) : (
+              <Button asChild>
+                <Link href="/">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Your First Site
+                </Link>
+              </Button>
+            )}
           </motion.div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
