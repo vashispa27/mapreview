@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 import { AuthProvider } from "@/components/providers/auth-provider"
 import { AdminProvider } from "@/components/providers/admin-provider"
 import Script from "next/script"
-import { CrispWidget } from "@/components/crisp-widget"
+import { WhatsAppWidget } from "@/components/whatsapp-widget"
 import { StickyTimer } from "@/components/sticky-timer"
 
 export default function RootLayout({
@@ -62,7 +62,7 @@ export default function RootLayout({
             gtag('config', 'G-RXC8HGDM3G');
           `}
         </Script>
-        <CrispWidget />
+        <WhatsAppWidget />
         <StickyTimer />
         <AuthProvider>
           <AdminProvider>
