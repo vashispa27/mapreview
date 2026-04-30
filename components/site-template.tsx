@@ -65,17 +65,18 @@ function FloatingPageNav({
   isPreview?: boolean
   isGym?: boolean
 }) {
+  const isFood = isGym === false
   const tabs = [
     { key: "home", label: "Home" },
-    ...(pages.services ? [{ key: "services", label: isGym ? "Memberships" : "Services" }] : []),
-    ...(pages.products ? [{ key: "products", label: "Products" }] : []),
+    ...(!isFood && pages.services ? [{ key: "services", label: isGym ? "Memberships" : "Services" }] : []),
+    ...(!isFood && pages.products ? [{ key: "products", label: "Products" }] : []),
     ...((pages as any).trainers ? [{ key: "trainers", label: "Our Trainers" }] : []),
-    ...(pages.contact ? [{ key: "contact", label: "Contact" }] : []),
+    ...(pages.contact ? [{ key: "contact", label: isFood ? "Book Table" : "Contact" }] : []),
   ]
 
   const allTabs = [
     ...tabs,
-    ...(pages.products && !isPreview ? [{ key: "__cart__", label: "Cart" }] : []),
+    ...(!isFood && pages.products && !isPreview ? [{ key: "__cart__", label: "Cart" }] : []),
   ]
 
   return (
@@ -120,7 +121,7 @@ function FloatingPageNav({
             {tab.label}
           </button>
         ))}
-        {pages.products && !isPreview && (
+        {!isFood && pages.products && !isPreview && (
           <button
             onClick={onCartClick}
             className="relative ml-1 p-2 rounded-xl transition hover:bg-black/5"
@@ -145,13 +146,14 @@ function FloatingPageNav({
 // ─── Floating menu button + styled dialog — shared by all templates ───────────
 function MenuFloater({ business, colorScheme }: { business: BusinessData; colorScheme: ColorScheme }) {
   const ref = useRef<HTMLDialogElement>(null)
-  if (!business.menuImage) return null
-  const isPdf = business.menuImage.startsWith("data:application/pdf")
+  const isFood = business.isGym === false
+  if (!isFood && !business.menuImage) return null
+  const isPdf = business.menuImage?.startsWith("data:application/pdf") || business.menuImage?.includes(".pdf")
   return (
     <>
       <button
         onClick={() => ref.current?.showModal()}
-        className="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-white shadow-2xl hover:scale-105 active:scale-95 transition-transform"
+        className="fixed bottom-20 sm:bottom-6 left-6 z-40 flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-white shadow-2xl hover:scale-105 active:scale-95 transition-transform"
         style={{ backgroundColor: colorScheme.primary }}
       >
         <UtensilsCrossed className="w-4 h-4" />
@@ -204,10 +206,24 @@ function MenuFloater({ business, colorScheme }: { business: BusinessData; colorS
           </div>
           {/* Content */}
           <div style={{ overflowY: "auto", flex: 1 }}>
-            {isPdf ? (
-              <iframe src={business.menuImage} style={{ width: "100%", height: "70vh", display: "block", border: "none" }} title="Menu" />
+            {business.menuImage ? (
+              isPdf ? (
+                <iframe src={business.menuImage} style={{ width: "100%", height: "70vh", display: "block", border: "none" }} title="Menu" />
+              ) : (
+                <img src={business.menuImage} alt="Our Menu" style={{ width: "100%", height: "auto", display: "block" }} />
+              )
             ) : (
-              <img src={business.menuImage} alt="Our Menu" style={{ width: "100%", height: "auto", display: "block" }} />
+              <div style={{ padding: "40px 24px", textAlign: "center" }}>
+                <UtensilsCrossed style={{ width: 40, height: 40, color: colorScheme.primary, margin: "0 auto 16px" }} />
+                <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>Menu coming soon!</p>
+                <p style={{ fontSize: 14, color: "#6b7280", marginBottom: 20 }}>In the meantime, call us for today's specials.</p>
+                {business.phone && (
+                  <a href={`tel:${business.phone}`}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 30, fontWeight: 700, fontSize: 14, color: "#fff", backgroundColor: colorScheme.primary, textDecoration: "none" }}>
+                    <Phone style={{ width: 14, height: 14 }} />{business.phone}
+                  </a>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -216,98 +232,6 @@ function MenuFloater({ business, colorScheme }: { business: BusinessData; colorS
   )
 }
 
-// ─── Book Table floater — food sites only ──────────────────────────────────
-function BookTableFloater({ business, colorScheme }: { business: BusinessData; colorScheme: ColorScheme }) {
-  const ref = useRef<HTMLDialogElement>(null)
-  const [guests, setGuests] = useState("2")
-  const [date, setDate] = useState("")
-  const [time, setTime] = useState("19:00")
-
-  if (business.isGym) return null
-
-  const handleConfirm = () => {
-    const formattedDate = date ? new Date(date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : ""
-    const formattedTime = time ? new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : ""
-    const message = `I'd like to book a table for ${guests} guest${Number(guests) !== 1 ? "s" : ""}${formattedDate ? ` on ${formattedDate}` : ""}${formattedTime ? ` at ${formattedTime}` : ""}.`
-    window.dispatchEvent(new CustomEvent("book-table-request", { detail: { guests, date, time, message } }))
-    ref.current?.close()
-  }
-
-  const today = new Date().toISOString().split("T")[0]
-
-  return (
-    <>
-      <button
-        onClick={() => ref.current?.showModal()}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-white shadow-2xl hover:scale-105 active:scale-95 transition-transform"
-        style={{ backgroundColor: colorScheme.primary }}
-      >
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 5h18M3 12h18M3 19h18" /></svg>
-        Book Table
-      </button>
-
-      <dialog
-        ref={ref}
-        style={{
-          padding: 0, border: "none", borderRadius: 16,
-          width: "min(360px, calc(100vw - 32px))",
-          overflow: "hidden", margin: "auto", inset: 0, position: "fixed",
-        }}
-        className="shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
-        onClick={(e) => { if (e.target === ref.current) ref.current?.close() }}
-      >
-        <div style={{ background: "#fff" }}>
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "16px 20px", borderBottom: "1px solid #e5e7eb",
-          }}>
-            <span style={{ fontWeight: 700, fontSize: 15 }}>Reserve a Table</span>
-            <button onClick={() => ref.current?.close()}
-              style={{ width: 28, height: 28, borderRadius: "50%", border: "none", background: "#f3f4f6", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <X style={{ width: 13, height: 13, color: "#555" }} />
-            </button>
-          </div>
-          <div style={{ padding: "20px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9ca3af", marginBottom: 6 }}>Guests</label>
-                <select value={guests} onChange={e => setGuests(e.target.value)}
-                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #e5e7eb", fontSize: 14, outline: "none", background: "#fff" }}>
-                  {Array.from({ length: 20 }, (_, i) => i + 1).map(n => (
-                    <option key={n} value={String(n)}>{n} {n === 1 ? "Guest" : "Guests"}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9ca3af", marginBottom: 6 }}>Date</label>
-                <input type="date" value={date} min={today} onChange={e => setDate(e.target.value)}
-                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #e5e7eb", fontSize: 14, outline: "none", background: "#fff", boxSizing: "border-box" }} />
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9ca3af", marginBottom: 6 }}>Time</label>
-                <input type="time" value={time} onChange={e => setTime(e.target.value)}
-                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #e5e7eb", fontSize: 14, outline: "none", background: "#fff", boxSizing: "border-box" }} />
-              </div>
-            </div>
-            <button
-              onClick={handleConfirm}
-              disabled={!date || !time}
-              style={{
-                width: "100%", marginTop: 20, padding: "12px 0", borderRadius: 10,
-                border: "none", cursor: date && time ? "pointer" : "not-allowed",
-                fontWeight: 700, fontSize: 14, color: "#fff",
-                background: date && time ? colorScheme.primary : "#d1d5db",
-                transition: "background 0.2s",
-              }}
-            >
-              Confirm Booking
-            </button>
-          </div>
-        </div>
-      </dialog>
-    </>
-  )
-}
 
 export function SiteTemplate({ business, config, isPreview = false, onBusinessChange }: SiteTemplateProps) {
   const { colorScheme, layout, fontStyle, animations } = config
@@ -349,18 +273,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
     document.getElementById("section-contact")?.scrollIntoView({ behavior: "smooth" })
   }
 
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const { message } = (e as CustomEvent).detail
-      setPrefilledService({ id: "booking", title: "Table Booking", price: message, description: message })
-      if (pages.contact) {
-        setActivePage("contact")
-        setTimeout(() => document.getElementById("section-contact")?.scrollIntoView({ behavior: "smooth" }), 50)
-      }
-    }
-    window.addEventListener("book-table-request", handler)
-    return () => window.removeEventListener("book-table-request", handler)
-  }, [pages.contact])
 
 
   const handleRemovePhoto = (indexToRemove: number) => {
@@ -394,7 +306,12 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
     rounded: "font-sans tracking-wide",
   }[fontStyle]
 
-  const hasPages = !!(pages.services || pages.products || pages.contact || pages.trainers)
+  const isFood = business.isGym === false
+  const hasPages = !!(
+    (!isFood && (pages.services || pages.products)) ||
+    pages.contact ||
+    pages.trainers
+  )
 
   const navigate = (p: string) => {
     setActivePage(p as Page)
@@ -411,17 +328,17 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       cartCount={cartCount}
       onCartClick={() => setCartOpen(true)}
       isPreview={isPreview}
-      isGym={!!business.isGym}
+      isGym={business.isGym}
     />
   ) : null
 
-  const cartDrawer = (
+  const cartDrawer = !isFood ? (
     <CartDrawer open={cartOpen} items={cartItems} colorScheme={colorScheme} onClose={() => setCartOpen(false)} onUpdateQty={updateQty} onCheckout={handleCartCheckout} />
-  )
+  ) : null
 
   const subSections = hasPages ? (
     <>
-      {pages.services && (
+      {!isFood && pages.services && (
         <div id="section-services" className={cn("min-h-screen pb-16 sm:pb-0", fontClass)} style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}>
           {business.isGym
             ? <MembershipPage business={business} colorScheme={colorScheme} fontClass={fontClass} onEnquire={bookService} onBusinessChange={onBusinessChange} />
@@ -429,7 +346,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
           }
         </div>
       )}
-      {pages.products && (
+      {!isFood && pages.products && (
         <div id="section-products" className={cn("min-h-screen pb-16 sm:pb-0", fontClass)} style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}>
           <ProductsPage business={business} colorScheme={colorScheme} fontClass={fontClass} cartItems={cartItems} onAddToCart={isPreview ? undefined : addToCart} onBusinessChange={onBusinessChange} />
         </div>
@@ -479,7 +396,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "bold") return (
@@ -489,7 +405,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "executive") return (
@@ -499,7 +414,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "neon") return (
@@ -509,7 +423,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "sport") return (
@@ -519,7 +432,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "editorial") return (
@@ -529,7 +441,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "dark-power") return (
@@ -539,7 +450,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "sunrise") return (
@@ -549,7 +459,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "glass") return (
@@ -559,7 +468,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "retro") return (
@@ -569,7 +477,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "coastal") return (
@@ -579,7 +486,6 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
 
@@ -1502,7 +1408,6 @@ function LuxuryTemplate({ business, config, isPreview = false, onBusinessChange 
         </div>
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -1818,7 +1723,6 @@ function BoldTemplate({ business, config, isPreview = false, onBusinessChange }:
         </div>
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -2182,7 +2086,6 @@ function ExecutiveTemplate({ business, config, isPreview = false, onBusinessChan
         </div>
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -2403,7 +2306,6 @@ function NeonTemplate({ business, config, isPreview = false, onBusinessChange }:
         {!isPreview && <p className="mt-6 text-xs text-white/20">Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -2626,7 +2528,6 @@ function SportTemplate({ business, config, isPreview = false, onBusinessChange }
         {!isPreview && <p className="text-center text-xs mt-6" style={{ color: muted }}>Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -2839,7 +2740,6 @@ function EditorialTemplate({ business, config, isPreview = false, onBusinessChan
         {!isPreview && <p className="text-center text-xs mt-6" style={{ color: muted }}>Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -3007,7 +2907,6 @@ function DarkPowerTemplate({ business, config, isPreview = false, onBusinessChan
         {!isPreview && <p className="text-center text-xs mt-6 text-white/20">Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -3226,7 +3125,6 @@ function SunriseTemplate({ business, config, isPreview = false, onBusinessChange
         {!isPreview && <p className="mt-6 text-xs" style={{ color: muted }}>Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -3471,7 +3369,6 @@ function GlassTemplate({ business, config, isPreview = false, onBusinessChange }
         {!isPreview && <p className="mt-6 text-[11px] text-white/25">Website created with <a href="/" className="underline" style={{ color: primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -3700,7 +3597,6 @@ function RetroTemplate({ business, config, isPreview = false, onBusinessChange }
         {!isPreview && <p className="mt-6 text-[11px] opacity-40">Website created with <a href="/" className="underline" style={{ color: amber }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -3935,7 +3831,6 @@ function CoastalTemplate({ business, config, isPreview = false, onBusinessChange
         {!isPreview && <p className="mt-6 text-[11px]" style={{ color: muted }}>Website created with <a href="/" className="underline" style={{ color: primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
-      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
