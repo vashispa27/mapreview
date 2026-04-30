@@ -31,7 +31,11 @@ export function PageManager({ business, onChange }: PageManagerProps) {
   const pages = business.pages ?? {}
   const isGym = !!business.isGym
 
-  const ALL_PAGES = BASE_PAGES.filter((p) => !p.gymOnly || isGym)
+  const ALL_PAGES = BASE_PAGES.filter((p) => {
+    if (p.gymOnly && !isGym) return false
+    if (!isGym && (p.key === "services" || p.key === "products")) return false
+    return true
+  })
 
   const activePagesKeys = ALL_PAGES.filter((p) => !!pages[p.key])
   const availableToAdd = ALL_PAGES.filter((p) => !pages[p.key])

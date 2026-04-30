@@ -12,7 +12,9 @@ import {
   Loader2, Globe, Monitor, Tablet, Smartphone,
   LayoutGrid, Paintbrush, Sparkles, Phone, ArrowLeft,
   Plus, Check, ExternalLink, Copy, QrCode, AlertCircle,
+  UtensilsCrossed, Upload, X, BookOpen,
 } from "lucide-react"
+import { compressImageToBlob } from "@/lib/compress-image"
 
 interface PreviewPageProps {
   params: Promise<{ id: string }>
@@ -53,6 +55,32 @@ export default function PreviewPage({ params }: PreviewPageProps) {
   const [rightTab, setRightTab]       = useState<"design" | "content" | "publish">("design")
   const [mobileTab, setMobileTab]     = useState<"preview" | "design" | "content" | "publish">("preview")
   const [copied, setCopied]           = useState(false)
+
+  // ── Menu upload (food sites) ───────────────────────────────────────────────
+  const menuFileRef         = useRef<HTMLInputElement>(null)
+  const [isUploadingMenu, setIsUploadingMenu] = useState(false)
+
+  const handleMenuUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !business) return
+    setIsUploadingMenu(true)
+    try {
+      const { blob } = await compressImageToBlob(file, 1200, 1600, 0.85)
+      const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, { method: "POST", body: blob })
+      if (!res.ok) throw new Error("Upload failed")
+      const data = await res.json()
+      handleBusinessChange({ ...business, menuImage: data.url })
+    } catch (err) {
+      console.error("Menu upload failed:", err)
+    } finally {
+      setIsUploadingMenu(false)
+      if (menuFileRef.current) menuFileRef.current.value = ""
+    }
+  }
+
+  const handleMenuRemove = () => {
+    if (business) handleBusinessChange({ ...business, menuImage: undefined })
+  }
 
   // ── Iframe for accurate mobile/tablet preview (desktop builder only) ───────
   const iframeRef    = useRef<HTMLIFrameElement>(null)
@@ -641,12 +669,52 @@ export default function PreviewPage({ params }: PreviewPageProps) {
                       </div>
                     </section>
 
+                    {!isGym && (
+                      <section>
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Restaurant Features</p>
+                        <div className="space-y-2">
+                          <div className="rounded-xl border border-gray-200 overflow-hidden">
+                            <div className="flex items-center justify-between px-3 py-3">
+                              <div className="flex items-center gap-2">
+                                <UtensilsCrossed className="w-4 h-4 text-slate-400" />
+                                <span className="text-sm font-semibold text-gray-700">View Menu</span>
+                              </div>
+                              {business.menuImage ? (
+                                <button onClick={handleMenuRemove} className="flex items-center gap-1 text-xs font-semibold text-red-500">
+                                  <X className="w-3.5 h-3.5" /> Remove
+                                </button>
+                              ) : (
+                                <button onClick={() => menuFileRef.current?.click()} disabled={isUploadingMenu}
+                                  className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg"
+                                  style={{ background: "#EDE9FE", color: "#6D28D9" }}>
+                                  {isUploadingMenu ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                                  {isUploadingMenu ? "Uploading…" : "Upload"}
+                                </button>
+                              )}
+                            </div>
+                            {business.menuImage && (
+                              <div className="border-t border-gray-100 px-3 py-2 bg-gray-50">
+                                <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                                  <Check className="w-3.5 h-3.5" /> Menu uploaded — visible on site
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 px-3 py-3 rounded-xl border border-gray-200">
+                            <BookOpen className="w-4 h-4 text-slate-400" />
+                            <span className="text-sm font-semibold text-gray-700">Book Table</span>
+                            <span className="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: "#DCFCE7", color: "#16A34A" }}>Always on</span>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+
                     <section>
                       <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Add Page</p>
                       <div className="space-y-2">
                         {([
-                          { key: "services", label: isGym ? "Memberships" : "Services", enabled: !!pages.services },
-                          { key: "products", label: "Products", enabled: !!pages.products },
+                          ...(isGym ? [{ key: "services", label: "Memberships", enabled: !!pages.services }] : []),
+                          ...(isGym ? [{ key: "products", label: "Products", enabled: !!pages.products }] : []),
                           { key: "contact",  label: "Contact",  enabled: !!pages.contact  },
                           ...(isGym ? [{ key: "trainers", label: "Trainers", enabled: !!(pages as any).trainers }] : []),
                         ]).map(({ key, label, enabled }) => (
@@ -1096,12 +1164,55 @@ export default function PreviewPage({ params }: PreviewPageProps) {
                     </div>
                   </section>
 
+                  {!isGym && (
+                    <section>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Restaurant Features</p>
+                      <input ref={menuFileRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={handleMenuUpload} />
+                      <div className="space-y-2">
+                        {/* View Menu toggle */}
+                        <div className="rounded-xl border border-gray-200 overflow-hidden">
+                          <div className="flex items-center justify-between px-3 py-2.5">
+                            <div className="flex items-center gap-2">
+                              <UtensilsCrossed className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="text-xs font-semibold text-gray-700">View Menu</span>
+                            </div>
+                            {business.menuImage ? (
+                              <button onClick={handleMenuRemove} className="flex items-center gap-1 text-[10px] font-semibold text-red-500 hover:text-red-600 transition">
+                                <X className="w-3 h-3" /> Remove
+                              </button>
+                            ) : (
+                              <button onClick={() => menuFileRef.current?.click()} disabled={isUploadingMenu}
+                                className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg transition"
+                                style={{ background: "#EDE9FE", color: "#6D28D9" }}>
+                                {isUploadingMenu ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                                {isUploadingMenu ? "Uploading…" : "Upload"}
+                              </button>
+                            )}
+                          </div>
+                          {business.menuImage && (
+                            <div className="border-t border-gray-100 px-3 py-2 bg-gray-50">
+                              <p className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                                <Check className="w-3 h-3" /> Menu uploaded — visible on site
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        {/* Book Table — always on for food sites */}
+                        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-200">
+                          <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+                          <span className="text-xs font-semibold text-gray-700">Book Table</span>
+                          <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "#DCFCE7", color: "#16A34A" }}>Always on</span>
+                        </div>
+                      </div>
+                    </section>
+                  )}
+
                   <section>
                     <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Add Page</p>
                     <div className="space-y-1">
                       {([
-                        { key: "services", label: isGym ? "Memberships" : "Services", enabled: !!pages.services },
-                        { key: "products", label: "Products",  enabled: !!pages.products },
+                        ...(isGym ? [{ key: "services", label: "Memberships", enabled: !!pages.services }] : []),
+                        ...(isGym ? [{ key: "products", label: "Products", enabled: !!pages.products }] : []),
                         { key: "contact",  label: "Contact",   enabled: !!pages.contact  },
                         ...(isGym ? [{ key: "trainers", label: "Trainers", enabled: !!(pages as any).trainers }] : []),
                       ]).map(({ key, label, enabled }) => (

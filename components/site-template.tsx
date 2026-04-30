@@ -216,6 +216,99 @@ function MenuFloater({ business, colorScheme }: { business: BusinessData; colorS
   )
 }
 
+// ─── Book Table floater — food sites only ──────────────────────────────────
+function BookTableFloater({ business, colorScheme }: { business: BusinessData; colorScheme: ColorScheme }) {
+  const ref = useRef<HTMLDialogElement>(null)
+  const [guests, setGuests] = useState("2")
+  const [date, setDate] = useState("")
+  const [time, setTime] = useState("19:00")
+
+  if (business.isGym) return null
+
+  const handleConfirm = () => {
+    const formattedDate = date ? new Date(date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) : ""
+    const formattedTime = time ? new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : ""
+    const message = `I'd like to book a table for ${guests} guest${Number(guests) !== 1 ? "s" : ""}${formattedDate ? ` on ${formattedDate}` : ""}${formattedTime ? ` at ${formattedTime}` : ""}.`
+    window.dispatchEvent(new CustomEvent("book-table-request", { detail: { guests, date, time, message } }))
+    ref.current?.close()
+  }
+
+  const today = new Date().toISOString().split("T")[0]
+
+  return (
+    <>
+      <button
+        onClick={() => ref.current?.showModal()}
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-white shadow-2xl hover:scale-105 active:scale-95 transition-transform"
+        style={{ backgroundColor: colorScheme.primary }}
+      >
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 5h18M3 12h18M3 19h18" /></svg>
+        Book Table
+      </button>
+
+      <dialog
+        ref={ref}
+        style={{
+          padding: 0, border: "none", borderRadius: 16,
+          width: "min(360px, calc(100vw - 32px))",
+          overflow: "hidden", margin: "auto", inset: 0, position: "fixed",
+        }}
+        className="shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+        onClick={(e) => { if (e.target === ref.current) ref.current?.close() }}
+      >
+        <div style={{ background: "#fff" }}>
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "16px 20px", borderBottom: "1px solid #e5e7eb",
+          }}>
+            <span style={{ fontWeight: 700, fontSize: 15 }}>Reserve a Table</span>
+            <button onClick={() => ref.current?.close()}
+              style={{ width: 28, height: 28, borderRadius: "50%", border: "none", background: "#f3f4f6", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <X style={{ width: 13, height: 13, color: "#555" }} />
+            </button>
+          </div>
+          <div style={{ padding: "20px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9ca3af", marginBottom: 6 }}>Guests</label>
+                <select value={guests} onChange={e => setGuests(e.target.value)}
+                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #e5e7eb", fontSize: 14, outline: "none", background: "#fff" }}>
+                  {Array.from({ length: 20 }, (_, i) => i + 1).map(n => (
+                    <option key={n} value={String(n)}>{n} {n === 1 ? "Guest" : "Guests"}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9ca3af", marginBottom: 6 }}>Date</label>
+                <input type="date" value={date} min={today} onChange={e => setDate(e.target.value)}
+                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #e5e7eb", fontSize: 14, outline: "none", background: "#fff", boxSizing: "border-box" }} />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9ca3af", marginBottom: 6 }}>Time</label>
+                <input type="time" value={time} onChange={e => setTime(e.target.value)}
+                  style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1.5px solid #e5e7eb", fontSize: 14, outline: "none", background: "#fff", boxSizing: "border-box" }} />
+              </div>
+            </div>
+            <button
+              onClick={handleConfirm}
+              disabled={!date || !time}
+              style={{
+                width: "100%", marginTop: 20, padding: "12px 0", borderRadius: 10,
+                border: "none", cursor: date && time ? "pointer" : "not-allowed",
+                fontWeight: 700, fontSize: 14, color: "#fff",
+                background: date && time ? colorScheme.primary : "#d1d5db",
+                transition: "background 0.2s",
+              }}
+            >
+              Confirm Booking
+            </button>
+          </div>
+        </div>
+      </dialog>
+    </>
+  )
+}
+
 export function SiteTemplate({ business, config, isPreview = false, onBusinessChange }: SiteTemplateProps) {
   const { colorScheme, layout, fontStyle, animations } = config
   const isDark = config.theme === "dark" || (config.theme !== "light" && colorScheme.id === "midnight")
@@ -255,6 +348,19 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
     setActivePage("contact")
     document.getElementById("section-contact")?.scrollIntoView({ behavior: "smooth" })
   }
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { message } = (e as CustomEvent).detail
+      setPrefilledService({ id: "booking", title: "Table Booking", price: message, description: message })
+      if (pages.contact) {
+        setActivePage("contact")
+        setTimeout(() => document.getElementById("section-contact")?.scrollIntoView({ behavior: "smooth" }), 50)
+      }
+    }
+    window.addEventListener("book-table-request", handler)
+    return () => window.removeEventListener("book-table-request", handler)
+  }, [pages.contact])
 
 
   const handleRemovePhoto = (indexToRemove: number) => {
@@ -373,6 +479,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "bold") return (
@@ -382,6 +489,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "executive") return (
@@ -391,6 +499,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "neon") return (
@@ -400,6 +509,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "sport") return (
@@ -409,6 +519,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "editorial") return (
@@ -418,6 +529,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "dark-power") return (
@@ -427,6 +539,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "sunrise") return (
@@ -436,6 +549,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "glass") return (
@@ -445,6 +559,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "retro") return (
@@ -454,6 +569,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
   if (layout === "coastal") return (
@@ -463,6 +579,7 @@ export function SiteTemplate({ business, config, isPreview = false, onBusinessCh
       {floatingNav}
       {cartDrawer}
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </>
   )
 
@@ -1385,6 +1502,7 @@ function LuxuryTemplate({ business, config, isPreview = false, onBusinessChange 
         </div>
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -1700,6 +1818,7 @@ function BoldTemplate({ business, config, isPreview = false, onBusinessChange }:
         </div>
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -2063,6 +2182,7 @@ function ExecutiveTemplate({ business, config, isPreview = false, onBusinessChan
         </div>
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -2283,6 +2403,7 @@ function NeonTemplate({ business, config, isPreview = false, onBusinessChange }:
         {!isPreview && <p className="mt-6 text-xs text-white/20">Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -2505,6 +2626,7 @@ function SportTemplate({ business, config, isPreview = false, onBusinessChange }
         {!isPreview && <p className="text-center text-xs mt-6" style={{ color: muted }}>Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -2717,6 +2839,7 @@ function EditorialTemplate({ business, config, isPreview = false, onBusinessChan
         {!isPreview && <p className="text-center text-xs mt-6" style={{ color: muted }}>Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -2884,6 +3007,7 @@ function DarkPowerTemplate({ business, config, isPreview = false, onBusinessChan
         {!isPreview && <p className="text-center text-xs mt-6 text-white/20">Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -3102,6 +3226,7 @@ function SunriseTemplate({ business, config, isPreview = false, onBusinessChange
         {!isPreview && <p className="mt-6 text-xs" style={{ color: muted }}>Website created with <a href="/" className="underline" style={{ color: colorScheme.primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -3122,6 +3247,22 @@ function GlassTemplate({ business, config, isPreview = false, onBusinessChange }
   const glassCardBorder = glassLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.07)"
   const glassText = glassLight ? "#111" : "#fff"
   const glassMuted = glassLight ? "#555" : "rgba(255,255,255,0.6)"
+
+  const handleRemovePhoto = (i: number) => {
+    if (onBusinessChange) onBusinessChange({ ...business, photos: business.photos.filter((_, idx) => idx !== i) })
+  }
+  const handleUpdatePhotos = (newPhotos: any[]) => {
+    if (onBusinessChange) onBusinessChange({ ...business, photos: newPhotos })
+  }
+  const handleUpdateDescription = (val: string) => {
+    if (onBusinessChange) onBusinessChange({ ...business, description: val })
+  }
+  const handleUpdateFeature = (index: number, val: string) => {
+    if (onBusinessChange) {
+      const f = [...business.features]; f[index] = val
+      onBusinessChange({ ...business, features: f })
+    }
+  }
 
   return (
     <div className={cn("min-h-screen", fontClass)} style={{ background: glassBg, color: glassText }}>
@@ -3171,7 +3312,7 @@ function GlassTemplate({ business, config, isPreview = false, onBusinessChange }
           <AnimatedDiv animate={animations} {...fadeIn}>
             <p className="text-xs tracking-[0.35em] uppercase mb-4 font-semibold" style={{ color: primary }}>About Us</p>
             <h2 className="text-3xl md:text-4xl font-black mb-5 leading-tight">{business.description.slice(0, 60)}…</h2>
-            <p className="leading-relaxed text-sm" style={{ color: glassMuted }}>{business.description}</p>
+            <InlineTextArea value={business.description} onChange={handleUpdateDescription} disabled={!isPreview || !onBusinessChange} className="leading-relaxed text-sm block w-full" style={{ color: glassMuted }} />
             <div className="mt-8 grid grid-cols-3 gap-4">
               {[{ label: "Rating", value: `${business.rating}★` }, { label: "Reviews", value: `${business.totalReviews}+` }, { label: "Price", value: business.priceLevel }].map(s => (
                 <div key={s.label} className="p-4 rounded-2xl text-center"
@@ -3209,7 +3350,7 @@ function GlassTemplate({ business, config, isPreview = false, onBusinessChange }
                   <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${primary}33` }}>
                     <Check className="w-4 h-4" style={{ color: primary }} />
                   </div>
-                  <p className="text-sm font-semibold" style={{ color: glassText }}>{f}</p>
+                  <InlineTextArea value={f} rows={2} onChange={(v) => handleUpdateFeature(i, v)} disabled={!isPreview || !onBusinessChange} className="text-sm font-semibold w-full" style={{ color: glassText }} />
                 </div>
               </AnimatedDiv>
             ))}
@@ -3221,15 +3362,23 @@ function GlassTemplate({ business, config, isPreview = false, onBusinessChange }
       {business.photos.length > 1 && (
         <section className="px-6 md:px-12 py-16" style={{ background: glassBg2 }}>
           <div className="max-w-5xl mx-auto">
-            <AnimatedDiv animate={animations} {...fadeIn} className="text-center mb-10">
-              <p className="text-xs tracking-[0.35em] uppercase mb-2 font-semibold" style={{ color: primary }}>Gallery</p>
-              <h2 className="text-3xl font-black">Our Space</h2>
-            </AnimatedDiv>
+            <div className="flex items-center justify-between mb-10">
+              <AnimatedDiv animate={animations} {...fadeIn}>
+                <p className="text-xs tracking-[0.35em] uppercase mb-2 font-semibold" style={{ color: primary }}>Gallery</p>
+                <h2 className="text-3xl font-black">Our Space</h2>
+              </AnimatedDiv>
+              {isPreview && onBusinessChange && <PhotoManagerModal photos={business.photos} availablePhotos={business.availablePhotos} onChange={handleUpdatePhotos} />}
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {business.photos.slice(0, 6).map((p, i) => (
-                <div key={i} className={cn("overflow-hidden rounded-2xl", i === 0 && "md:col-span-2")}
+                <div key={i} className={cn("overflow-hidden rounded-2xl group relative", i === 0 && "md:col-span-2")}
                   style={{ aspectRatio: i === 0 ? "16/9" : "1", boxShadow: "0 8px 32px rgba(0,0,0,0.2)" }}>
                   <img src={p.url} alt={p.caption} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                  {isPreview && onBusinessChange && (
+                    <button onClick={() => handleRemovePhoto(i)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm">
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -3245,16 +3394,31 @@ function GlassTemplate({ business, config, isPreview = false, onBusinessChange }
               <p className="text-xs tracking-[0.35em] uppercase mb-2 font-semibold" style={{ color: primary }}>Testimonials</p>
               <h2 className="text-3xl font-black">What People Say</h2>
             </AnimatedDiv>
-            <div className="grid md:grid-cols-3 gap-4">
-              {business.reviews.slice(0, 3).map((r, i) => (
-                <div key={i} className="p-6 rounded-2xl h-full"
-                  style={{ background: glassCard, backdropFilter: "blur(12px)", border: `1px solid ${glassCardBorder}` }}>
-                  <div className="flex gap-0.5 mb-4">{[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5" fill={primary} stroke="transparent" />)}</div>
-                  <p className="text-sm leading-relaxed mb-5 italic" style={{ color: glassMuted }}>"{r.text.slice(0, 120)}…"</p>
-                  <p className="font-bold text-sm" style={{ color: primary }}>{r.author}</p>
-                </div>
-              ))}
-            </div>
+            {animations ? (
+              <AnimatedReviews
+                reviews={business.reviews}
+                colorScheme={colorScheme}
+                isDark={!glassLight}
+                customStyles={{
+                  cardBg: glassCard,
+                  border: glassCardBorder,
+                  muted: glassMuted,
+                  padding: "p-6",
+                  rounded: "rounded-2xl",
+                }}
+              />
+            ) : (
+              <div className="grid md:grid-cols-3 gap-4">
+                {business.reviews.slice(0, 3).map((r, i) => (
+                  <div key={i} className="p-6 rounded-2xl h-full"
+                    style={{ background: glassCard, backdropFilter: "blur(12px)", border: `1px solid ${glassCardBorder}` }}>
+                    <div className="flex gap-0.5 mb-4">{[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5" fill={primary} stroke="transparent" />)}</div>
+                    <p className="text-sm leading-relaxed mb-5 italic" style={{ color: glassMuted }}>"{r.text.slice(0, 120)}…"</p>
+                    <p className="font-bold text-sm" style={{ color: primary }}>{r.author}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -3307,6 +3471,7 @@ function GlassTemplate({ business, config, isPreview = false, onBusinessChange }
         {!isPreview && <p className="mt-6 text-[11px] text-white/25">Website created with <a href="/" className="underline" style={{ color: primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -3323,6 +3488,22 @@ function RetroTemplate({ business, config, isPreview = false, onBusinessChange }
   const cream = retroDark ? "#1a0f07" : "#FBF6EE"
   const tan   = retroDark ? "#2e1a0e" : "#E8D9C4"
   const dark  = retroDark ? "#f0e8d8" : "#2C1A0E"
+
+  const handleRemovePhoto = (i: number) => {
+    if (onBusinessChange) onBusinessChange({ ...business, photos: business.photos.filter((_, idx) => idx !== i) })
+  }
+  const handleUpdatePhotos = (newPhotos: any[]) => {
+    if (onBusinessChange) onBusinessChange({ ...business, photos: newPhotos })
+  }
+  const handleUpdateDescription = (val: string) => {
+    if (onBusinessChange) onBusinessChange({ ...business, description: val })
+  }
+  const handleUpdateFeature = (index: number, val: string) => {
+    if (onBusinessChange) {
+      const f = [...business.features]; f[index] = val
+      onBusinessChange({ ...business, features: f })
+    }
+  }
 
   return (
     <div className={cn("min-h-screen", fontClass)} style={{ backgroundColor: cream, color: dark }}>
@@ -3374,7 +3555,7 @@ function RetroTemplate({ business, config, isPreview = false, onBusinessChange }
           <AnimatedDiv animate={animations} {...fadeIn}>
             <p className="text-xs tracking-[0.4em] uppercase font-bold mb-4" style={{ color: amber }}>Our Story</p>
             <h2 className="text-3xl md:text-4xl font-black mb-5 leading-tight" style={{ fontFamily: "Georgia, serif" }}>{business.description.slice(0, 55)}…</h2>
-            <p className="leading-relaxed text-sm" style={{ color: "#5c4033" }}>{business.description}</p>
+            <InlineTextArea value={business.description} onChange={handleUpdateDescription} disabled={!isPreview || !onBusinessChange} className="leading-relaxed text-sm block w-full" style={{ color: "#5c4033" }} />
             <div className="mt-8 flex items-center gap-6">
               {[{ label: "Rating", value: `${business.rating}` }, { label: "Reviews", value: `${business.totalReviews}` }, { label: "Price", value: business.priceLevel }].map((s, i) => (
                 <div key={s.label} className={cn("text-center", i > 0 && "pl-6 border-l")} style={{ borderColor: tan }}>
@@ -3406,16 +3587,24 @@ function RetroTemplate({ business, config, isPreview = false, onBusinessChange }
       {business.photos.length > 1 && (
         <section className="px-6 md:px-12 py-16" style={{ background: tan }}>
           <div className="max-w-5xl mx-auto">
-            <AnimatedDiv animate={animations} {...fadeIn} className="text-center mb-10">
-              <p className="text-xs tracking-[0.4em] uppercase font-bold mb-2" style={{ color: amber }}>Gallery</p>
-              <h2 className="text-3xl font-black" style={{ fontFamily: "Georgia, serif" }}>A Glimpse Inside</h2>
-            </AnimatedDiv>
+            <div className="flex items-center justify-between mb-10">
+              <AnimatedDiv animate={animations} {...fadeIn} className="text-center">
+                <p className="text-xs tracking-[0.4em] uppercase font-bold mb-2" style={{ color: amber }}>Gallery</p>
+                <h2 className="text-3xl font-black" style={{ fontFamily: "Georgia, serif" }}>A Glimpse Inside</h2>
+              </AnimatedDiv>
+              {isPreview && onBusinessChange && <PhotoManagerModal photos={business.photos} availablePhotos={business.availablePhotos} onChange={handleUpdatePhotos} />}
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {business.photos.slice(0, 6).map((p, i) => (
                 <AnimatedDiv key={i} animate={animations} {...fadeIn} style={{ transitionDelay: `${i * 0.08}s` }}>
-                  <div className="bg-white p-2 pb-8 shadow-md cursor-pointer" style={{ borderRadius: "2px", transform: `rotate(${(i % 3 - 1) * 1.5}deg)` }}>
+                  <div className="bg-white p-2 pb-8 shadow-md cursor-pointer group relative" style={{ borderRadius: "2px", transform: `rotate(${(i % 3 - 1) * 1.5}deg)` }}>
                     <img src={p.url} alt={p.caption} className="w-full aspect-square object-cover" />
                     <p className="mt-2 text-center text-[11px] italic" style={{ color: "#a0856e" }}>{p.caption}</p>
+                    {isPreview && onBusinessChange && (
+                      <button onClick={() => handleRemovePhoto(i)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm">
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </AnimatedDiv>
               ))}
@@ -3431,18 +3620,33 @@ function RetroTemplate({ business, config, isPreview = false, onBusinessChange }
             <p className="text-xs tracking-[0.4em] uppercase font-bold mb-2" style={{ color: amber }}>Testimonials</p>
             <h2 className="text-3xl font-black" style={{ fontFamily: "Georgia, serif" }}>Heard on the Street</h2>
           </AnimatedDiv>
-          <div className="grid md:grid-cols-3 gap-6">
-            {business.reviews.slice(0, 3).map((r, i) => (
-              <AnimatedDiv key={i} animate={animations} {...fadeIn} style={{ transitionDelay: `${i * 0.1}s` }}>
-                <div className="p-6 h-full" style={{ background: cream, border: `1px solid ${tan}`, borderTop: `4px solid ${amber}`, borderRadius: "2px" }}>
-                  <div className="flex gap-0.5 mb-4">{[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5" fill={j < r.rating ? amber : "transparent"} stroke={amber} />)}</div>
-                  <p className="text-sm leading-relaxed mb-4 italic" style={{ color: "#5c4033" }}>"{r.text.slice(0, 120)}…"</p>
-                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: amber }}>{r.author}</p>
-                  <p className="text-[10px]" style={{ color: "#a0856e" }}>{r.date}</p>
-                </div>
-              </AnimatedDiv>
-            ))}
-          </div>
+          {animations ? (
+            <AnimatedReviews
+              reviews={business.reviews}
+              colorScheme={colorScheme}
+              isDark={retroDark}
+              customStyles={{
+                cardBg: cream,
+                border: tan,
+                muted: "#5c4033",
+                padding: "p-6",
+                rounded: "rounded-none",
+              }}
+            />
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {business.reviews.slice(0, 3).map((r, i) => (
+                <AnimatedDiv key={i} animate={animations} {...fadeIn} style={{ transitionDelay: `${i * 0.1}s` }}>
+                  <div className="p-6 h-full" style={{ background: cream, border: `1px solid ${tan}`, borderTop: `4px solid ${amber}`, borderRadius: "2px" }}>
+                    <div className="flex gap-0.5 mb-4">{[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5" fill={j < r.rating ? amber : "transparent"} stroke={amber} />)}</div>
+                    <p className="text-sm leading-relaxed mb-4 italic" style={{ color: "#5c4033" }}>"{r.text.slice(0, 120)}…"</p>
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: amber }}>{r.author}</p>
+                    <p className="text-[10px]" style={{ color: "#a0856e" }}>{r.date}</p>
+                  </div>
+                </AnimatedDiv>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -3496,6 +3700,7 @@ function RetroTemplate({ business, config, isPreview = false, onBusinessChange }
         {!isPreview && <p className="mt-6 text-[11px] opacity-40">Website created with <a href="/" className="underline" style={{ color: amber }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }
@@ -3511,6 +3716,22 @@ function CoastalTemplate({ business, config, isPreview = false, onBusinessChange
   const bg = colorScheme.background
   const muted = colorScheme.muted
 
+  const handleRemovePhoto = (i: number) => {
+    if (onBusinessChange) onBusinessChange({ ...business, photos: business.photos.filter((_, idx) => idx !== i) })
+  }
+  const handleUpdatePhotos = (newPhotos: any[]) => {
+    if (onBusinessChange) onBusinessChange({ ...business, photos: newPhotos })
+  }
+  const handleUpdateDescription = (val: string) => {
+    if (onBusinessChange) onBusinessChange({ ...business, description: val })
+  }
+  const handleUpdateFeature = (index: number, val: string) => {
+    if (onBusinessChange) {
+      const f = [...business.features]; f[index] = val
+      onBusinessChange({ ...business, features: f })
+    }
+  }
+
   return (
     <div className={cn("min-h-screen", fontClass)} style={{ backgroundColor: bg, color: colorScheme.text }}>
 
@@ -3520,7 +3741,7 @@ function CoastalTemplate({ business, config, isPreview = false, onBusinessChange
           <AnimatedDiv animate={animations} initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true } as any} transition={{ duration: 0.8 }}>
             <p className="text-xs tracking-[0.4em] uppercase font-bold mb-5" style={{ color: primary }}>{business.category}</p>
             <h1 className="text-5xl md:text-6xl font-black leading-tight mb-6">{business.name}</h1>
-            <p className="text-base leading-relaxed mb-8 max-w-md" style={{ color: muted }}>{business.description.slice(0, 140)}…</p>
+            <InlineTextArea value={business.description} onChange={handleUpdateDescription} disabled={!isPreview || !onBusinessChange} className="text-base leading-relaxed mb-8 max-w-md block w-full" style={{ color: muted }} />
             <div className="flex flex-wrap gap-3 mb-8">
               <div className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
                 style={{ background: `${primary}15`, color: primary }}>
@@ -3590,7 +3811,7 @@ function CoastalTemplate({ business, config, isPreview = false, onBusinessChange
                 <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: `${primary}15` }}>
                   <Check className="w-4 h-4" style={{ color: primary }} />
                 </div>
-                <p className="text-sm font-semibold">{f}</p>
+                <InlineTextArea value={f} rows={2} onChange={(v) => handleUpdateFeature(i, v)} disabled={!isPreview || !onBusinessChange} className="text-sm font-semibold w-full" />
               </div>
             </AnimatedDiv>
           ))}
@@ -3601,15 +3822,23 @@ function CoastalTemplate({ business, config, isPreview = false, onBusinessChange
       {business.photos.length > 1 && (
         <section className="px-6 md:px-12 py-16" style={{ background: `${primary}06` }}>
           <div className="max-w-5xl mx-auto">
-            <AnimatedDiv animate={animations} {...fadeIn} className="text-center mb-10">
-              <p className="text-xs tracking-[0.4em] uppercase font-bold mb-2" style={{ color: primary }}>Gallery</p>
-              <h2 className="text-3xl font-black">Our Space</h2>
-            </AnimatedDiv>
+            <div className="flex items-center justify-between mb-10">
+              <AnimatedDiv animate={animations} {...fadeIn}>
+                <p className="text-xs tracking-[0.4em] uppercase font-bold mb-2" style={{ color: primary }}>Gallery</p>
+                <h2 className="text-3xl font-black">Our Space</h2>
+              </AnimatedDiv>
+              {isPreview && onBusinessChange && <PhotoManagerModal photos={business.photos} availablePhotos={business.availablePhotos} onChange={handleUpdatePhotos} />}
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {business.photos.slice(0, 6).map((p, i) => (
-                <div key={i} className={cn("overflow-hidden rounded-2xl", i === 0 && "md:col-span-2")}
+                <div key={i} className={cn("overflow-hidden rounded-2xl group relative", i === 0 && "md:col-span-2")}
                   style={{ aspectRatio: i === 0 ? "16/9" : "1", boxShadow: `0 4px 20px ${primary}18` }}>
                   <img src={p.url} alt={p.caption} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                  {isPreview && onBusinessChange && (
+                    <button onClick={() => handleRemovePhoto(i)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity hover:bg-destructive z-20 backdrop-blur-sm">
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -3624,24 +3853,40 @@ function CoastalTemplate({ business, config, isPreview = false, onBusinessChange
             <p className="text-xs tracking-[0.4em] uppercase font-bold mb-2" style={{ color: primary }}>Reviews</p>
             <h2 className="text-3xl font-black">Happy Customers</h2>
           </AnimatedDiv>
-          <div className="grid md:grid-cols-3 gap-5">
-            {business.reviews.slice(0, 3).map((r, i) => (
-              <AnimatedDiv key={i} animate={animations} {...fadeIn} style={{ transitionDelay: `${i * 0.1}s` }}>
-                <div className="p-6 rounded-2xl h-full flex flex-col"
-                  style={{ background: bg, border: `1.5px solid ${primary}18`, boxShadow: `0 4px 20px ${primary}10` }}>
-                  <div className="flex gap-0.5 mb-4">{[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4" fill={j < r.rating ? primary : "transparent"} stroke={primary} />)}</div>
-                  <p className="text-sm leading-relaxed flex-1 mb-4" style={{ color: muted }}>"{r.text.slice(0, 120)}…"</p>
-                  <div className="flex items-center gap-3">
-                    {r.avatar && <img src={r.avatar} alt={r.author} className="w-8 h-8 rounded-full object-cover" />}
-                    <div>
-                      <p className="text-sm font-bold">{r.author}</p>
-                      <p className="text-xs" style={{ color: muted }}>{r.date}</p>
+          {animations ? (
+            <AnimatedReviews
+              reviews={business.reviews}
+              colorScheme={colorScheme}
+              isDark={false}
+              customStyles={{
+                cardBg: bg,
+                border: `${primary}18`,
+                muted: muted,
+                padding: "p-6",
+                rounded: "rounded-2xl",
+                boxShadow: `0 4px 20px ${primary}10`,
+              }}
+            />
+          ) : (
+            <div className="grid md:grid-cols-3 gap-5">
+              {business.reviews.slice(0, 3).map((r, i) => (
+                <AnimatedDiv key={i} animate={animations} {...fadeIn} style={{ transitionDelay: `${i * 0.1}s` }}>
+                  <div className="p-6 rounded-2xl h-full flex flex-col"
+                    style={{ background: bg, border: `1.5px solid ${primary}18`, boxShadow: `0 4px 20px ${primary}10` }}>
+                    <div className="flex gap-0.5 mb-4">{[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4" fill={j < r.rating ? primary : "transparent"} stroke={primary} />)}</div>
+                    <p className="text-sm leading-relaxed flex-1 mb-4" style={{ color: muted }}>"{r.text.slice(0, 120)}…"</p>
+                    <div className="flex items-center gap-3">
+                      {r.avatar && <img src={r.avatar} alt={r.author} className="w-8 h-8 rounded-full object-cover" />}
+                      <div>
+                        <p className="text-sm font-bold">{r.author}</p>
+                        <p className="text-xs" style={{ color: muted }}>{r.date}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </AnimatedDiv>
-            ))}
-          </div>
+                </AnimatedDiv>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -3690,6 +3935,7 @@ function CoastalTemplate({ business, config, isPreview = false, onBusinessChange
         {!isPreview && <p className="mt-6 text-[11px]" style={{ color: muted }}>Website created with <a href="/" className="underline" style={{ color: primary }}>MapToSite</a></p>}
       </footer>
       <MenuFloater business={business} colorScheme={colorScheme} />
+      <BookTableFloater business={business} colorScheme={colorScheme} />
     </div>
   )
 }

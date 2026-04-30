@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { BusinessData, ColorScheme, ServiceItem } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 import { Phone, Instagram, Linkedin, Facebook, Twitter, Send, CheckCircle } from "lucide-react"
@@ -26,6 +26,19 @@ export function ContactPage({ business, colorScheme, fontClass, prefilledService
   })
   const [submitted, setSubmitted] = useState(false)
   const [sending, setSending] = useState(false)
+
+  useEffect(() => {
+    if (!prefilledService) return
+    setForm(prev => ({
+      ...prev,
+      service: prefilledService.title,
+      message: prefilledService.id === "cart"
+        ? `I'd like to order:\n${prefilledService.price}`
+        : prefilledService.id === "booking"
+        ? prefilledService.price ?? ""
+        : `I'd like to book: ${prefilledService.title}${prefilledService.price ? ` (${prefilledService.price})` : ""}`,
+    }))
+  }, [prefilledService?.id])
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
 
