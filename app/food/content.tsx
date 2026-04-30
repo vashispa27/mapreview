@@ -65,6 +65,12 @@ function RestaurantNav() {
 
           {/* Desktop right */}
           <div className="hidden md:flex items-center gap-3">
+            <a
+              href="#pricing"
+              className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Pricing
+            </a>
             {status === "loading" ? (
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
             ) : session ? (
@@ -124,6 +130,13 @@ function RestaurantNav() {
               exit={{ opacity: 0, y: -8 }}
               className="md:hidden border-t border-border bg-background/95 backdrop-blur-lg px-4 py-4 flex flex-col gap-3"
             >
+              <a
+                href="#pricing"
+                className="text-sm font-semibold py-2 border-b border-border"
+                onClick={() => setMobileOpen(false)}
+              >
+                Pricing
+              </a>
               {session ? (
                 <>
                   <div className="flex items-center gap-3 pb-3 border-b border-border">
@@ -963,39 +976,68 @@ function HowItWorks() {
 // ─── Pricing ──────────────────────────────────────────────────────────────────
 
 function RestaurantPricing() {
+  const { data: session } = useSession()
+  const [loginModalOpen, setLoginModalOpen] = useState(false)
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+
+  const handleCheckout = async (plan: string) => {
+    if (!session) { setLoginModalOpen(true); return }
+    setLoadingPlan(plan)
+    try {
+      const res = await fetch("/api/payments/create-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert("Failed to initiate checkout. Please try again.")
+      }
+    } catch {
+      alert("Something went wrong. Please try again.")
+    } finally {
+      setLoadingPlan(null)
+    }
+  }
+
   const tiers = [
     {
+      id: "food-base",
       name: "Base",
-      price: "₹999",
+      price: "₹149",
       period: "/month",
       desc: "Your restaurant website, live today",
       badge: null,
       features: [
-        "Restaurant website from Google Maps",
-        "Digital menu with photos & prices",
-        "Photo gallery — auto-pulled from Google Maps",
-        "Google reviews displayed on your website",
-        "Table booking form",
-        "Run offers and promotions anytime",
-        "Free hosting & unlimited edits",
+        "Manage up to 10 restaurant chains",
+        "Auto-sync photos & reviews from Google Maps",
+        "Free hosting — no extra cost",
+        "Unlimited campaigns & promotions on your page",
+        "Send rewards & coupons to customers",
+        "Free WhatsApp integration",
+        "Unlimited table bookings",
       ],
-      cta: "Get Started Free",
+      cta: "Get Base",
       highlight: false,
     },
     {
+      id: "food-pro",
       name: "Pro",
-      price: "₹9,999",
+      price: "₹1,299",
       period: "/year",
       desc: "Full restaurant marketing platform",
       badge: "Best Value",
       features: [
-        "Everything in Base",
-        "Customer loyalty program",
-        "Send offers to repeat customers",
-        "GST billing for catering & events",
-        "Free custom domain (yourrestaurant.com)",
-        "Advanced SEO — rank higher on Google",
-        "Priority support",
+        "Everything in Base — billed annually",
+        "Manage up to 10 restaurant chains",
+        "Auto-sync photos & reviews from Google Maps",
+        "Free hosting — no extra cost",
+        "Unlimited campaigns & promotions on your page",
+        "Send rewards & coupons to customers",
+        "Free WhatsApp integration",
+        "Unlimited table bookings",
       ],
       cta: "Get Pro",
       highlight: true,
@@ -1003,79 +1045,85 @@ function RestaurantPricing() {
   ]
 
   return (
-    <section className="py-24 px-4">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">Simple, honest pricing</h2>
-          <p className="text-lg text-muted-foreground">No hidden fees. Cancel any time.</p>
-        </motion.div>
+    <>
+      <LoginModal open={loginModalOpen} onOpenChange={setLoginModalOpen} accent="red" />
+      <section id="pricing" className="py-24 px-4">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">Simple, honest pricing</h2>
+            <p className="text-lg text-muted-foreground">No hidden fees. Cancel any time.</p>
+          </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {tiers.map((tier, i) => (
-            <motion.div
-              key={tier.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className={cn(
-                "relative rounded-3xl border-2 p-8 flex flex-col",
-                tier.highlight
-                  ? "border-red-500 bg-card shadow-2xl shadow-red-500/10"
-                  : "border-border bg-card shadow-lg"
-              )}
-            >
-              {tier.badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full">
-                  {tier.badge}
-                </div>
-              )}
-              <div className="mb-6">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center", tier.highlight ? "bg-red-600/10" : "bg-muted")}>
-                    {tier.highlight
-                      ? <Sparkles className="w-4 h-4 text-red-600" />
-                      : <Zap className="w-4 h-4 text-muted-foreground" />}
-                  </div>
-                  <h3 className="text-2xl font-black uppercase italic tracking-tight">{tier.name}</h3>
-                </div>
-                <p className="text-sm text-muted-foreground mb-4">{tier.desc}</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black tracking-tighter">{tier.price}</span>
-                  <span className="text-muted-foreground font-bold text-sm">{tier.period}</span>
-                </div>
-              </div>
-              <ul className="space-y-3 flex-1 mb-8">
-                {tier.features.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm">
-                    <div className={cn("w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5", tier.highlight ? "bg-red-600/10" : "bg-muted")}>
-                      <Check className={cn("w-3 h-3", tier.highlight ? "text-red-600" : "text-muted-foreground")} strokeWidth={3} />
-                    </div>
-                    <span className="font-medium opacity-90">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
+          <div className="grid md:grid-cols-2 gap-8">
+            {tiers.map((tier, i) => (
+              <motion.div
+                key={tier.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
                 className={cn(
-                  "w-full h-14 text-base font-black uppercase tracking-widest",
-                  tier.highlight && "bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/25"
+                  "relative rounded-3xl border-2 p-8 flex flex-col",
+                  tier.highlight
+                    ? "border-red-500 bg-card shadow-2xl shadow-red-500/10"
+                    : "border-border bg-card shadow-lg"
                 )}
-                variant={tier.highlight ? "default" : "outline"}
-                size="lg"
-                onClick={() => window.dispatchEvent(new Event("focus-restaurant-input"))}
               >
-                {tier.cta}
-              </Button>
-            </motion.div>
-          ))}
+                {tier.badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full">
+                    {tier.badge}
+                  </div>
+                )}
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center", tier.highlight ? "bg-red-600/10" : "bg-muted")}>
+                      {tier.highlight
+                        ? <Sparkles className="w-4 h-4 text-red-600" />
+                        : <Zap className="w-4 h-4 text-muted-foreground" />}
+                    </div>
+                    <h3 className="text-2xl font-black uppercase italic tracking-tight">{tier.name}</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">{tier.desc}</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-black tracking-tighter">{tier.price}</span>
+                    <span className="text-muted-foreground font-bold text-sm">{tier.period}</span>
+                  </div>
+                </div>
+                <ul className="space-y-3 flex-1 mb-8">
+                  {tier.features.map((f) => (
+                    <li key={f} className="flex items-start gap-3 text-sm">
+                      <div className={cn("w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5", tier.highlight ? "bg-red-600/10" : "bg-muted")}>
+                        <Check className={cn("w-3 h-3", tier.highlight ? "text-red-600" : "text-muted-foreground")} strokeWidth={3} />
+                      </div>
+                      <span className="font-medium opacity-90">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  className={cn(
+                    "w-full h-14 text-base font-black uppercase tracking-widest",
+                    tier.highlight && "bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/25"
+                  )}
+                  variant={tier.highlight ? "default" : "outline"}
+                  size="lg"
+                  disabled={loadingPlan !== null}
+                  onClick={() => handleCheckout(tier.id)}
+                >
+                  {loadingPlan === tier.id ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : tier.cta}
+                </Button>
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }
 
