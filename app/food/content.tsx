@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
   MapPin, ArrowRight, Check, X, Sparkles, Star,
   UtensilsCrossed, Zap, Search, Loader2, HelpCircle,
-  BookOpen, Gift, Tag, CalendarCheck,
+  BookOpen, CalendarCheck, MessageSquare, LayoutDashboard,
   LayoutGrid, LogOut, Menu as MenuIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -471,27 +471,23 @@ function Hero() {
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-[1.1] tracking-tight mb-5"
               >
-                Your restaurant is
-                <br />
-                <span className="text-red-600 relative inline-block">
-                  invisible
-                  <motion.svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 120 8" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.9, duration: 0.6 }}>
-                    <motion.path d="M2 6 Q60 2 118 6" stroke="#dc2626" strokeWidth="3" fill="none" strokeLinecap="round" />
-                  </motion.svg>
-                </span>{" "}
-                to real customers.
+                Turn Your Restaurant&apos;s Google Visitors into{" "}
+                <span className="text-red-600">Orders & Table Bookings</span>
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                 className="text-base md:text-lg text-muted-foreground mb-6 max-w-xl leading-relaxed"
               >
-                Hundreds of people search &ldquo;restaurants near me&rdquo; every day in your area. They see your
-                competitors&apos; menus, photos, and offers — then they choose.{" "}
-                <span className="text-foreground font-semibold">
-                  If you don&apos;t have a website, you&apos;re not even in the conversation.
-                </span>
+                People are already finding your restaurant on Google.
+                MapToSite helps you turn those visitors into real orders, reservations, and enquiries.
               </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.36 }}
+                className="mb-5"
+              >
+              </motion.div>
 
               {/* Inline search UI */}
               <motion.div
@@ -728,12 +724,12 @@ function TheCost() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
-            Your restaurant is getting passed over{" "}
-            <span className="text-red-400">every single day.</span>
+            Why Your Restaurant Isn&apos;t Getting Enough{" "}
+            <span className="text-red-400">Orders from Google</span>
           </h2>
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto">
-            The decision of where to eat is made before they leave home. If you&apos;re not showing them
-            a menu and photos, someone else is.
+            People are already finding you — but they leave without taking action.
+            Here&apos;s why.
           </p>
         </motion.div>
 
@@ -760,20 +756,23 @@ function TheCost() {
             viewport={{ once: true }}
             className="bg-red-950/30 border border-red-900/40 rounded-3xl p-8"
           >
-            <p className="text-red-400 text-sm font-black uppercase tracking-widest mb-6">Without a website</p>
+            <p className="text-red-400 text-sm font-black uppercase tracking-widest mb-6">The problem</p>
             <div className="space-y-4">
               {[
-                "Customers can't see your menu before visiting",
-                "No way to show off your ambiance or signature dishes",
-                "No place to announce Happy Hour or seasonal deals",
-                "First-time customers have no reason to come back",
-                "You're invisible on Google to anyone who doesn't already know you",
+                "People check your restaurant but don't take action",
+                "Orders go to competitors or third-party aggregators",
+                "No direct booking or enquiry system in place",
+                "Everything depends on third-party apps taking a cut",
               ].map((pain) => (
                 <div key={pain} className="flex items-start gap-3">
                   <X className="w-4 h-4 text-red-500 mt-0.5 shrink-0 stroke-[3]" />
                   <p className="text-sm text-zinc-300">{pain}</p>
                 </div>
               ))}
+            </div>
+            <div className="mt-6 pt-5 border-t border-red-900/40 space-y-2">
+              <p className="text-sm font-black text-zinc-200">👉 You don&apos;t have a visibility problem.</p>
+              <p className="text-sm font-black text-red-400">👉 You have a conversion problem.</p>
             </div>
           </motion.div>
 
@@ -783,14 +782,16 @@ function TheCost() {
             viewport={{ once: true }}
             className="bg-green-950/30 border border-green-900/40 rounded-3xl p-8"
           >
-            <p className="text-green-400 text-sm font-black uppercase tracking-widest mb-6">With MapToSite</p>
+            <p className="text-green-400 text-sm font-black uppercase tracking-widest mb-6">The solution</p>
+            <p className="text-lg font-black text-white mb-5 leading-snug">
+              Convert Your Google Visitors into Direct Customers
+            </p>
             <div className="space-y-4">
               {[
-                "Full menu with photos — visible before they even step in",
-                "Real Google photos show your restaurant at its best",
-                "Post offers, deals, and seasonal menus anytime",
-                "Send loyalty rewards to bring customers back automatically",
-                "Table booking on your website — no calls, no friction",
+                "A dedicated page that converts Google visitors into orders",
+                "Direct WhatsApp & booking — no aggregator commissions",
+                "Customers can reserve a table or enquire instantly",
+                "Your own system, your own customer relationships",
               ].map((benefit) => (
                 <div key={benefit} className="flex items-start gap-3">
                   <Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0 stroke-[3]" />
@@ -810,34 +811,29 @@ function TheCost() {
 function WhatYouGet() {
   const features = [
     {
-      icon: BookOpen,
-      title: "Digital menu with photos",
-      desc: "Every dish with a photo and price. Customers know exactly what to expect before walking in. Update it yourself in seconds.",
+      icon: Star,
+      title: "Professional restaurant website",
+      desc: "Mobile-optimised, auto-built from your Google Maps listing. Photos, reviews, hours and location — all pulled in automatically.",
     },
     {
-      icon: Star,
-      title: "Google reviews on display",
-      desc: "Your real star rating and customer reviews shown front-and-center. Social proof that turns a searcher into a booking.",
+      icon: BookOpen,
+      title: "Menu display system",
+      desc: "Showcase your full menu with photos and prices. Customers know what to expect before they even step in.",
+    },
+    {
+      icon: MessageSquare,
+      title: "WhatsApp order & enquiry integration",
+      desc: "One tap sends customers straight to your WhatsApp. Direct orders and enquiries — no commissions, no middlemen.",
     },
     {
       icon: CalendarCheck,
-      title: "Table booking",
-      desc: "Customers reserve a table directly from your website. Simple form, instant notification to you — fills your tables without phone calls.",
+      title: "Booking & reservation system",
+      desc: "Let customers reserve a table directly from your page. Simple form, instant notification — no phone calls needed.",
     },
     {
-      icon: Gift,
-      title: "Loyalty programs",
-      desc: "Reward your regulars. Set milestones — every 5th visit gets a free dessert — and send rewards automatically to keep people coming back.",
-    },
-    {
-      icon: Tag,
-      title: "Offers & promotions",
-      desc: "Run Happy Hour deals, weekend specials, or seasonal menus directly on your website. Update in seconds, no developer needed.",
-    },
-    {
-      icon: MapPin,
-      title: "Photos & gallery from Google Maps",
-      desc: "Your real restaurant photos pulled automatically. Real ambiance, real dishes — not stock images.",
+      icon: LayoutDashboard,
+      title: "Lead & customer management dashboard",
+      desc: "Track every enquiry, booking and customer in one place. Stay on top of your pipeline without chasing WhatsApp threads.",
     },
   ]
 
@@ -851,12 +847,10 @@ function WhatYouGet() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
-            Everything your restaurant
-            <br />
-            website needs to win customers
+            What You Get
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Built automatically from your Google Maps listing. Menu, photos, reviews, booking — live in 60 seconds.
+            Everything built automatically from your Google Maps listing — live in 60 seconds.
           </p>
         </motion.div>
 
@@ -912,23 +906,22 @@ function LoyaltySpotlight() {
             viewport={{ once: true }}
           >
             <span className="inline-flex items-center gap-1.5 bg-red-100 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-red-200 mb-5">
-              <Gift className="w-3 h-3" /> Turn one-time visitors into regulars
+              <Zap className="w-3 h-3" /> What changes after this
             </span>
             <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-5">
-              A great meal brings them once.
-              <br />
-              <span className="text-red-600">A loyalty program brings them back.</span>
+              What Changes After{" "}
+              <span className="text-red-600">Going Live</span>
             </h2>
             <p className="text-muted-foreground text-base leading-relaxed mb-6">
-              Most restaurants have no way to reach customers after they leave. With MapToSite, you set up
-              a loyalty program and send targeted offers to people who&apos;ve visited — so they come back
-              instead of trying somewhere new.
+              Once your restaurant has its own page, Google visitors stop bouncing — and start ordering,
+              booking, and coming back.
             </p>
             <div className="space-y-4">
               {[
-                { emoji: "🎁", title: "Reward your regulars", desc: "Every 5th visit gets a free dessert, a discount, or a special offer." },
-                { emoji: "📢", title: "Promote deals instantly", desc: "Post a Happy Hour deal or weekend special in 30 seconds. No designer." },
-                { emoji: "📅", title: "Seasonal menus", desc: "Holiday specials, festival offers, new dish launches — publish anytime." },
+                { emoji: "💰", title: "More direct orders", desc: "No aggregator commission. Customers order straight from you via WhatsApp." },
+                { emoji: "🗓️", title: "More table bookings", desc: "A simple booking form on your page fills tables without phone calls." },
+                { emoji: "⭐", title: "Better customer experience", desc: "Menu, photos, hours and contact — all in one place, always up to date." },
+                { emoji: "🏆", title: "Higher trust and credibility", desc: "A professional web presence builds confidence before they even walk in." },
               ].map(({ emoji, title, desc }) => (
                 <div key={title} className="flex items-start gap-4">
                   <span className="text-2xl leading-none shrink-0">{emoji}</span>
@@ -1003,9 +996,9 @@ function LoyaltySpotlight() {
 
 function HowItWorks() {
   const steps = [
-    { number: "01", emoji: "🔍", title: "Search your restaurant on Google Maps", desc: "Type your restaurant name. We find your listing — real photos, reviews, hours, location, everything already there." },
-    { number: "02", emoji: "⚡", title: "Your website is built in 60 seconds", desc: "Photos, reviews, opening hours, and location are pulled automatically. Add your menu and set up your offers." },
-    { number: "03", emoji: "🚀", title: "Customers find you. And come back.", desc: "Share your link. Add it to your Google Maps bio. Customers browse your menu, book a table, and join your loyalty program." },
+    { number: "01", emoji: "🔍", title: "Customers find your restaurant on Google", desc: "They search, they see your listing — and now instead of leaving, they land on your own optimised restaurant page." },
+    { number: "02", emoji: "📄", title: "They land on your optimized page", desc: "Your menu, photos, reviews, and hours — all pulled automatically from Google Maps. Professional, mobile-ready, live in 60 seconds." },
+    { number: "03", emoji: "⚡", title: "They order, book, or contact instantly", desc: "One tap to WhatsApp, one click to book a table, or a direct enquiry — no aggregator, no middleman, no commission." },
   ]
 
   return (
@@ -1018,13 +1011,10 @@ function HowItWorks() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
-            Live in <span className="text-red-600">60 seconds.</span>
-            <br />
-            No code. No drag &amp; drop.
+            How It Works
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            If your restaurant is on Google Maps, you&apos;re halfway there. We pull everything from
-            your existing listing automatically.
+            From Google listing to direct orders — in 60 seconds. No code. No drag &amp; drop.
           </p>
         </motion.div>
 
