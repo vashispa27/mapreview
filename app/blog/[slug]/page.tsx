@@ -128,15 +128,23 @@ export default async function BlogPostPage({ params }: Props) {
 
           <div
             className="prose prose-lg dark:prose-invert max-w-none
-            prose-headings:font-black prose-headings:uppercase prose-headings:italic prose-headings:tracking-tight
-            prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6
+            prose-headings:font-black prose-headings:tracking-tight prose-headings:text-foreground
+            prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
+            prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
             prose-p:text-muted-foreground prose-p:leading-relaxed
-            prose-strong:text-foreground prose-strong:font-black
-            prose-li:text-muted-foreground
-            prose-table:w-full
-            prose-td:align-middle
-            prose-th:align-middle
-            [&_table]:overflow-x-auto [&_table]:block [&_table]:max-w-full"
+            prose-strong:text-foreground prose-strong:font-bold
+            prose-li:text-muted-foreground prose-li:leading-relaxed
+            prose-ul:my-4 prose-ol:my-4
+            prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:rounded-r-xl prose-blockquote:py-1
+            prose-blockquote:text-muted-foreground prose-blockquote:not-italic
+            prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-a:font-semibold
+            prose-table:text-sm
+            prose-thead:bg-muted/60
+            prose-th:font-bold prose-th:text-foreground prose-th:px-4 prose-th:py-3
+            prose-td:px-4 prose-td:py-3 prose-td:align-middle
+            [&_table]:w-full [&_table]:border-collapse [&_table]:rounded-xl [&_table]:overflow-hidden [&_table]:border [&_table]:border-border
+            [&_thead]:bg-muted/50 [&_th]:border [&_th]:border-border [&_td]:border [&_td]:border-border
+            [&_tr:nth-child(even)]:bg-muted/20"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
