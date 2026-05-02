@@ -722,5 +722,299 @@ export const blogs: BlogPost[] = [
 
 <p>FitGymSoftware is a solid internal tool for gyms that are already operationally complex. If you have biometrics installed and process a high volume of multi-state transactions, the depth is justified. But if your main challenge is that people can't find you online — FitGymSoftware's 200+ features don't help with that. MapToSite does, and it costs ₹4,160 less per year once GST is factored in.</p>
     `
-  }
+  },
+
+  // ── Cluster 1: Google Maps ────────────────────────────────────────────────
+  {
+    slug: "convert-google-maps-traffic",
+    title: "How to Convert Google Maps Traffic into Real Business Leads",
+    excerpt: "Thousands of people find local businesses on Google Maps every day — and most businesses have no system to convert them. Here's how to fix that.",
+    date: "May 2, 2026",
+    isoDate: "2026-05-02",
+    author: "Abhinav V.",
+    readTime: "6 min read",
+    category: "Google Maps",
+    metaDescription: "Learn how to convert Google Maps traffic into real leads and customers. A practical guide for local business owners in India.",
+    keywords: ["convert google maps traffic", "google maps leads", "local business leads India", "google maps to website"],
+    content: `<p>Coming soon.</p>`,
+  },
+  {
+    slug: "google-business-leads",
+    title: "How to Get More Leads from Your Google Business Profile",
+    excerpt: "Your Google Business Profile is already generating views. The question is — are those views turning into enquiries, orders, or bookings?",
+    date: "May 2, 2026",
+    isoDate: "2026-05-02",
+    author: "Abhinav V.",
+    readTime: "5 min read",
+    category: "Google Maps",
+    metaDescription: "Turn your Google Business Profile into a lead generation machine. Practical tips for local businesses in India to get more enquiries from Google.",
+    keywords: ["google business profile leads", "google maps lead generation", "local business India", "google business enquiries"],
+    content: `<p>Coming soon.</p>`,
+  },
+  {
+    slug: "how-to-get-leads-from-google-maps",
+    title: "How to Get Leads from Google Maps (Step-by-Step Guide for 2026)",
+    excerpt: "Google Maps is the single biggest source of local traffic for most businesses. Here's exactly how to turn that traffic into paying customers.",
+    date: "May 2, 2026",
+    isoDate: "2026-05-02",
+    author: "Abhinav V.",
+    readTime: "7 min read",
+    category: "Google Maps",
+    metaDescription: "Step-by-step guide to getting leads from Google Maps in 2026. Learn how local businesses in India can convert map views into real customers.",
+    keywords: ["how to get leads from google maps", "google maps lead generation 2026", "local SEO India", "google maps business leads"],
+    content: `<p>Coming soon.</p>`,
+  },
+
+  // ── Cluster 2: Gym ────────────────────────────────────────────────────────
+  {
+    slug: "gym-management-software",
+    title: "Gym Management Software for Local Fitness Businesses (2026 Guide)",
+    excerpt: "Most gym owners don't have a traffic problem — they have a conversion and management problem. Here's what the right gym software actually needs to do.",
+    date: "May 2, 2026",
+    isoDate: "2026-05-02",
+    author: "Abhinav V.",
+    readTime: "7 min read",
+    category: "Gym",
+    metaDescription: "A complete guide to gym management software for local fitness businesses in 2026. Learn what features actually matter and how to convert Google visitors into paying members.",
+    keywords: ["gym management software India", "gym software 2026", "gym lead capture", "gym member management", "gym website India"],
+    content: `
+<p>Most gym owners don't have a traffic problem.</p>
+<p>They have a conversion and management problem.</p>
+<p>People find your gym on Google. They check your profile. And then… they leave. No enquiry. No membership. No follow-up.</p>
+<p>This is exactly where the right <a href="/gyms">gym management system for local gyms</a> changes everything.</p>
+
+<h2>What is Gym Management Software?</h2>
+
+<p>Gym management software is a system that helps you:</p>
+<ul>
+  <li>Manage members</li>
+  <li>Track enquiries and leads</li>
+  <li>Handle bookings and communication</li>
+  <li>Automate follow-ups</li>
+  <li>Run your gym operations from one place</li>
+</ul>
+
+<p>But here's the truth most people won't tell you: most traditional gym software focuses only on management, not conversion. And that's why gyms still struggle even after buying software.</p>
+
+<h2>Why Most Gyms Fail Even After Using Software</h2>
+
+<p>Let's break down the real problem. If you're not <a href="/gyms">converting Google visitors into gym members</a>, it's usually one of these four reasons:</p>
+
+<ol>
+  <li><strong>No Lead Capture System</strong> — People visit your Google listing, but there's no structured way to capture them.</li>
+  <li><strong>No Follow-Up System</strong> — Missed messages equal lost members.</li>
+  <li><strong>Everything is Manual</strong> — WhatsApp, calls, and notes all scattered across different places.</li>
+  <li><strong>No Conversion Funnel</strong> — You're visible… but not converting.</li>
+</ol>
+
+<blockquote>
+  <p>That's the gap most software doesn't solve.</p>
+</blockquote>
+
+<h2>What a Modern Gym Management System Should Include</h2>
+
+<p>If you're choosing software today, it must include a proper <a href="/gyms">lead capture system for gyms</a>. Here's what non-negotiable looks like:</p>
+
+<ol>
+  <li><strong>Website Integration</strong> — Not optional. Essential. A website acts as your conversion layer between Google and your front desk.</li>
+  <li><strong>Lead Capture (WhatsApp + Forms)</strong> — You need instant contact options: WhatsApp buttons, quick enquiry forms, and booking options.</li>
+  <li><strong>Lead Tracking Dashboard</strong> — Know who contacted you, when, and what they want — all in one place.</li>
+  <li><strong>Automation</strong> — Follow-ups should not depend on memory. Auto messages, renewal reminders, and lead tracking should run themselves.</li>
+  <li><strong>Simple Interface</strong> — If it's complicated, you won't use it. The best tool is the one you actually use.</li>
+</ol>
+
+<h2>Traditional Gym Software vs Modern Systems</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Traditional Gym Software</th>
+      <th>Modern System (MapToSite)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Member management</td>
+      <td>✅ Yes</td>
+      <td>✅ Yes</td>
+    </tr>
+    <tr>
+      <td>Public website</td>
+      <td>❌ No</td>
+      <td>✅ Built from Google Maps</td>
+    </tr>
+    <tr>
+      <td>Lead capture</td>
+      <td>❌ No</td>
+      <td>✅ WhatsApp + forms</td>
+    </tr>
+    <tr>
+      <td>Enquiry tracking</td>
+      <td>❌ No</td>
+      <td>✅ Dashboard</td>
+    </tr>
+    <tr>
+      <td>Automated follow-ups</td>
+      <td>❌ No</td>
+      <td>✅ Built in</td>
+    </tr>
+    <tr>
+      <td>Setup time</td>
+      <td>Days to weeks</td>
+      <td>60 seconds</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>A Smarter Approach: MapToSite</h2>
+
+<p>Most gyms already get traffic from Google. <a href="/gyms">See how MapToSite works for gyms</a> — it focuses on one thing: turning that traffic into actual members.</p>
+
+<p>Instead of starting from scratch, it:</p>
+<ul>
+  <li>Converts your Google listing into a professional gym website</li>
+  <li>Adds WhatsApp lead capture instantly</li>
+  <li>Gives you a dashboard to manage all enquiries</li>
+  <li>Handles member renewals and automated reminders</li>
+</ul>
+<p>All in one system. No tech skills. No complex setup.</p>
+
+<h2>How It Works</h2>
+
+<ol>
+  <li>Connect your Google Maps listing</li>
+  <li>Your website is generated instantly — photos, reviews, hours, all pulled automatically</li>
+  <li>Start receiving enquiries and managing leads from one dashboard</li>
+</ol>
+
+<h2>Benefits for Gym Owners</h2>
+
+<ul>
+  <li><strong>More Enquiries</strong> — <a href="/gyms">Increase gym enquiries</a> by converting existing Google traffic into real leads.</li>
+  <li><strong>Better Follow-Up</strong> — Track every enquiry in one place. Nothing falls through the cracks.</li>
+  <li><strong>Professional Presence</strong> — Look more credible than the competition with a proper website.</li>
+  <li><strong>Save Time</strong> — Automation reduces the manual work that's draining your day.</li>
+</ul>
+
+<h2>Who Should Use This?</h2>
+
+<ul>
+  <li>Small gym owners</li>
+  <li>Personal trainers</li>
+  <li>Fitness studios</li>
+  <li>New gym setups</li>
+  <li>Anyone who relies on Google for visibility</li>
+</ul>
+
+<h2>Common Questions</h2>
+
+<p><strong>Do I need technical knowledge?</strong><br />No. Everything is handled for you — no code, no drag-and-drop, no setup.</p>
+
+<p><strong>Will this replace my current tools?</strong><br />It can replace them or work alongside them, depending on what you're using today.</p>
+
+<p><strong>Is this suitable for small gyms?</strong><br />Yes. It's built specifically for local fitness businesses — not enterprise chains.</p>
+
+<h2>Final Thoughts</h2>
+
+<p>If your gym is already getting attention on Google but not converting, the problem is not visibility. It's your system.</p>
+
+<p>The right gym management software should not just help you manage — it should help you grow.</p>
+
+<p><a href="/gyms">See how MapToSite works for gyms →</a></p>
+    `,
+  },
+  {
+    slug: "gym-lead-generation",
+    title: "Gym Lead Generation: How to Get More Enquiries from Google",
+    excerpt: "Most gyms spend on ads but ignore the free traffic already coming from Google Maps. Here's how to capture it.",
+    date: "May 2, 2026",
+    isoDate: "2026-05-02",
+    author: "Abhinav V.",
+    readTime: "6 min read",
+    category: "Gym",
+    metaDescription: "Learn how to generate more leads for your gym using Google Maps, WhatsApp, and a proper website. Practical guide for gym owners in India.",
+    keywords: ["gym lead generation", "how to get gym leads", "gym enquiries India", "gym marketing India"],
+    content: `<p>Coming soon.</p>`,
+  },
+  {
+    slug: "how-to-get-more-gym-members",
+    title: "How to Get More Gym Members Without Spending on Ads",
+    excerpt: "Google is already sending people to your gym listing. Here's how to convert them into paying members — without a rupee in ad spend.",
+    date: "May 2, 2026",
+    isoDate: "2026-05-02",
+    author: "Abhinav V.",
+    readTime: "6 min read",
+    category: "Gym",
+    metaDescription: "Practical strategies to get more gym members in India without running ads. Use Google Maps, WhatsApp, and a gym website to grow organically.",
+    keywords: ["how to get more gym members", "grow gym members India", "gym marketing without ads", "gym website India"],
+    content: `<p>Coming soon.</p>`,
+  },
+  {
+    slug: "gym-marketing-system",
+    title: "The Complete Gym Marketing System for Indian Gym Owners",
+    excerpt: "A gym marketing system that actually works — built around Google Maps, WhatsApp, and a website that converts visitors into members.",
+    date: "May 2, 2026",
+    isoDate: "2026-05-02",
+    author: "Abhinav V.",
+    readTime: "8 min read",
+    category: "Gym",
+    metaDescription: "Build a gym marketing system that generates leads on autopilot. A complete guide for gym owners in India using Google Maps and WhatsApp.",
+    keywords: ["gym marketing system", "gym marketing India", "gym digital marketing", "gym google maps marketing"],
+    content: `<p>Coming soon.</p>`,
+  },
+
+  // ── Cluster 3: Restaurant ─────────────────────────────────────────────────
+  {
+    slug: "restaurant-management-software",
+    title: "The Best Restaurant Management Software in India (2026 Guide)",
+    excerpt: "Managing a restaurant is hard. Managing it without the right tools is harder. Here's what actually matters when choosing restaurant software.",
+    date: "May 2, 2026",
+    isoDate: "2026-05-02",
+    author: "Abhinav V.",
+    readTime: "7 min read",
+    category: "Restaurant",
+    metaDescription: "A complete guide to restaurant management software in India for 2026. Compare tools for ordering, booking, and customer management.",
+    keywords: ["restaurant management software India", "best restaurant software 2026", "restaurant software comparison", "restaurant booking system India"],
+    content: `<p>Coming soon.</p>`,
+  },
+  {
+    slug: "how-to-get-more-restaurant-orders",
+    title: "How to Get More Direct Restaurant Orders Without Aggregators",
+    excerpt: "Aggregators take 20–30% of every order. Here's how to build a direct ordering system that keeps 100% of the revenue.",
+    date: "May 2, 2026",
+    isoDate: "2026-05-02",
+    author: "Abhinav V.",
+    readTime: "6 min read",
+    category: "Restaurant",
+    metaDescription: "Learn how to get more direct orders for your restaurant without Swiggy or Zomato. Build a direct ordering system and keep your full margin.",
+    keywords: ["restaurant direct orders India", "how to get restaurant orders without swiggy", "restaurant WhatsApp ordering", "direct food ordering system"],
+    content: `<p>Coming soon.</p>`,
+  },
+  {
+    slug: "restaurant-direct-ordering-system",
+    title: "How to Set Up a Direct Ordering System for Your Restaurant",
+    excerpt: "A direct ordering system means customers order from you — not through a platform that takes a cut. Here's how to build one in 60 seconds.",
+    date: "May 2, 2026",
+    isoDate: "2026-05-02",
+    author: "Abhinav V.",
+    readTime: "5 min read",
+    category: "Restaurant",
+    metaDescription: "Set up a direct ordering system for your restaurant in India. Skip the aggregator commission and take orders via WhatsApp and your own website.",
+    keywords: ["restaurant direct ordering system", "restaurant own website India", "restaurant WhatsApp ordering", "skip zomato swiggy"],
+    content: `<p>Coming soon.</p>`,
+  },
+  {
+    slug: "restaurant-lead-generation",
+    title: "Restaurant Lead Generation: How to Turn Google Visitors into Customers",
+    excerpt: "People search for restaurants near them every day. Most restaurants have no system to capture that traffic. Here's how to fix it.",
+    date: "May 2, 2026",
+    isoDate: "2026-05-02",
+    author: "Abhinav V.",
+    readTime: "6 min read",
+    category: "Restaurant",
+    metaDescription: "Learn how to generate leads for your restaurant from Google Maps and Google Search. A practical guide for restaurant owners in India.",
+    keywords: ["restaurant lead generation India", "how to get restaurant customers", "restaurant google maps leads", "restaurant marketing India"],
+    content: `<p>Coming soon.</p>`,
+  },
 ];

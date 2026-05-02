@@ -59,19 +59,15 @@ function RestaurantNav() {
               <UtensilsCrossed className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-foreground">
-              MapToSite <span className="text-red-600">Food</span>
+              MapToSite <span className="text-red-600">Restaurants</span>
             </span>
           </div>
 
           {/* Desktop right */}
           <div className="hidden md:flex items-center gap-3">
             <a href="#examples" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">Examples</a>
-            <a
-              href="#pricing"
-              className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Pricing
-            </a>
+            <a href="#pricing" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
+            <a href="/blog" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">Blog</a>
             {status === "loading" ? (
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
             ) : session ? (
@@ -139,6 +135,7 @@ function RestaurantNav() {
               >
                 Pricing
               </a>
+              <a href="/blog" className="text-sm font-semibold py-2 border-b border-border" onClick={() => setMobileOpen(false)}>Blog</a>
               {session ? (
                 <>
                   <div className="flex items-center gap-3 pb-3 border-b border-border">

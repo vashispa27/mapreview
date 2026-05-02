@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import { RestaurantLanding } from "./content"
 
 export const metadata: Metadata = {
-  title: "Your Restaurant Is Invisible Online. Let's Fix That. | MapToSite Food",
+  title: "Your Restaurant Is Invisible Online. Let's Fix That. | MapToSite Restaurants",
   description:
     "78% of diners research a restaurant online before visiting. If you don't have a website, they choose your competitor. Get your restaurant website, menu, table booking, and loyalty program live in 60 seconds.",
   keywords: [
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description:
       "Get your restaurant website with menu, gallery, Google reviews, table booking, and loyalty programs — built from your Google Maps listing in 60 seconds.",
     url: "https://food.maptosite.app",
-    siteName: "MapToSite Food",
+    siteName: "MapToSite Restaurants",
     type: "website",
   },
   twitter: {
