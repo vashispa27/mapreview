@@ -99,7 +99,7 @@ export default function HubPage() {
               </Link>
 
               <Link
-                href="/food"
+                href="/restaurants"
                 className="group bg-card border-2 border-border hover:border-red-500 rounded-2xl p-6 text-left transition-all hover:shadow-lg hover:-translate-y-0.5 duration-200"
               >
                 <div className="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center mb-4 group-hover:bg-red-100 transition-colors">
@@ -225,7 +225,7 @@ export default function HubPage() {
                 <Dumbbell className="w-5 h-5" /> MapToSite Fitness
               </Link>
               <Link
-                href="/food"
+                href="/restaurants"
                 className="inline-flex items-center gap-2 h-13 px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white font-black rounded-xl border border-white/20 transition-colors"
               >
                 <UtensilsCrossed className="w-5 h-5" /> MapToSite Food

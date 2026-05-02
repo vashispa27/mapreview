@@ -50,11 +50,11 @@ function MySitesContent() {
   const { isAdminMode } = useAdminMode()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const fromFood = searchParams.get("from") === "food"
+  const fromFood = searchParams.get("from") === "restaurants"
   const [persistedSource, setPersistedSource] = useState<string | null>(null)
 
   useEffect(() => {
-    if (fromFood) localStorage.setItem("mts_source", "food")
+    if (fromFood) localStorage.setItem("mts_source", "restaurants")
     setPersistedSource(localStorage.getItem("mts_source"))
   }, [fromFood])
   const [sites, setSites] = useState<Site[]>([])
@@ -127,7 +127,7 @@ function MySitesContent() {
 
   // Branding: food if they only have restaurant sites, or came from food page
   const isFoodBranding = (hasRestaurantSites && !hasGymSites)
-    || (!hasGymSites && (fromFood || persistedSource === "food"))
+    || (!hasGymSites && (fromFood || persistedSource === "restaurants"))
 
   if (status === "loading" || loading) {
     return (
