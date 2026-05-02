@@ -51,7 +51,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="font-sans antialiased">
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-RXC8HGDM3G"
+          src="https://www.googletagmanager.com/gtag/js?id=G-LNGGMH0MFE"
           strategy="lazyOnload"
         />
         <Script id="google-analytics" strategy="lazyOnload">
@@ -59,7 +59,7 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-RXC8HGDM3G');
+            gtag('config', 'G-LNGGMH0MFE');
           `}
         </Script>
         <WhatsAppWidget />
