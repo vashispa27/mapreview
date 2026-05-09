@@ -330,19 +330,19 @@ const GYM_EXAMPLES = [
   {
     name: "Tiger Fitness",
     url: "https://maptosite.app/site/tigerfitness",
-    thumb: "/example-tigerfitness.png",
+    thumb: "/example-tigerfitness.jpg",
     tag: "Strength & Conditioning",
   },
   {
     name: "Fitness Empire",
     url: "https://maptosite.app/site/fitness-empire",
-    thumb: "/example-fitness-empire.png",
+    thumb: "/example-fitness-empire.jpg",
     tag: "Multi-sport Gym",
   },
   {
     name: "Dynamo Fitness Gym",
     url: "https://maptosite.app/site/dynamo-fitness-gym",
-    thumb: "/example-dynamo-fitness.png",
+    thumb: "/example-dynamo-fitness.jpg",
     tag: "Personal Training",
   },
 ]
