@@ -324,6 +324,89 @@ function Solution() {
   )
 }
 
+// ─── Example Sites ────────────────────────────────────────────────────────────
+
+const GYM_EXAMPLES = [
+  {
+    name: "Tiger Fitness",
+    url: "https://maptosite.app/site/tigerfitness",
+    thumb: "/example-tigerfitness.png",
+    tag: "Strength & Conditioning",
+  },
+  {
+    name: "Fitness Empire",
+    url: "https://maptosite.app/site/fitness-empire",
+    thumb: "/example-fitness-empire.png",
+    tag: "Multi-sport Gym",
+  },
+  {
+    name: "Dynamo Fitness Gym",
+    url: "https://maptosite.app/site/dynamo-fitness-gym",
+    thumb: "/example-dynamo-fitness.png",
+    tag: "Personal Training",
+  },
+]
+
+function ExampleSites() {
+  return (
+    <section className="py-24 px-4">
+      <div className="max-w-5xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          className="text-center mb-14"
+        >
+          <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20 mb-5">
+            <Sparkles className="w-3 h-3" /> Live Examples
+          </span>
+          <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4">
+            Gyms Already on MapToSite
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+            Real websites built from Google Maps listings — live and converting.
+          </p>
+        </motion.div>
+
+        <div className="grid sm:grid-cols-3 gap-6">
+          {GYM_EXAMPLES.map(({ name, url, thumb, tag }, i) => (
+            <motion.a
+              key={name}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+              className="group rounded-2xl border border-border overflow-hidden bg-card hover:border-primary/40 hover:shadow-xl transition-all duration-300 block"
+            >
+              <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={thumb}
+                  alt={name}
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    const t = e.currentTarget
+                    t.style.display = "none"
+                    const parent = t.parentElement
+                    if (parent) {
+                      parent.innerHTML = `<div class="w-full h-full flex items-center justify-center"><span class="text-5xl">🏋️</span></div>`
+                    }
+                  }}
+                />
+              </div>
+              <div className="p-4">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                  {tag}
+                </span>
+                <h3 className="font-black text-base mt-2 mb-0.5 group-hover:text-primary transition-colors">{name}</h3>
+                <p className="text-xs text-muted-foreground font-medium">View live site →</p>
+              </div>
+            </motion.a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── How it works ─────────────────────────────────────────────────────────────
 
 function HowItWorks() {
@@ -587,6 +670,7 @@ export function GymLanding() {
       <Hero />
       <Problem />
       <Solution />
+      <ExampleSites />
       <HowItWorks />
       <WhatYouGet />
       <div id="pricing">
