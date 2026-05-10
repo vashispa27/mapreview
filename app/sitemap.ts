@@ -15,13 +15,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/terms`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
   ]
 
-  // Blog posts
-  const blogPages: MetadataRoute.Sitemap = blogs.map((post) => ({
-    url: `${BASE}/blog/${post.slug}`,
-    lastModified: new Date(post.date),
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  }))
+  // Blog posts (published only)
+  const blogPages: MetadataRoute.Sitemap = blogs
+    .filter((post) => !post.content.includes("Coming soon"))
+    .map((post) => ({
+      url: `${BASE}/blog/${post.slug}`,
+      lastModified: new Date(post.date),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }))
 
   // Published sites
   let sitePages: MetadataRoute.Sitemap = []

@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = blogs.find((b) => b.slug === slug);
 
-  if (!post) return { title: "Post Not Found" };
+  if (!post || post.content.includes("Coming soon")) return { title: "Post Not Found" };
 
   const url = `${SITE_URL}/blog/${post.slug}`;
 
@@ -50,7 +50,7 @@ export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
   const post = blogs.find((b) => b.slug === slug);
 
-  if (!post) {
+  if (!post || post.content.includes("Coming soon")) {
     notFound();
   }
 

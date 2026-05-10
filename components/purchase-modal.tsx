@@ -69,12 +69,12 @@ export function PurchaseModal({ open, onClose, isFood = false }: PurchaseModalPr
     {
       id: "base",
       name: "Base",
-      price: "₹999",
+      price: "₹259",
       priceSuffix: "/month",
       icon: Zap,
       popular: false,
       features: [
-        "Up to 10 websites",
+        "Up to 3 websites",
         "Unlimited edits & free hosting",
         "Auto-sync reviews & photos from Google Maps",
         "Full ecommerce — cart, products & services",
@@ -85,12 +85,13 @@ export function PurchaseModal({ open, onClose, isFood = false }: PurchaseModalPr
     {
       id: "pro",
       name: "Pro",
-      price: "₹9,999",
-      priceSuffix: "/year",
+      price: "₹999",
+      priceSuffix: "/month",
       icon: Sparkles,
       popular: true,
       features: [
         "Everything in Base",
+        "Up to 10 websites",
         "Gym member management console",
         "Diet & workout planner",
         "GST billing & invoices",
@@ -140,7 +141,7 @@ export function PurchaseModal({ open, onClose, isFood = false }: PurchaseModalPr
                     {isFood ? "Get Your Restaurant Online" : "Purchase a Plan to Publish"}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    {isFood ? "₹149/mo or ₹1,299/year — cancel anytime." : "One-time payment. Full access for 1 year."}
+                    {isFood ? "₹149/mo or ₹1,299/year — cancel anytime." : "₹259/mo or ₹999/mo — cancel anytime. No contracts."}
                   </p>
                 </div>
               </div>

@@ -23,10 +23,12 @@ export const metadata: Metadata = {
 }
 
 export default function BlogListingPage() {
+  const publishedPosts = blogs.filter((post) => !post.content.includes("Coming soon"))
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <main className="pt-32 pb-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
@@ -39,19 +41,25 @@ export default function BlogListingPage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
-            {blogs.map((post) => (
+            {publishedPosts.map((post) => (
               <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
                 <Card className="h-full border-2 transition-all hover:border-primary hover:shadow-xl overflow-hidden flex flex-col">
-                  <div className="aspect-video bg-muted relative flex items-center justify-center overflow-hidden">
-                    {/* Placeholder for real images */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/20 flex items-center justify-center p-8 text-center font-bold text-muted-foreground uppercase italic tracking-widest opacity-50 group-hover:scale-105 transition-transform duration-500">
-                      {post.title}
-                    </div>
+                  <div className="aspect-video bg-muted relative overflow-hidden">
+                    {post.image ? (
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/20 group-hover:scale-105 transition-transform duration-500" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                     <Badge className="absolute top-4 left-4 font-black uppercase tracking-widest">
                       {post.category}
                     </Badge>
                   </div>
-                  
+
                   <CardHeader>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3 font-bold uppercase tracking-widest">
                       <div className="flex items-center gap-1">
@@ -67,13 +75,13 @@ export default function BlogListingPage() {
                       {post.title}
                     </CardTitle>
                   </CardHeader>
-                  
+
                   <CardContent className="flex-1">
                     <p className="text-muted-foreground line-clamp-3">
                       {post.excerpt}
                     </p>
                   </CardContent>
-                  
+
                   <CardFooter className="pt-0 font-black uppercase tracking-widest text-sm text-primary flex items-center gap-2 group-hover:gap-4 transition-all">
                     Read Comparison <ArrowRight className="w-4 h-4" />
                   </CardFooter>

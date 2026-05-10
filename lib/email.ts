@@ -209,7 +209,7 @@ export async function sendPaymentSuccessEmail(
             </tr>
             <tr>
               <td style="padding-top:10px;font-size:13px;color:#6b7280;">${plan === "pro" ? "Payment" : (expiryFormatted ? "Valid until" : "Billing")}</td>
-              <td align="right" style="padding-top:10px;font-size:14px;font-weight:700;color:#1a1a2e;">${plan === "pro" ? "₹9,999/year · renews annually" : (expiryFormatted ?? "₹999/month · renews automatically")}</td>
+              <td align="right" style="padding-top:10px;font-size:14px;font-weight:700;color:#1a1a2e;">${plan === "pro" ? "₹999/month · renews automatically" : (expiryFormatted ?? "₹259/month · renews automatically")}</td>
             </tr>
           </table>
         </td>

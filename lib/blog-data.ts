@@ -10,6 +10,7 @@ export interface BlogPost {
   content: string;
   metaDescription: string;
   keywords: string[];
+  image?: string;
 }
 
 export const blogs: BlogPost[] = [
@@ -24,6 +25,7 @@ export const blogs: BlogPost[] = [
     category: "Comparison",
     metaDescription: "GymBook vs MapToSite — an honest side-by-side comparison. GymBook tracks your existing members well. MapToSite does that and builds your public website from Google Maps. See which one fits your gym.",
     keywords: ["GymBook vs MapToSite", "GymBook alternative", "gym management software India", "gym website builder India", "gym member management"],
+    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80",
     content: `
 <p>GymBook handles one job cleanly: keeping your existing members organized. Renewal tracking, WhatsApp reminders, QR attendance — it's a tidy internal tool. But organized records don't bring in new members. If your biggest challenge is <em>growing</em> your gym rather than managing it, GymBook runs out of road quickly.</p>
 
@@ -76,9 +78,9 @@ export const blogs: BlogPost[] = [
       <td>✅ Yes — emailed directly to members</td>
     </tr>
     <tr>
-      <td>Annual cost</td>
-      <td>₹2,596 – ₹3,596 / year</td>
-      <td>₹9,999 / year</td>
+      <td>Monthly cost</td>
+      <td>₹216 – ₹300 / month</td>
+      <td>₹999 / month</td>
     </tr>
   </tbody>
 </table>
@@ -109,9 +111,9 @@ export const blogs: BlogPost[] = [
   </thead>
   <tbody>
     <tr>
-      <td>Annual cost</td>
-      <td>₹2,596 – ₹3,596</td>
-      <td>₹9,999</td>
+      <td>Monthly cost</td>
+      <td>₹216 – ₹300</td>
+      <td>₹999</td>
     </tr>
     <tr>
       <td>Setup fee</td>
@@ -136,7 +138,7 @@ export const blogs: BlogPost[] = [
   </tbody>
 </table>
 
-<p>MapToSite costs ₹6,000 – ₹7,000 more a year. That difference buys a website that works as your 24/7 salesperson, GST-compliant invoicing, and diet and workout plans you can email directly to members. If the website converts even two extra enquiries a month that would have otherwise gone to a competitor, it pays for itself before the quarter ends.</p>
+<p>MapToSite costs ₹699 more per month. That difference buys a website that works as your 24/7 salesperson, GST-compliant invoicing, and diet and workout plans you can email directly to members. If the website converts even one extra enquiry a month that would have otherwise gone to a competitor, it pays for itself.</p>
 
 <h2>Who should use which</h2>
 
@@ -181,8 +183,9 @@ export const blogs: BlogPost[] = [
     author: "Abhinav V.",
     readTime: "5 min read",
     category: "Comparison",
-    metaDescription: "EasyGymSoftware vs MapToSite: EasyGymSoftware costs ₹20,000 in year one (₹15,000 setup + ₹5,000 AMC). MapToSite is ₹9,999/year with no setup fees and a full public website included.",
+    metaDescription: "EasyGymSoftware vs MapToSite: EasyGymSoftware costs ₹20,000 in year one (₹15,000 setup + ₹5,000 AMC). MapToSite is ₹999/month with no setup fees and a full public website included.",
     keywords: ["EasyGymSoftware vs MapToSite", "EasyGymSoftware alternative", "gym management software India", "gym website builder", "gym software no contract"],
+    image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
     content: `
 <p>EasyGymSoftware has a long feature list: biometric integration, an AI-assisted diet planner, online booking, RFID check-in, a branded member app. It's been built over years and it shows. For large, multi-location gyms with IT support, some of this is genuinely useful.</p>
 
@@ -247,12 +250,12 @@ export const blogs: BlogPost[] = [
     <tr>
       <td>Year 1 total cost</td>
       <td>₹20,000</td>
-      <td>₹9,999</td>
+      <td>₹11,988</td>
     </tr>
     <tr>
       <td>Year 2+ annual cost</td>
       <td>₹5,000</td>
-      <td>₹9,999</td>
+      <td>₹11,988</td>
     </tr>
   </tbody>
 </table>
@@ -288,31 +291,31 @@ export const blogs: BlogPost[] = [
     <tr>
       <td>Year 1</td>
       <td>₹20,000</td>
-      <td>₹9,999</td>
-      <td>EasyGym costs ₹10,001 more</td>
+      <td>₹11,988</td>
+      <td>EasyGym costs ₹8,012 more</td>
     </tr>
     <tr>
       <td>Year 2</td>
       <td>₹5,000</td>
-      <td>₹9,999</td>
-      <td>MapToSite costs ₹4,999 more</td>
+      <td>₹11,988</td>
+      <td>MapToSite costs ₹6,988 more</td>
     </tr>
     <tr>
       <td>Year 3</td>
       <td>₹5,000</td>
-      <td>₹9,999</td>
-      <td>MapToSite costs ₹4,999 more</td>
+      <td>₹11,988</td>
+      <td>MapToSite costs ₹6,988 more</td>
     </tr>
     <tr>
       <td><strong>3-year total</strong></td>
       <td><strong>₹30,000</strong></td>
-      <td><strong>₹29,997</strong></td>
-      <td>Essentially the same</td>
+      <td><strong>₹35,964</strong></td>
+      <td>MapToSite costs ₹5,964 more — but includes your website</td>
     </tr>
   </tbody>
 </table>
 
-<p>Over three years, the total cost is nearly identical. But years 2 and 3 with MapToSite include a website that's actively bringing in new members. Years 2 and 3 with EasyGymSoftware don't.</p>
+<p>MapToSite costs more over three years — but years 2 and 3 with MapToSite include a website that's actively bringing in new members. EasyGymSoftware's cheaper AMC buys you internal tools with no public presence. If your website converts even two new members a month, MapToSite pays for the difference many times over.</p>
 
 <h2>Who should use which</h2>
 
@@ -361,8 +364,9 @@ export const blogs: BlogPost[] = [
     author: "Abhinav V.",
     readTime: "6 min read",
     category: "Comparison",
-    metaDescription: "GymOwl vs MapToSite: GymOwl costs ₹17,999–₹22,999/year with no website builder. MapToSite Pro is ₹9,999/year and includes your full public website plus member management.",
+    metaDescription: "GymOwl vs MapToSite: GymOwl costs ₹17,999–₹22,999/year with no website builder. MapToSite Pro is ₹999/month and includes your full public website plus member management.",
     keywords: ["GymOwl vs MapToSite", "GymOwl alternative India", "gym management software comparison", "gym website builder India", "get more gym members online"],
+    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80",
     content: `
 <p>GymOwl has a legitimately good feature set. The CRM, employee scheduling, class booking, commission tracking, and 10+ analytics reports are all well-built. If your gym runs like a small enterprise, GymOwl can manage the complexity.</p>
 
@@ -425,9 +429,9 @@ export const blogs: BlogPost[] = [
       <td>✅ Yes — emailed to members</td>
     </tr>
     <tr>
-      <td>Annual cost</td>
-      <td>₹17,999</td>
-      <td>₹9,999</td>
+      <td>Monthly cost</td>
+      <td>₹1,500</td>
+      <td>₹999</td>
     </tr>
   </tbody>
 </table>
@@ -462,7 +466,7 @@ export const blogs: BlogPost[] = [
     <tr>
       <td>Pro (all features)</td>
       <td>—</td>
-      <td>₹9,999 / year</td>
+      <td>₹999 / month</td>
     </tr>
     <tr>
       <td>Website included</td>
@@ -477,7 +481,7 @@ export const blogs: BlogPost[] = [
   </tbody>
 </table>
 
-<p>You're paying ₹8,000–₹13,000 a year more with GymOwl. That doesn't buy you a website. It buys you a more sophisticated operations backend — which only matters if your gym is already full and you're managing complexity, not trying to grow.</p>
+<p>You're paying ₹500–₹1,000 a month more with GymOwl. That doesn't buy you a website. It buys you a more sophisticated operations backend — which only matters if your gym is already full and you're managing complexity, not trying to grow.</p>
 
 <h2>The acquisition gap</h2>
 
@@ -526,7 +530,7 @@ export const blogs: BlogPost[] = [
 
 <h2>Bottom line</h2>
 
-<p>GymOwl is well-built software for a specific type of gym: large, complex, and already operating at capacity. If that's not where you are yet, you're paying for features you don't use and skipping the one thing that would actually help — a website that captures the people searching for you right now. MapToSite costs ₹8,000 less per year and solves that problem on day one.</p>
+<p>GymOwl is well-built software for a specific type of gym: large, complex, and already operating at capacity. If that's not where you are yet, you're paying for features you don't use and skipping the one thing that would actually help — a website that captures the people searching for you right now. MapToSite costs ₹500–₹1,000 less per month and solves that problem on day one.</p>
     `
   },
   {
@@ -540,6 +544,7 @@ export const blogs: BlogPost[] = [
     category: "Comparison",
     metaDescription: "FitGymSoftware vs MapToSite: FitGymSoftware has 200+ features and good GST support, but no website builder and no API. MapToSite is ₹4,000/year cheaper after GST and builds your public website automatically.",
     keywords: ["FitGymSoftware vs MapToSite", "FitGymSoftware alternative", "gym software India comparison", "gym management GST India", "gym website builder"],
+    image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80",
     content: `
 <p>FitGymSoftware advertises 200+ features. Biometric check-in, RFID access, staff payroll, WhatsApp integration, lead management, finance reports — it's a deep internal platform used by gyms across 100+ cities. For what it does, it does it reasonably well.</p>
 
@@ -602,9 +607,9 @@ export const blogs: BlogPost[] = [
       <td>✅ Yes</td>
     </tr>
     <tr>
-      <td>Annual cost (after GST)</td>
-      <td>₹11,999 + 18% GST ≈ <strong>₹14,159</strong></td>
-      <td><strong>₹9,999</strong> (no GST on top)</td>
+      <td>Monthly cost (after GST)</td>
+      <td>₹999 + 18% GST ≈ <strong>₹1,179</strong></td>
+      <td><strong>₹999</strong> (no GST on top)</td>
     </tr>
   </tbody>
 </table>
@@ -642,23 +647,23 @@ export const blogs: BlogPost[] = [
   <tbody>
     <tr>
       <td>Listed price</td>
-      <td>₹11,999 / year</td>
-      <td>₹9,999 / year</td>
+      <td>₹999 / month</td>
+      <td>₹999 / month</td>
     </tr>
     <tr>
       <td>GST (18%)</td>
-      <td>+ ₹2,159</td>
+      <td>+ ₹180</td>
       <td>₹0 extra</td>
     </tr>
     <tr>
-      <td>Effective annual cost</td>
-      <td>~ ₹14,159</td>
-      <td>₹9,999</td>
+      <td>Effective monthly cost</td>
+      <td>~ ₹1,179</td>
+      <td>₹999</td>
     </tr>
     <tr>
       <td>You save</td>
       <td>—</td>
-      <td>₹4,160 / year</td>
+      <td>₹180 / month</td>
     </tr>
     <tr>
       <td>Website included</td>
@@ -683,7 +688,7 @@ export const blogs: BlogPost[] = [
   </tbody>
 </table>
 
-<p>MapToSite is about ₹4,160 cheaper per year once you factor in GST. That difference pays for the website FitGymSoftware can't provide.</p>
+<p>MapToSite saves you ₹180 a month once you factor in GST — and that difference pays for the website FitGymSoftware can't provide.</p>
 
 <h2>Who should use which</h2>
 
@@ -720,7 +725,7 @@ export const blogs: BlogPost[] = [
 
 <h2>Bottom line</h2>
 
-<p>FitGymSoftware is a solid internal tool for gyms that are already operationally complex. If you have biometrics installed and process a high volume of multi-state transactions, the depth is justified. But if your main challenge is that people can't find you online — FitGymSoftware's 200+ features don't help with that. MapToSite does, and it costs ₹4,160 less per year once GST is factored in.</p>
+<p>FitGymSoftware is a solid internal tool for gyms that are already operationally complex. If you have biometrics installed and process a high volume of multi-state transactions, the depth is justified. But if your main challenge is that people can't find you online — FitGymSoftware's 200+ features don't help with that. MapToSite does, and it costs ₹180 less per month once GST is factored in.</p>
     `
   },
 
@@ -777,6 +782,7 @@ export const blogs: BlogPost[] = [
     category: "Gym",
     metaDescription: "A complete guide to gym management software for local fitness businesses in 2026. Learn what features actually matter and how to convert Google visitors into paying members.",
     keywords: ["gym management software India", "gym software 2026", "gym lead capture", "gym member management", "gym website India"],
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
     content: `
 <p>Most gym owners don't have a traffic problem.</p>
 <p>They have a conversion and management problem.</p>
