@@ -189,7 +189,7 @@ export function HeroSection() {
         return
       }
 
-      // Start the speed challenge timer — stops when user publishes
+      localStorage.setItem("challenge_site_id", data.jobId)
       window.dispatchEvent(new Event("challenge-start"))
 
       toast({

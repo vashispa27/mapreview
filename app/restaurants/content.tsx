@@ -368,6 +368,7 @@ function Hero() {
       const res = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: finalUrl }) })
       const data = await res.json()
       if (!res.ok) { setError(data.error || "Failed to generate site"); return }
+      localStorage.setItem("challenge_site_id", data.jobId)
       window.dispatchEvent(new Event("challenge-start"))
       toast({ title: "Site Generation Started!", description: "Your restaurant page is being built. Check your My Sites dashboard." })
       router.push("/my-sites?from=restaurants")

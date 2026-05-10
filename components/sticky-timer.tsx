@@ -31,6 +31,7 @@ export function StickyTimer() {
   const dismiss = () => {
     clearTick()
     localStorage.removeItem("challenge_start_time")
+    localStorage.removeItem("challenge_site_id")
     setState("hidden")
     setElapsed(0)
     setPromo(null)

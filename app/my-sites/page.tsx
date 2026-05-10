@@ -86,18 +86,17 @@ function MySitesContent() {
           const activeCount = data.sites.filter((s: Site) => s.status !== "FAILED").length
           setTotalActive(activeCount)
 
-          // Fire challenge-complete only for a site created AFTER the challenge started
+          // Fire challenge-complete when the specific site being generated reaches COMPLETED
           const challengeStart = localStorage.getItem("challenge_start_time")
-          if (challengeStart) {
-            const startMs = Number(challengeStart)
-            const newlyCompleted = data.sites.find(
-              (s: Site) =>
-                s.status === "COMPLETED" &&
-                new Date(s.createdAt).getTime() > startMs
+          const challengeSiteId = localStorage.getItem("challenge_site_id")
+          if (challengeStart && challengeSiteId) {
+            const targetSite = data.sites.find(
+              (s: Site) => s.id === challengeSiteId && s.status === "COMPLETED"
             )
-            if (newlyCompleted) {
-              const seconds = Math.floor((Date.now() - startMs) / 1000)
-              localStorage.removeItem("challenge_start_time") // prevent re-firing on next poll
+            if (targetSite) {
+              const seconds = Math.floor((Date.now() - Number(challengeStart)) / 1000)
+              localStorage.removeItem("challenge_start_time")
+              localStorage.removeItem("challenge_site_id")
               window.dispatchEvent(new CustomEvent("challenge-complete", { detail: { seconds } }))
               if (seconds > 60) {
                 fetch("/api/promo-email", {
