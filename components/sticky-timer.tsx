@@ -104,7 +104,7 @@ export function StickyTimer() {
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] pointer-events-none">
+    <div className="fixed top-14 left-1/2 -translate-x-1/2 z-[100] pointer-events-none">
       <AnimatePresence mode="wait">
 
         {/* Timer running */}

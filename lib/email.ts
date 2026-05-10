@@ -474,11 +474,11 @@ export async function sendSpeedChallengeEmail(
   const firstName = name?.split(" ")[0] || "there"
 
   const body = `
-  ${heroSection("⚡", "linear-gradient(135deg,#fdf4ff 0%,#ede9fe 100%)", `You built it in ${seconds} seconds!`, `You earned ${discount} off your MapToSite plan.`)}
+  ${heroSection("🎉", "linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%)", `Your 50% off — as promised!`, `Your website took ${seconds} seconds. We owe you a discount.`)}
 
   <div style="padding:32px 40px;">
     <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
-      Hi ${firstName}, you just completed the MapToSite Speed Challenge in <strong>${seconds} seconds</strong> — that earns you <strong>${discount} off</strong> any plan.
+      Hi ${firstName}, your website took <strong>${seconds} seconds</strong> to generate — that's over our 60-second guarantee. As promised, here's <strong>${discount} off</strong> any plan on us.
     </p>
 
     <div style="background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:12px;padding:20px 24px;margin:0 0 24px;text-align:center;">
@@ -500,9 +500,9 @@ export async function sendSpeedChallengeEmail(
     return await client.send({
       from: sender,
       to: [{ email: toEmail }],
-      subject: `⚡ You did it in ${seconds}s — here's your ${discount} discount code`,
-      html: layout(`Speed Challenge complete! Your ${discount} off code inside.`, body),
-      text: `Hi ${firstName}, you completed the Speed Challenge in ${seconds}s! Use code ${promoCode} for ${discount} off at ${APP_URL}/#pricing`,
+      subject: `🎉 Your 60s guarantee triggered — ${discount} off inside`,
+      html: layout(`Your ${discount} off code — 60-second guarantee`, body),
+      text: `Hi ${firstName}, your website took ${seconds}s — over our 60s guarantee. Use code ${promoCode} for ${discount} off at ${APP_URL}/#pricing`,
       category: "Speed Challenge",
     })
   } catch (error) {

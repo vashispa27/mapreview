@@ -2,15 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { sendSpeedChallengeEmail } from "@/lib/email"
 
-const TIERS = [
-  { ceiling: 60,  code: process.env.NEXT_PUBLIC_PROMO_UNDER_30 ?? "", discount: "50%" },
-  { ceiling: 80,  code: process.env.NEXT_PUBLIC_PROMO_UNDER_40 ?? "", discount: "40%" },
-  { ceiling: 90,  code: process.env.NEXT_PUBLIC_PROMO_UNDER_50 ?? "", discount: "30%" },
-  { ceiling: 100, code: process.env.NEXT_PUBLIC_PROMO_UNDER_60 ?? "", discount: "20%" },
-]
+const PROMO_CODE = process.env.NEXT_PUBLIC_PROMO_UNDER_30 ?? ""
 
-function getTier(seconds: number) {
-  return TIERS.find(t => seconds < t.ceiling && t.code) ?? null
+// Only send promo when generation took MORE than 60 seconds
+function shouldSendPromo(seconds: number) {
+  return seconds > 60 && PROMO_CODE !== ""
 }
 
 export async function POST(req: NextRequest) {
@@ -24,18 +20,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid seconds" }, { status: 400 })
   }
 
-  const tier = getTier(seconds)
-  if (!tier) {
-    return NextResponse.json({ ok: false, reason: "no_tier" })
+  if (!shouldSendPromo(seconds)) {
+    return NextResponse.json({ ok: false, reason: "under_60s_no_promo" })
   }
 
   await sendSpeedChallengeEmail(
     session.user.email,
     session.user.name ?? "",
     seconds,
-    tier.code,
-    tier.discount
+    PROMO_CODE,
+    "50%"
   )
 
-  return NextResponse.json({ ok: true, discount: tier.discount })
+  return NextResponse.json({ ok: true, discount: "50%" })
 }
