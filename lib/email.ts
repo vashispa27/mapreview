@@ -340,9 +340,12 @@ export async function sendSiteStatusEmail(
   toEmail: string,
   siteName: string,
   status: "SUCCESS" | "FAILED",
-  url?: string
+  url?: string,
+  challengeSeconds?: number,
+  promoCode?: string
 ) {
   const isSuccess = status === "SUCCESS"
+  const tookOver60 = typeof challengeSeconds === "number" && challengeSeconds > 60 && promoCode
 
   const body = isSuccess ? `
   ${heroSection("🚀", "linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)", "Your site is live!", `"${siteName}" is ready to share.`)}
@@ -351,6 +354,21 @@ export async function sendSiteStatusEmail(
     <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.7;">
       Great news! Your website for <strong>${siteName}</strong> has been generated and is live.
     </p>
+
+    ${typeof challengeSeconds === "number" ? `
+    <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 20px;margin:0 0 20px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:20px;">⚡</span>
+      <p style="margin:0;font-size:14px;color:#15803d;font-weight:600;">
+        Generated in <strong>${challengeSeconds} seconds</strong>${tookOver60 ? " — over 60s, so you've earned 50% off!" : " — challenge beaten! 🎉"}
+      </p>
+    </div>` : ""}
+
+    ${tookOver60 ? `
+    <div style="background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:12px;padding:20px 24px;margin:0 0 24px;text-align:center;">
+      <p style="margin:0 0 6px;font-size:12px;color:#7c3aed;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Your 50% off discount code</p>
+      <p style="margin:0;font-size:28px;font-weight:900;letter-spacing:2px;color:#4c1d95;">${promoCode}</p>
+      <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">Apply at checkout when upgrading to any paid plan</p>
+    </div>` : ""}
 
     ${url ? `
     <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:16px 20px;margin:0 0 24px;">
@@ -382,10 +400,12 @@ export async function sendSiteStatusEmail(
     return await client.send({
       from: sender,
       to: [{ email: toEmail }],
-      subject: isSuccess ? `"${siteName}" is live! 🎉` : `Build failed for "${siteName}" ⚠️`,
+      subject: isSuccess
+        ? (tookOver60 ? `"${siteName}" is live! + 50% off code inside 🎉` : `"${siteName}" is live! 🎉`)
+        : `Build failed for "${siteName}" ⚠️`,
       html: layout(isSuccess ? `Your site is live!` : `Build error for ${siteName}`, body),
       text: isSuccess
-        ? `Your site "${siteName}" is live at: ${url}`
+        ? `Your site "${siteName}" is live at: ${url}${tookOver60 ? ` | 50% off code: ${promoCode}` : ""}`
         : `We encountered an error while building "${siteName}". Please try again at ${APP_URL}`,
       category: "Site Status",
     })

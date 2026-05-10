@@ -137,17 +137,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
           })
           setLoading(false)
 
-          // Stop speed challenge timer — site is built, email sent
-          const startTime = localStorage.getItem("challenge_start_time")
-          if (startTime) {
-            const seconds = Math.floor((Date.now() - Number(startTime)) / 1000)
-            window.dispatchEvent(new CustomEvent("challenge-complete", { detail: { seconds } }))
-            fetch("/api/promo-email", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ seconds }),
-            }).catch(() => {})
-          }
+          // challenge-complete is fired from my-sites polling (not here) to avoid double-firing
         } else if (data.status === "FAILED") {
           setError(data.errorMessage || "Application compiler encountered systemic rejection securely")
           setLoading(false)

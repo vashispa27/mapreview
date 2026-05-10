@@ -252,10 +252,21 @@ export const generateSiteJob = inngest.createFunction(
 
         updateJob(jobId, { status: "COMPLETED" })
 
-        // SEND SUCCESS EMAIL
+        // SEND SUCCESS EMAIL — include generation time and promo code if > 60s
         if (site.user?.email) {
           const liveUrl = `https://maptosite.app/site/${site.slug || site.id}`
-          await sendSiteStatusEmail(site.user.email, businessData.name, "SUCCESS", liveUrl)
+          const generationSeconds = Math.round((Date.now() - new Date(startTime).getTime()) / 1000)
+          const promoCode = generationSeconds > 60
+            ? (process.env.NEXT_PUBLIC_PROMO_UNDER_30 ?? "")
+            : undefined
+          await sendSiteStatusEmail(
+            site.user.email,
+            businessData.name,
+            "SUCCESS",
+            liveUrl,
+            generationSeconds,
+            promoCode || undefined
+          )
         }
 
         const endTime = new Date().toISOString()
