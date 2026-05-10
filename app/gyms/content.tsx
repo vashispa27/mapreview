@@ -44,7 +44,7 @@ function GymNav() {
   return (
     <>
       <LoginModal open={loginModalOpen} onOpenChange={setLoginModalOpen} />
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+      <nav className="fixed top-10 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
@@ -161,7 +161,7 @@ function Hero() {
   return (
     <>
       <LoginModal open={loginModalOpen} onOpenChange={setLoginModalOpen} />
-      <section className="pt-20 pb-12 px-4">
+      <section className="pt-32 pb-12 px-4">
         <div className="max-w-6xl mx-auto w-full">
           <div className="grid md:grid-cols-2 gap-10 items-center">
 
@@ -174,24 +174,24 @@ function Hero() {
                 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                 className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20 mb-5"
               >
-                <Zap className="w-3 h-3" /> For Gym Owners
+                <Zap className="w-3 h-3" /> For Gym Owners in India
               </motion.span>
 
               <motion.h1
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-[1.1] tracking-tight mb-5"
               >
-                Turn Your Gym&apos;s{" "}
-                <span className="text-primary">Google Visitors</span>
-                {" "}into Paying Members
+                Get Your Gym a{" "}
+                <span className="text-primary">Website + Full Management System</span>
+                {" "}in 60 Seconds
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                 className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed"
               >
-                Most gyms get views on Google — but don&apos;t convert them.
-                MapToSite helps you turn those visitors into real enquiries and walk-ins.
+                Add members, collect enquiries, send renewal reminders, and manage your entire gym —
+                all from one place. No WhatsApp juggling. No Excel sheets. No tech knowledge needed.
               </motion.p>
 
               <motion.div
@@ -209,7 +209,7 @@ function Hero() {
                       className="h-14 px-8 font-black text-base shadow-lg shadow-primary/25"
                       onClick={() => setLoginModalOpen(true)}
                     >
-                      Go Live Now
+                      Set Up My Gym Now
                       <Zap className="ml-2 w-5 h-5" />
                     </Button>
                     <div className="flex items-center gap-3">
@@ -221,11 +221,28 @@ function Hero() {
                         ))}
                       </div>
                       <p className="text-sm text-muted-foreground font-medium">
-                        <span className="font-bold text-foreground">120+</span> gyms already converting more visitors
+                        <span className="font-bold text-foreground">120+</span> gym owners already using this
                       </p>
                     </div>
                   </>
                 )}
+
+                {/* Secondary actions */}
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-1">
+                  <a
+                    href="#examples"
+                    onClick={(e) => { e.preventDefault(); document.getElementById("examples")?.scrollIntoView({ behavior: "smooth" }) }}
+                    className="inline-flex items-center gap-1.5 h-11 px-5 text-sm font-black text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl transition-colors shadow-md shadow-primary/20"
+                  >
+                    🌐 See Websites We&apos;ve Built
+                  </a>
+                  <a
+                    href="/demo-console"
+                    className="inline-flex items-center gap-1.5 h-11 px-5 text-sm font-black text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl transition-colors shadow-md shadow-primary/20"
+                  >
+                    📊 Try management console
+                  </a>
+                </div>
               </motion.div>
             </motion.div>
 
@@ -311,9 +328,6 @@ function Solution() {
           <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20 mb-5">
             <CheckCircle2 className="w-3 h-3" /> The Solution
           </span>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6">
-            Fix Your Gym&apos;s Conversion System
-          </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             MapToSite turns your Google traffic into actual enquiries using a simple, automated system —
             built from your Google Maps listing in 60 seconds.
@@ -349,7 +363,7 @@ const GYM_EXAMPLES = [
 
 function ExampleSites() {
   return (
-    <section className="py-24 px-4">
+    <section id="examples" className="py-24 px-4">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -663,15 +677,28 @@ function FinalCTA() {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
+function ChallengeBanner() {
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground">
+      <div className="max-w-6xl mx-auto px-4 h-10 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold">
+        <Zap className="w-3.5 h-3.5 shrink-0" />
+        <span>
+          60-Second Challenge: If your website takes longer than 60 seconds to go live —
+          <span className="underline underline-offset-2 ml-1">flat 50% off on any plan. We dare you.</span>
+        </span>
+      </div>
+    </div>
+  )
+}
+
 export function GymLanding() {
   return (
     <div className="min-h-screen bg-background">
+      <ChallengeBanner />
       <GymNav />
       <Hero />
       <Problem />
-      <Solution />
       <ExampleSites />
-      <HowItWorks />
       <WhatYouGet />
       <div id="pricing">
         <PricingSection />

@@ -50,7 +50,7 @@ export function PricingSection() {
       id: "base",
       name: "Base",
       description: "Website + ecommerce for any business",
-      price: "₹999",
+      price: "₹259",
       priceSuffix: "/month",
       badge: null,
       features: [
@@ -72,9 +72,9 @@ export function PricingSection() {
       id: "pro",
       name: "Pro",
       description: "Full management platform for gyms & businesses",
-      price: "₹9,999",
-      priceSuffix: "/year",
-      badge: "Best Value",
+      price: "₹999",
+      priceSuffix: "/month",
+      badge: "Most Popular",
       features: [
         "Everything in Base",
         "Gym member management console",
@@ -104,7 +104,7 @@ export function PricingSection() {
           </p>
           <div className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted px-4 py-2 rounded-full">
             <RefreshCw className="w-3.5 h-3.5" />
-            Pro billed annually · Base billed monthly · Cancel any time
+            Both plans billed monthly · Cancel any time · No contracts
           </div>
         </motion.div>
 

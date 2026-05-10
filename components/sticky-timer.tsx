@@ -4,22 +4,17 @@ import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Zap, Copy, Check, X } from "lucide-react"
 
-const PROMOS: Record<string, { code: string; discount: string }> = {
-  under60:  { code: process.env.NEXT_PUBLIC_PROMO_UNDER_30 ?? "", discount: "50%" },
-  under80:  { code: process.env.NEXT_PUBLIC_PROMO_UNDER_40 ?? "", discount: "40%" },
-  under90:  { code: process.env.NEXT_PUBLIC_PROMO_UNDER_50 ?? "", discount: "30%" },
-  under100: { code: process.env.NEXT_PUBLIC_PROMO_UNDER_60 ?? "", discount: "20%" },
+const PROMO_50 = {
+  code: process.env.NEXT_PUBLIC_PROMO_UNDER_30 ?? "",
+  discount: "50%",
 }
 
+// Challenge: if it took MORE than 60 seconds, they earn 50% off
 function getPromo(seconds: number) {
-  if (seconds < 60)  return PROMOS.under60
-  if (seconds < 80)  return PROMOS.under80
-  if (seconds < 90)  return PROMOS.under90
-  if (seconds < 100) return PROMOS.under100
-  return null
+  return seconds > 60 ? PROMO_50 : null
 }
 
-type TimerState = "hidden" | "running" | "won" | "missed"
+type TimerState = "hidden" | "running" | "slow" | "fast"
 
 export function StickyTimer() {
   const [state, setState] = useState<TimerState>("hidden")
@@ -65,7 +60,7 @@ export function StickyTimer() {
     return () => window.removeEventListener("challenge-start", handleStart)
   }, [])
 
-  // Stop timer when user publishes
+  // Stop timer when site is published
   useEffect(() => {
     const handleComplete = (e: Event) => {
       const seconds = (e as CustomEvent<{ seconds: number }>).detail?.seconds
@@ -75,9 +70,9 @@ export function StickyTimer() {
       const earned = getPromo(seconds)
       if (earned) {
         setPromo(earned)
-        setState("won")
+        setState("slow") // took > 60s — give 50% off as promised
       } else {
-        setState("missed")
+        setState("fast") // under 60s — challenge met, no coupon needed
       }
       localStorage.removeItem("challenge_start_time")
     }
@@ -111,6 +106,8 @@ export function StickyTimer() {
   return (
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] pointer-events-none">
       <AnimatePresence mode="wait">
+
+        {/* Timer running */}
         {state === "running" && (
           <motion.div
             key="running"
@@ -120,8 +117,10 @@ export function StickyTimer() {
             className="pointer-events-auto flex items-center gap-3 bg-primary text-primary-foreground pl-4 pr-2 py-2 rounded-full shadow-2xl shadow-primary/40"
           >
             <Zap className="w-4 h-4 shrink-0" />
-            <span className="text-sm font-medium">Building your website</span>
-            <span className="font-mono font-bold text-base tabular-nums">{fmt(elapsed)}</span>
+            <span className="text-sm font-medium">60s challenge</span>
+            <span className={`font-mono font-bold text-base tabular-nums ${elapsed > 60 ? "text-red-300" : ""}`}>
+              {fmt(elapsed)}
+            </span>
             <button
               onClick={dismiss}
               className="w-6 h-6 rounded-full bg-primary-foreground/20 flex items-center justify-center hover:bg-primary-foreground/30 transition-colors"
@@ -132,9 +131,10 @@ export function StickyTimer() {
           </motion.div>
         )}
 
-        {state === "won" && promo && (
+        {/* Took > 60s — promo earned */}
+        {state === "slow" && promo && (
           <motion.div
-            key="won"
+            key="slow"
             initial={{ opacity: 0, y: -20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.9 }}
@@ -142,8 +142,7 @@ export function StickyTimer() {
           >
             <span className="text-base">🎉</span>
             <span className="text-sm font-semibold text-foreground">
-              Done in {elapsed}s! You earned{" "}
-              <span className="text-primary">{promo.discount} off</span>
+              Took {elapsed}s — <span className="text-primary">{promo.discount} off</span> as promised!
             </span>
             {promo.code ? (
               <button
@@ -166,17 +165,18 @@ export function StickyTimer() {
           </motion.div>
         )}
 
-        {state === "missed" && (
+        {/* Under 60s — challenge met, no coupon */}
+        {state === "fast" && (
           <motion.div
-            key="missed"
+            key="fast"
             initial={{ opacity: 0, y: -20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.9 }}
             className="pointer-events-auto flex items-center gap-3 bg-card border border-border pl-4 pr-2 py-2 rounded-full shadow-xl"
           >
-            <span className="text-base">⏱️</span>
-            <span className="text-sm text-muted-foreground">
-              {elapsed}s — just over 100! Try again next time.
+            <span className="text-base">⚡</span>
+            <span className="text-sm font-semibold text-foreground">
+              Done in {elapsed}s — challenge beaten!
             </span>
             <button
               onClick={dismiss}
@@ -187,6 +187,7 @@ export function StickyTimer() {
             </button>
           </motion.div>
         )}
+
       </AnimatePresence>
     </div>
   )
