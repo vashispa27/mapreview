@@ -7,8 +7,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'MapToSite - Turn Google Maps into Beautiful Websites',
-  description: 'Transform any Google Maps business page into a stunning one-pager website with real reviews and photos in seconds.',
+  title: 'MapToSite — Gym & Restaurant Websites from Google Maps in 60 Seconds',
+  description: 'MapToSite instantly converts your Google Maps listing into a professional website with real reviews, photos, and a full management system. No coding. No setup.',
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '16x16 32x32 48x48', type: 'image/x-icon' },
@@ -45,6 +45,44 @@ import Script from "next/script"
 import { WhatsAppWidget } from "@/components/whatsapp-widget"
 import { StickyTimer } from "@/components/sticky-timer"
 
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "MapToSite",
+  alternateName: ["MapToSite.app", "Map To Site"],
+  url: "https://maptosite.app",
+  description: "Turn your Google Maps listing into a professional website in 60 seconds. Auto-fills photos, reviews, hours and memberships.",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://maptosite.app/?q={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
+  },
+}
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "MapToSite",
+  alternateName: "MapToSite.app",
+  url: "https://maptosite.app",
+  logo: "https://maptosite.app/apple-icon.png",
+  description: "MapToSite instantly converts your Google Maps business profile into a professional website with built-in enquiry and management tools. No coding. No setup.",
+  foundingDate: "2024",
+  areaServed: "IN",
+  sameAs: [
+    "https://instagram.com/maptosite",
+    "https://twitter.com/maptosite",
+  ],
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer support",
+    availableLanguage: ["English", "Hindi"],
+  },
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -53,6 +91,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased">
+        <Script
+          id="schema-website"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+          strategy="beforeInteractive"
+        />
+        <Script
+          id="schema-organization"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          strategy="beforeInteractive"
+        />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-LNGGMH0MFE"
           strategy="lazyOnload"
