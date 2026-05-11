@@ -10,8 +10,11 @@ export const metadata: Metadata = {
   title: 'MapToSite - Turn Google Maps into Beautiful Websites',
   description: 'Transform any Google Maps business page into a stunning one-pager website with real reviews and photos in seconds.',
   icons: {
-    icon: '/icon.svg',
-    apple: '/apple-icon.png',
+    icon: [
+      { url: '/favicon.ico', sizes: '16x16 32x32 48x48', type: 'image/x-icon' },
+      { url: '/icon.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   openGraph: {
     title: 'MapToSite - Turn Google Maps into Beautiful Websites',
