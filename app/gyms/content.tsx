@@ -220,9 +220,6 @@ function Hero() {
                           </div>
                         ))}
                       </div>
-                      <p className="text-sm text-muted-foreground font-medium">
-                        <span className="font-bold text-foreground">120+</span> gym owners already using this
-                      </p>
                     </div>
                   </>
                 )}
