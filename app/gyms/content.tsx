@@ -212,15 +212,6 @@ function Hero() {
                       Set Up My Gym Now
                       <Zap className="ml-2 w-5 h-5" />
                     </Button>
-                    <div className="flex items-center gap-3">
-                      <div className="flex -space-x-2">
-                        {["A", "R", "S", "M"].map((l, i) => (
-                          <div key={i} className="w-7 h-7 rounded-full bg-primary/10 border-2 border-white flex items-center justify-center text-[10px] font-black text-primary">
-                            {l}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
                   </>
                 )}
 
