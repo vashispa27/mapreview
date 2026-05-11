@@ -78,6 +78,7 @@ const organizationSchema = {
   ],
   contactPoint: {
     "@type": "ContactPoint",
+    email: "admin@maptosite.app",
     contactType: "customer support",
     availableLanguage: ["English", "Hindi"],
   },

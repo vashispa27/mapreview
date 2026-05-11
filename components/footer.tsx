@@ -6,6 +6,12 @@ import { MiniMascot } from "@/components/mascot"
 import Link from "next/link"
 
 const footerLinks = {
+  company: [
+    { name: "About", href: "/about" },
+    { name: "Blog", href: "/blog" },
+    { name: "Gym Websites", href: "/gyms" },
+    { name: "Restaurant Websites", href: "/restaurants" },
+  ],
   legal: [
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Terms of Service", href: "/terms" },
@@ -17,7 +23,7 @@ export function Footer() {
   return (
     <footer className="bg-muted/50 border-t border-border">
       <div className="max-w-6xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="md:col-span-2">
             <motion.div
@@ -34,14 +40,37 @@ export function Footer() {
             </p>
           </div>
 
+          {/* Company */}
+          <div>
+            <h4 className="font-semibold text-foreground mb-4 uppercase tracking-wider text-xs">Company</h4>
+            <ul className="space-y-3">
+              {footerLinks.company.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* Contact Us */}
           <div>
             <h4 className="font-semibold text-foreground mb-4 uppercase tracking-wider text-xs">Contact Us</h4>
             <ul className="space-y-3">
               <li>
-                <a 
-                  href="https://instagram.com/maptosite.app" 
-                  target="_blank" 
+                <a
+                  href="mailto:admin@maptosite.app"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+                >
+                  <Mail className="w-4 h-4" />
+                  admin@maptosite.app
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://instagram.com/maptosite.app"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
                 >

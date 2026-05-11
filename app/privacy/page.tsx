@@ -40,6 +40,16 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-bold text-foreground">4. Cookie Policy</h2>
             <p>We use cookies to enhance your experience and secure your session. By using MapToSite, you consent to the use of cookies for authentication and performance tracking purposes.</p>
           </section>
+
+          <section className="space-y-4 pt-8">
+            <h2 className="text-2xl font-bold text-foreground">5. Contact Us</h2>
+            <p>If you have any questions about this Privacy Policy or how we handle your data, please contact us at:</p>
+            <p>
+              <a href="mailto:admin@maptosite.app" className="text-primary font-medium hover:underline">
+                admin@maptosite.app
+              </a>
+            </p>
+          </section>
         </div>
       </main>
       <Footer />

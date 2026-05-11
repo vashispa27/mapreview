@@ -34,6 +34,16 @@ export default function TermsPage() {
             <h2 className="text-2xl font-bold text-foreground">5. Changes</h2>
             <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. We will try to provide at least 30 days notice prior to any new terms taking effect.</p>
           </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold text-foreground">6. Contact Us</h2>
+            <p>If you have any questions about these Terms of Service, please contact us at:</p>
+            <p>
+              <a href="mailto:admin@maptosite.app" className="text-primary font-medium hover:underline">
+                admin@maptosite.app
+              </a>
+            </p>
+          </section>
         </div>
       </main>
       <Footer />
