@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { track } from "@/lib/analytics"
 
 // ─── Template thumbnail ───────────────────────────────────────────────────────
 const TEMPLATE_ACCENTS: Record<string, { header: string; hero: string; card: string; dark?: boolean }> = {
@@ -76,6 +77,8 @@ export default function GymTemplatePage() {
 
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const iframeHeight = device === "mobile" ? 812 : device === "tablet" ? 1024 : 900
+
+  useEffect(() => { track("gym_template_viewed") }, [])
 
   useEffect(() => {
     iframeRef.current?.contentWindow?.postMessage(
@@ -220,6 +223,7 @@ export default function GymTemplatePage() {
           {/* CTA */}
           <Link
             href="/gyms"
+            onClick={() => track("gym_template_cta_clicked")}
             className="flex-shrink-0 flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-white shadow-md transition-opacity hover:opacity-90"
             style={{ background: "#16a34a" }}
           >
@@ -360,6 +364,7 @@ export default function GymTemplatePage() {
               </p>
               <Link
                 href="/gyms"
+                onClick={() => track("gym_template_cta_clicked")}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white shadow-md hover:opacity-90 transition-opacity"
                 style={{ background: "#16a34a" }}
               >

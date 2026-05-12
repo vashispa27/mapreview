@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react"
 import { useToast } from "@/hooks/use-toast"
 import { LoginModal } from "@/components/login-modal"
 import { cn } from "@/lib/utils"
+import { track } from "@/lib/analytics"
 import {
   Dialog,
   DialogContent,
@@ -53,6 +54,7 @@ export function GymSearchBlock({
   const inputRef = useRef<HTMLInputElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const clientCache = useRef(new Map<string, SearchResult[]>())
+  const hasTrackedTyping = useRef(false)
 
   useEffect(() => {
     const handleFocus = () => {
@@ -231,8 +233,14 @@ export function GymSearchBlock({
             placeholder={placeholder}
             value={searchQuery}
             readOnly={!session}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onClick={() => { if (!session) setIsLoginModalOpen(true) }}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              if (!hasTrackedTyping.current) { hasTrackedTyping.current = true; track("search_typing") }
+            }}
+            onClick={() => {
+              track("search_bar_clicked")
+              if (!session) { track("login_modal_opened"); setIsLoginModalOpen(true) }
+            }}
             onFocus={() => { if (searchResults.length > 0) setShowDropdown(true) }}
             onKeyDown={(e) => { if (e.key === "Escape") setShowDropdown(false) }}
             className={cn("pl-12 h-14 text-base bg-card border-border shadow-sm", !session && "cursor-pointer")}

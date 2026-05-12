@@ -15,6 +15,7 @@ const InteractiveConsoleWidget = dynamic(
 import { useSession, signIn } from "next-auth/react"
 import { useToast } from "@/hooks/use-toast"
 import { LoginModal } from "@/components/login-modal"
+import { track } from "@/lib/analytics"
 import {
   Dialog,
   DialogContent,
@@ -53,8 +54,8 @@ export function HeroSection() {
 
   const inputRef = useRef<HTMLInputElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
-  // Client-side cache: query → results (lives for the page session)
   const clientCache = useRef(new Map<string, SearchResult[]>())
+  const hasTrackedTyping = useRef(false)
 
   useEffect(() => {
     const handleFocusEvent = () => {
@@ -468,11 +469,13 @@ export function HeroSection() {
                     placeholder="Search your gym name..."
                     value={searchQuery}
                     onChange={(e) => {
-                      if (!session) { setIsLoginModalOpen(true); return }
+                      if (!session) { track("login_modal_opened"); setIsLoginModalOpen(true); return }
                       setSearchQuery(e.target.value)
+                      if (!hasTrackedTyping.current) { hasTrackedTyping.current = true; track("search_typing") }
                     }}
                     onFocus={() => {
-                      if (!session) { setIsLoginModalOpen(true); return }
+                      track("search_bar_clicked")
+                      if (!session) { track("login_modal_opened"); setIsLoginModalOpen(true); return }
                       if (searchResults.length > 0) setShowDropdown(true)
                     }}
                     onKeyDown={(e) => {
@@ -529,6 +532,7 @@ export function HeroSection() {
                       type="url"
                       placeholder="Paste Google Maps link of your gym"
                       value={url}
+                      onClick={() => track("search_bar_clicked")}
                       onChange={(e) => {
                         setUrl(e.target.value)
                         setError("")

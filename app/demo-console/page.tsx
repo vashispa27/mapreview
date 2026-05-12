@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Users, Plus, RefreshCw, Trash2, ChevronLeft, X,
   Search, AlertCircle, CheckCircle, Clock, Dumbbell, Mail,
@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { daysUntil, formatDate, fmtINR, getCurrentFY } from "@/lib/gym-utils"
 import Link from "next/link"
+import { track } from "@/lib/analytics"
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -116,6 +117,8 @@ export default function DemoConsolePage() {
   const [members, setMembers] = useState<Member[]>(MOCK_MEMBERS)
   const [payments] = useState<Payment[]>(MOCK_PAYMENTS)
   const [activeTab, setActiveTab] = useState<"members" | "earnings" | "settings" | "plans">("members")
+
+  useEffect(() => { track("demo_console_viewed") }, [])
 
   // Members UI state
   const [search, setSearch] = useState("")
@@ -283,7 +286,7 @@ export default function DemoConsolePage() {
               { key: "earnings", label: "Earnings & Billing", icon: IndianRupee },
               { key: "settings", label: "GST Settings", icon: Settings },
             ] as const).map(({ key, label, icon: Icon }) => (
-              <button key={key} onClick={() => setActiveTab(key)}
+              <button key={key} onClick={() => { setActiveTab(key); track("demo_tab_switched", { tab: key }) }}
                 className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
                   activeTab === key ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}>

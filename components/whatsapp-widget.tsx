@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { MessageCircle } from "lucide-react"
+import { track } from "@/lib/analytics"
 
 const HIDE_ROUTES = ["/site/", "/preview/", "/console/"]
 
@@ -19,6 +20,7 @@ export function WhatsAppWidget() {
       href={WA_URL}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => track("whatsapp_click")}
       className="fixed bottom-5 right-5 z-50 flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white text-sm font-bold px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 active:translate-y-0"
       aria-label="Book a demo on WhatsApp"
     >

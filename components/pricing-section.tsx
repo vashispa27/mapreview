@@ -1,16 +1,29 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { Check, Sparkles, Zap, Loader2, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSession, signIn } from "next-auth/react"
 import { cn } from "@/lib/utils"
+import { track } from "@/lib/analytics"
 
 export function PricingSection() {
   const { data: session } = useSession()
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+  const sectionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { track("viewed_pricing"); observer.disconnect() } },
+      { threshold: 0.3 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const fadeInUp = {
     initial: { opacity: 0, y: 30 },
@@ -93,7 +106,7 @@ export function PricingSection() {
   ]
 
   return (
-    <section id="pricing" className="py-24 px-6 bg-muted/30">
+    <section id="pricing" ref={sectionRef} className="py-24 px-6 bg-muted/30">
       <div className="max-w-5xl mx-auto">
         <motion.div {...fadeInUp} className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4 italic uppercase">
