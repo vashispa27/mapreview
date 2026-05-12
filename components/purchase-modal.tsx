@@ -16,6 +16,13 @@ export function PurchaseModal({ open, onClose, isFood = false }: PurchaseModalPr
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
   const handleCheckout = async (plan: string) => {
+    if (typeof window.gtag === "function") {
+      window.gtag("event", "conversion", {
+        send_to: "AW-18101188882/OEIxCP_ElJ4cEJLyqLdD",
+        value: plan === "pro" ? 999 : 259,
+        currency: "INR",
+      })
+    }
     setLoadingPlan(plan)
     try {
       const res = await fetch("/api/payments/create-session", {

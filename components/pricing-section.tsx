@@ -108,6 +108,16 @@ export function PricingSection() {
           </div>
         </motion.div>
 
+        <motion.div {...fadeInUp} transition={{ delay: 0.15 }} className="max-w-3xl mx-auto mb-6">
+          <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+            <span className="text-2xl shrink-0">⚡</span>
+            <p className="text-sm text-amber-800 leading-snug">
+              <span className="font-black">60-second challenge:</span> if your website + management system takes longer than 60 seconds to set up, you get{" "}
+              <span className="font-black">50% off any plan</span> — automatically, no questions asked.
+            </p>
+          </div>
+        </motion.div>
+
         <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
           {tiers.map((tier, index) => (
             <motion.div

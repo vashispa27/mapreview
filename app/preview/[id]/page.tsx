@@ -256,6 +256,9 @@ export default function PreviewPage({ params }: PreviewPageProps) {
 
     if (!isAdminDemo && !hasPlan) {
       setPurchaseModalOpen(true)
+      if (typeof window.gtag === "function") {
+        window.gtag("event", "conversion", { send_to: "AW-18101188882/OEIxCP_ElJ4cEJLyqLdD" })
+      }
       return
     }
 

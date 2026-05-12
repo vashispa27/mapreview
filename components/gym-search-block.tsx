@@ -124,6 +124,9 @@ export function GymSearchBlock({
       if (!res.ok) { setError(data.error || "Failed to generate site"); return }
       localStorage.setItem("challenge_site_id", data.jobId)
       window.dispatchEvent(new Event("challenge-start"))
+      if (typeof window.gtag === "function") {
+        window.gtag("event", "conversion", { send_to: "AW-18101188882/OEIxCP_ElJ4cEJLyqLdD" })
+      }
       toast({ title: "Site Generation Started!", description: "Your page is being built. Check your My Sites dashboard." })
       router.push("/my-sites")
     } catch { setError("Something went wrong. Please try again.") } finally { setIsLoading(false) }

@@ -671,7 +671,7 @@ function ChallengeBanner() {
       <div className="max-w-6xl mx-auto px-4 h-10 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold">
         <Zap className="w-3.5 h-3.5 shrink-0" />
         <span>
-          60-Second Challenge: If your website takes longer than 60 seconds to go live —
+          60-Second Challenge: If your website + management system takes longer than 60 seconds to set up —
           <span className="underline underline-offset-2 ml-1">flat 50% off on any plan. We dare you.</span>
         </span>
       </div>

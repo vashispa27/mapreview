@@ -191,6 +191,9 @@ export function HeroSection() {
 
       localStorage.setItem("challenge_site_id", data.jobId)
       window.dispatchEvent(new Event("challenge-start"))
+      if (typeof window.gtag === "function") {
+        window.gtag("event", "conversion", { send_to: "AW-18101188882/OEIxCP_ElJ4cEJLyqLdD" })
+      }
 
       toast({
         title: "Site Generation Started!",
