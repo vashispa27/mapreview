@@ -115,6 +115,7 @@ export default function RootLayout({
             gtag('js', new Date());
             gtag('config', 'AW-18101188882');
             gtag('config', 'G-LNGGMH0MFE');
+            gtag('config', 'G-KJRE445WHR');
           `}
         </Script>
         <WhatsAppWidget />
