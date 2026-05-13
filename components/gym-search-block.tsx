@@ -279,15 +279,15 @@ export function GymSearchBlock({
         {/* Paste + Generate */}
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
-            <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
             <Input
               ref={inputRef}
               type="url"
-              placeholder="Paste Google Maps link"
+              placeholder="maps.app.goo.gl/YourGymLink"
               value={url}
               onChange={(e) => { setUrl(e.target.value); setError("") }}
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleGenerate() } }}
-              className="pl-10 h-11 text-sm bg-muted/30 border-dashed border-border"
+              className="pl-10 h-11 text-sm bg-muted/30 border-dashed border-border placeholder:text-green-500 placeholder:font-medium"
               disabled={isLoading}
             />
           </div>

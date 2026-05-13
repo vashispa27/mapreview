@@ -21,7 +21,6 @@ import {
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
 import { LoginModal } from "@/components/login-modal"
-import { GymSearchBlock } from "@/components/gym-search-block"
 import { GymHeroVisual } from "@/components/gym-hero-visual"
 import { PricingSection } from "@/components/pricing-section"
 import { Footer } from "@/components/footer"
@@ -155,84 +154,70 @@ function GymNav() {
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
 function Hero() {
-  const { data: session } = useSession()
-  const [loginModalOpen, setLoginModalOpen] = useState(false)
-
   return (
-    <>
-      <LoginModal open={loginModalOpen} onOpenChange={setLoginModalOpen} />
-      <section className="pt-32 pb-12 px-4">
-        <div className="max-w-6xl mx-auto w-full">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
+    <section className="pt-32 pb-12 px-4">
+      <div className="max-w-6xl mx-auto w-full">
+        <div className="grid md:grid-cols-2 gap-10 items-center">
 
-            {/* Left — text + CTA */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-              className="text-center md:text-left"
+          {/* Left — text + CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+            className="text-center md:text-left"
+          >
+            <motion.span
+              initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+              className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20 mb-5"
             >
-              <motion.span
-                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20 mb-5"
-              >
-                <Zap className="w-3 h-3" /> For Gym Owners in India
-              </motion.span>
+              <Zap className="w-3 h-3" /> For Gym Owners in India
+            </motion.span>
 
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-[1.1] tracking-tight mb-5"
-              >
-                Get Your Gym a{" "}
-                <span className="text-primary">Website + Full Management System</span>
-                {" "}in 60 Seconds
-              </motion.h1>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-[1.1] tracking-tight mb-5"
+            >
+              Gym Management Software{" "}
+              <span className="text-primary">+ Website</span>
+              {" "}— Live in 60 Seconds
+            </motion.h1>
 
-              <motion.p
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed"
-              >
-                Add members, collect enquiries, send renewal reminders, and manage your entire gym —
-                all from one place. No WhatsApp juggling. No Excel sheets. No tech knowledge needed.
-              </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+              className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed"
+            >
+              Manage members, payments &amp; leads — all from one dashboard.
+              Gym website included. Ditch the spreadsheets. No tech knowledge needed.
+            </motion.p>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}
-                className="flex flex-col items-center md:items-start gap-4"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}
+              className="flex flex-col items-center md:items-start gap-4"
+            >
+              <Button
+                size="lg"
+                className="h-14 px-8 font-black text-base shadow-lg shadow-primary/25"
+                onClick={() => window.dispatchEvent(new Event("focus-gym-input"))}
               >
-                {session ? (
-                  <div className="w-full text-left">
-                    <GymSearchBlock />
-                  </div>
-                ) : (
-                  <>
-                    <Button
-                      size="lg"
-                      className="h-14 px-8 font-black text-base shadow-lg shadow-primary/25"
-                      onClick={() => setLoginModalOpen(true)}
-                    >
-                      Set Up My Gym Now
-                      <Zap className="ml-2 w-5 h-5" />
-                    </Button>
-                  </>
-                )}
+                Set Up My Gym Now
+                <Zap className="ml-2 w-5 h-5" />
+              </Button>
 
-                {/* Secondary actions */}
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-1">
-                  <a
-                    href="#examples"
-                    onClick={(e) => { e.preventDefault(); document.getElementById("examples")?.scrollIntoView({ behavior: "smooth" }) }}
-                    className="inline-flex items-center gap-1.5 h-11 px-5 text-sm font-black text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl transition-colors shadow-md shadow-primary/20"
-                  >
-                    🌐 See Websites We&apos;ve Built
-                  </a>
-                  <a
-                    href="/demo-console"
-                    className="inline-flex items-center gap-1.5 h-11 px-5 text-sm font-black text-primary-foreground bg-primary hover:bg-primary/90 rounded-xl transition-colors shadow-md shadow-primary/20"
-                  >
-                    📊 Try management console
-                  </a>
-                </div>
-              </motion.div>
+              {/* Secondary actions */}
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-1">
+                <a
+                  href="/demo-console"
+                  className="inline-flex items-center gap-1.5 h-11 px-5 text-sm font-black border-2 border-primary text-primary hover:bg-primary/5 rounded-xl transition-colors"
+                >
+                  📊 Try Instant Demo
+                </a>
+                <a
+                  href="/gyms/template"
+                  className="inline-flex items-center gap-1.5 h-11 px-5 text-sm font-black border-2 border-border text-foreground hover:bg-muted/60 rounded-xl transition-colors"
+                >
+                  🌐 Try Website Editor
+                </a>
+              </div>
             </motion.div>
+          </motion.div>
 
             {/* Right — visual */}
             <motion.div
@@ -244,7 +229,6 @@ function Hero() {
           </div>
         </div>
       </section>
-    </>
   )
 }
 
@@ -252,10 +236,10 @@ function Hero() {
 
 function Problem() {
   const pains = [
-    { icon: "👁️", title: "People check your gym but don't contact you", desc: "They find your Google listing, browse your photos — then leave without ever reaching out." },
-    { icon: "🏃", title: "Leads go to competitors", desc: "While you have no proper online presence, the gym down the street with a website gets the booking." },
-    { icon: "🔕", title: "No proper follow-up system", desc: "Interested visitors don't get a follow-up. You lose them before they ever walk through the door." },
-    { icon: "💬", title: "Everything runs on scattered WhatsApp messages", desc: "Enquiries, renewals, plans — all tracked manually in chat threads. Things fall through the cracks." },
+    { icon: "📊", title: "Members tracked in Excel or WhatsApp", desc: "You're managing renewals, payments and plans across chat threads and spreadsheets. Things get missed." },
+    { icon: "🏃", title: "Leads go to competitors", desc: "The gym down the street has a proper website. You don't. They get the booking. You don't." },
+    { icon: "🔕", title: "Renewals slip through", desc: "No system to remind members when their plan ends. You chase them manually — or just lose them." },
+    { icon: "💸", title: "No record of who has paid", desc: "Payment tracking in WhatsApp or a notebook means you're always guessing who has paid and who hasn't." },
   ]
 
   return (
@@ -298,8 +282,8 @@ function Problem() {
           initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           className="bg-primary text-primary-foreground rounded-2xl p-8 text-center"
         >
-          <p className="text-xl font-black mb-1">You don&apos;t have a traffic problem.</p>
-          <p className="text-xl font-black opacity-80">You have a conversion problem.</p>
+          <p className="text-xl font-black mb-1">Your gym is growing. Your tools are not.</p>
+          <p className="text-xl font-black opacity-80">It&apos;s time to ditch the spreadsheets.</p>
         </motion.div>
       </div>
     </section>
@@ -481,11 +465,11 @@ function HowItWorks() {
 
 function WhatYouGet() {
   const features = [
-    { icon: "🌐", title: "Professional gym website", desc: "Built from your Google Maps listing in 60 seconds. Photos, reviews, hours — all auto-pulled. No design skills needed." },
-    { icon: "💬", title: "WhatsApp enquiry system", desc: "A prominent WhatsApp button on every page. Visitors tap it and go straight to your chat. Zero friction, zero missed leads." },
-    { icon: "📊", title: "Lead tracking dashboard", desc: "See every enquiry, where it came from, and its status. Stop tracking leads in chat threads." },
-    { icon: "🔄", title: "Automated follow-ups", desc: "Renewal reminders sent automatically before memberships expire. You get paid on time without chasing anyone." },
-    { icon: "⚙️", title: "Simple management system", desc: "Add members, record payments, assign diet and workout plans — all from one dashboard. No spreadsheets." },
+    { icon: "👥", title: "Member management", desc: "Add members, track their status, assign plans. See who is active, expired, or due for renewal — all in one place." },
+    { icon: "💰", title: "Payment tracking", desc: "Record every payment as it comes in. No more chasing or guessing who has paid. Clear history for every member." },
+    { icon: "📋", title: "Lead & enquiry tracking", desc: "Every enquiry from your website is logged automatically. Follow up on time and stop losing interested people." },
+    { icon: "🔄", title: "Renewal reminders", desc: "Members get an automatic reminder before their plan expires. You collect on time without calling anyone." },
+    { icon: "🌐", title: "Gym website — included free", desc: "A proper gym website built from your Google Maps listing in 60 seconds. Photos, reviews, and hours auto-filled." },
   ]
 
   return (
@@ -495,8 +479,8 @@ function WhatYouGet() {
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">What You Get</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Everything your gym needs to convert Google visitors into paying members.</p>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">All-in-One Gym Software</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Members, payments, leads and your website — all from one dashboard. No extra apps. No extra cost.</p>
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -627,11 +611,11 @@ function FinalCTA() {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <div className="text-6xl mb-6">💪</div>
             <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6">
-              Stop losing members who are already searching for you
+              Set up your gym software + website in 60 seconds
             </h2>
             <p className="text-primary-foreground/70 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-              Your Google Maps listing already has everything. We turn it into a proper gym website —
-              with WhatsApp enquiries, member management, and renewal reminders — in 60 seconds.
+              Members, payments, leads — all in one place. Website included.
+              If it takes longer than 60 seconds, you get 50% off. No questions asked.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
