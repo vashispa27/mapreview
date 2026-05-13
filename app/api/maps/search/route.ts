@@ -1,15 +1,30 @@
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
 
-// Simple in-memory cache: query → { results, ts }
 const cache = new Map<string, { results: unknown[]; ts: number }>()
-const CACHE_TTL_MS = 5 * 60 * 1000 // 5 minutes
+const CACHE_TTL_MS = 5 * 60 * 1000
+
+// IP rate limit: 30 requests per minute
+const rateLimit = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT = 30
+const RATE_WINDOW = 60 * 1000
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const entry = rateLimit.get(ip)
+  if (!entry || now > entry.resetAt) {
+    rateLimit.set(ip, { count: 1, resetAt: now + RATE_WINDOW })
+    return false
+  }
+  if (entry.count >= RATE_LIMIT) return true
+  entry.count++
+  return false
+}
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
+    if (isRateLimited(ip)) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -30,10 +45,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Search not configured" }, { status: 500 })
     }
 
-    // Autocomplete is ~11× cheaper than Text Search ($2.83 vs $32 per 1000 requests)
-    // `components=country:XX` biases results to that country (ISO 3166-1 alpha-2).
-    // Cost is the same regardless — restriction only improves relevance.
-    // To target multiple countries: country:us|country:ca|country:gb
     const res = await fetch(
       `https://maps.googleapis.com/maps/api/place/autocomplete/json` +
         `?input=${encodeURIComponent(query)}` +
@@ -54,13 +65,10 @@ export async function GET(request: NextRequest) {
       id: p.place_id,
       name: p.structured_formatting?.main_text ?? p.description,
       address: p.structured_formatting?.secondary_text ?? "",
-      // Canonical place URL — accepted by Apify and passes our updated validation
       url: `https://www.google.com/maps/place/?q=place_id:${p.place_id}`,
     }))
 
-    // Cache before returning
     cache.set(cacheKey, { results, ts: Date.now() })
-    // Prune cache if it grows too large
     if (cache.size > 200) {
       const oldest = [...cache.entries()].sort((a, b) => a[1].ts - b[1].ts)[0]
       cache.delete(oldest[0])

@@ -758,6 +758,41 @@ export async function sendGymPlanEmail({
   })
 }
 
+// ─── OTP Email ────────────────────────────────────────────────────────────────
+
+export async function sendOtpEmail(toEmail: string, otp: string) {
+  const body = `
+  ${heroSection("🔐", "linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%)", "Your sign-in code", "Use this OTP to sign in to MapToSite")}
+
+  <div style="padding:32px 40px;text-align:center;">
+    <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.7;">
+      Enter this code to complete your sign-in. It expires in <strong>10 minutes</strong>.
+    </p>
+
+    <div style="background:#f5f3ff;border:2px solid #c4b5fd;border-radius:16px;padding:28px 40px;display:inline-block;margin:0 auto 24px;">
+      <p style="margin:0;font-size:42px;font-weight:900;letter-spacing:0.3em;color:#4c1d95;font-family:monospace;">${otp}</p>
+    </div>
+
+    <p style="margin:0;font-size:13px;color:#9ca3af;line-height:1.6;">
+      If you didn't request this, you can safely ignore this email.
+    </p>
+  </div>`
+
+  try {
+    return await client.send({
+      from: sender,
+      to: [{ email: toEmail }],
+      subject: `${otp} is your MapToSite sign-in code`,
+      html: layout("Your MapToSite sign-in code", body),
+      text: `Your MapToSite sign-in code is: ${otp}\n\nThis code expires in 10 minutes. Do not share it with anyone.`,
+      category: "Auth",
+    })
+  } catch (error) {
+    console.error("Failed to send OTP email:", error)
+    throw error
+  }
+}
+
 // ─── Legacy shim (used by existing webhook code) ─────────────────────────────
 
 export async function sendPaymentEmail(

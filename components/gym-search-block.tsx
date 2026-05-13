@@ -112,9 +112,15 @@ export function GymSearchBlock({
       router.push("/preview/admin-demo")
       return
     }
-    if (!session) { setIsLoginModalOpen(true); return }
     if (!finalUrl) { setError(`Please enter a Google Maps URL`); return }
     if (validateUrl(finalUrl) === "invalid") { setIsTutorialOpen(true); return }
+
+    // Not logged in → show fake preview flow
+    if (!session) {
+      router.push(`/try?url=${encodeURIComponent(finalUrl)}`)
+      return
+    }
+
     setError(""); setIsLoading(true)
     try {
       const res = await fetch("/api/generate", {
@@ -135,8 +141,12 @@ export function GymSearchBlock({
   }
 
   const handleSelectResult = (result: SearchResult) => {
-    if (!session) { setIsLoginModalOpen(true); return }
-    setSearchQuery(""); setShowDropdown(false); setPendingResult(result)
+    setSearchQuery(""); setShowDropdown(false)
+    if (!session) {
+      router.push(`/try?url=${encodeURIComponent(result.url)}&name=${encodeURIComponent(result.name)}`)
+      return
+    }
+    setPendingResult(result)
   }
 
   const accentClass = accent === "green"
@@ -232,18 +242,23 @@ export function GymSearchBlock({
             type="text"
             placeholder={placeholder}
             value={searchQuery}
-            readOnly={!session}
             onChange={(e) => {
               setSearchQuery(e.target.value)
               if (!hasTrackedTyping.current) { hasTrackedTyping.current = true; track("search_typing") }
             }}
-            onClick={() => {
-              track("search_bar_clicked")
-              if (!session) { track("login_modal_opened"); setIsLoginModalOpen(true) }
-            }}
+            onClick={() => track("search_bar_clicked")}
             onFocus={() => { if (searchResults.length > 0) setShowDropdown(true) }}
-            onKeyDown={(e) => { if (e.key === "Escape") setShowDropdown(false) }}
-            className={cn("pl-12 h-14 text-base bg-card border-border shadow-sm", !session && "cursor-pointer")}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") { setShowDropdown(false); return }
+              if (e.key === "Enter" && searchQuery.trim()) {
+                e.preventDefault()
+                setShowDropdown(false)
+                if (!session) {
+                  router.push(`/try?name=${encodeURIComponent(searchQuery.trim())}`)
+                }
+              }
+            }}
+            className="pl-12 h-14 text-base bg-card border-border shadow-sm"
           />
           <AnimatePresence>
             {showDropdown && searchResults.length > 0 && (

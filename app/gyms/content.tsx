@@ -666,6 +666,7 @@ export function GymLanding() {
       <GymNav />
       <Hero />
       <Problem />
+      <HowItWorks />
       <ExampleSites />
       <WhatYouGet />
       <div id="pricing">

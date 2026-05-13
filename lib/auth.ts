@@ -20,6 +20,60 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       checks: ["none"],
     }),
     Credentials({
+      id: "phone",
+      name: "Phone OTP",
+      credentials: {
+        phone: { type: "text" },
+        otp: { type: "text" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.phone || !credentials?.otp) return null
+        const phone = (credentials.phone as string).replace(/\s/g, "")
+        const otp = credentials.otp as string
+
+        const record = await db.phoneOtp.findFirst({
+          where: { phone, otp, used: false, expiresAt: { gt: new Date() } },
+        })
+        if (!record) return null
+
+        await db.phoneOtp.update({ where: { id: record.id }, data: { used: true } })
+
+        const user = await db.user.upsert({
+          where: { phone },
+          update: {},
+          create: { phone, name: phone, plan: "free" },
+        })
+        return { id: user.id, name: user.name, email: user.email }
+      },
+    }),
+    Credentials({
+      id: "email-otp",
+      name: "Email OTP",
+      credentials: {
+        email: { type: "text" },
+        otp: { type: "text" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.otp) return null
+        const email = (credentials.email as string).trim().toLowerCase()
+        const otp = credentials.otp as string
+
+        const record = await db.emailOtp.findFirst({
+          where: { email, otp, used: false, expiresAt: { gt: new Date() } },
+        })
+        if (!record) return null
+
+        await db.emailOtp.update({ where: { id: record.id }, data: { used: true } })
+
+        const user = await db.user.upsert({
+          where: { email },
+          update: {},
+          create: { email, name: email.split("@")[0], plan: "free" },
+        })
+        return { id: user.id, name: user.name, email: user.email }
+      },
+    }),
+    Credentials({
       id: "admin-credentials",
       name: "Admin",
       credentials: {
