@@ -52,14 +52,15 @@ export function GymSearchBlock({
   const [pendingResult, setPendingResult] = useState<SearchResult | null>(null)
 
   const inputRef = useRef<HTMLInputElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const clientCache = useRef(new Map<string, SearchResult[]>())
   const hasTrackedTyping = useRef(false)
 
   useEffect(() => {
     const handleFocus = () => {
-      inputRef.current?.focus()
-      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+      searchInputRef.current?.focus()
+      searchInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
     }
     window.addEventListener("focus-gym-input", handleFocus)
     return () => window.removeEventListener("focus-gym-input", handleFocus)
@@ -239,6 +240,7 @@ export function GymSearchBlock({
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none z-10" />
           {isSearching && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground z-10" />}
           <Input
+            ref={searchInputRef}
             type="text"
             placeholder={placeholder}
             value={searchQuery}
