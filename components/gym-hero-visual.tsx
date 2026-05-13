@@ -6,7 +6,7 @@ import { GymSearchBlock } from "@/components/gym-search-block"
 const FEATURES = [
   { icon: Globe,         title: "Your website",      sub: "Live & branded instantly" },
   { icon: Users,         title: "Member management", sub: "Add, track & renew" },
-  { icon: CreditCard,    title: "Payments",          sub: "Collect & reconcile" },
+  { icon: CreditCard,    title: "Payments",          sub: "Auto reminders + GST filing" },
   { icon: MessageCircle, title: "Lead capture",      sub: "Enquiries to WhatsApp" },
 ]
 

@@ -166,9 +166,9 @@ function Hero() {
           >
             <motion.span
               initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20 mb-5"
+              className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full text-xs font-bold border border-amber-200 mb-5"
             >
-              <Zap className="w-3 h-3" /> For Gym Owners in India
+              🛡️ If not live in 60s — website + management software — 50% off. We challenge you.
             </motion.span>
 
             <motion.h1
@@ -184,8 +184,8 @@ function Hero() {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
               className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed"
             >
-              Manage members, payments &amp; leads — all from one dashboard.
-              Gym website included. Ditch the spreadsheets. No tech knowledge needed.
+              Manage members, payment reminders, GST filing &amp; leads — all from one dashboard.{" "}
+              <span className="font-black text-foreground">Gym website included.</span> Ditch the spreadsheets. No tech knowledge needed.
             </motion.p>
 
             <motion.div
@@ -653,11 +653,7 @@ function ChallengeBanner() {
   return (
     <div className="fixed top-0 left-0 right-0 z-[60] bg-primary text-primary-foreground">
       <div className="max-w-6xl mx-auto px-4 h-10 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold">
-        <Zap className="w-3.5 h-3.5 shrink-0" />
-        <span>
-          60-Second Challenge: If your website + management system takes longer than 60 seconds to set up —
-          <span className="underline underline-offset-2 ml-1">flat 50% off on any plan. We dare you.</span>
-        </span>
+        <span>🇮🇳 For Gym Owners in India</span>
       </div>
     </div>
   )
