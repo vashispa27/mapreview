@@ -230,13 +230,7 @@ export function HeroSection() {
               </button>
             </div>
             <div className="p-2 bg-black">
-              <img
-                src="/url-tutorial.gif"
-                alt="How to copy Google Maps URL"
-                loading="lazy"
-                decoding="async"
-                className="w-full h-auto rounded-xl shadow-inner"
-              />
+              <img src="/url-tutorial.gif" alt="How to copy Google Maps URL" loading="lazy" decoding="async" className="w-full h-auto rounded-xl shadow-inner" />
             </div>
             <div className="p-6 bg-muted/30 text-center">
               <Button className="w-full h-12 text-base font-bold" onClick={() => setIsTutorialOpen(false)}>
