@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
@@ -8,7 +8,8 @@ import {
   Users, Plus, RefreshCw, Trash2, ChevronLeft, Loader2, X,
   Search, AlertCircle, CheckCircle, Clock, Dumbbell, Mail,
   Phone, Calendar, IndianRupee, FileText, Settings, Download,
-  TrendingUp, Receipt,
+  TrendingUp, Receipt, Inbox, MessageCircle, PhoneCall, CheckCheck,
+  Globe, Bell,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { daysUntil, formatDate, fmtINR, getCurrentFY } from "@/lib/gym-utils"
@@ -148,7 +149,7 @@ export default function GymConsolePage() {
   const [payments, setPayments] = useState<GymPayment[]>([])
   const [settings, setSettings] = useState<GymSettings | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<"members" | "earnings" | "settings" | "plans">("members")
+  const [activeTab, setActiveTab] = useState<"members" | "leads" | "earnings" | "settings" | "plans">("members")
 
   // Members state
   const [search, setSearch] = useState("")
@@ -186,6 +187,15 @@ export default function GymConsolePage() {
   const [dietPlanEditorOpen, setDietPlanEditorOpen] = useState(false)
   const [savingDietPlan, setSavingDietPlan] = useState(false)
   const [deletingDietPlanId, setDeletingDietPlanId] = useState<string | null>(null)
+
+  // Leads state
+  interface GymLeadItem { id: string; name: string; phone: string; email: string | null; message: string | null; source: string; status: string; enquiryDate: string }
+  const [leads, setLeads] = useState<GymLeadItem[]>([])
+  const [leadDrawerOpen, setLeadDrawerOpen] = useState(false)
+  const [leadForm, setLeadForm] = useState({ name: "", phone: "", email: "", message: "", source: "Walk-in" })
+  const [submittingLead, setSubmittingLead] = useState(false)
+  const [updatingLeadId, setUpdatingLeadId] = useState<string | null>(null)
+  const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null)
 
   function newSession() {
     return { id: Math.random().toString(36).slice(2), name: "", type: "workout" as const, exercises: [], notes: "" }
@@ -264,8 +274,14 @@ export default function GymConsolePage() {
       .then((d) => setDietPlans(d?.plans || []))
       .catch(() => {})
 
+  const fetchLeads = () =>
+    fetch(`/api/console/${siteId}/leads`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => setLeads(d?.leads || []))
+      .catch(() => {})
+
   useEffect(() => {
-    if (site) { fetchMembers(); fetchPayments(); fetchSettings(); fetchPlans(); fetchDietPlans() }
+    if (site) { fetchMembers(); fetchPayments(); fetchSettings(); fetchPlans(); fetchDietPlans(); fetchLeads() }
   }, [site])
 
   // ─── Handlers ───────────────────────────────────────────────────────────────
@@ -317,6 +333,45 @@ export default function GymConsolePage() {
 
   const handleExportCSV = () => {
     window.open(`/api/console/${siteId}/payments?export=csv&fy=${selectedFY}`, "_blank")
+  }
+
+  const handleAddLead = async () => {
+    if (!leadForm.name.trim() || !leadForm.phone.trim()) return
+    setSubmittingLead(true)
+    const res = await fetch(`/api/console/${siteId}/leads`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(leadForm),
+    })
+    setSubmittingLead(false)
+    if (res.ok) {
+      setLeadDrawerOpen(false)
+      setLeadForm({ name: "", phone: "", email: "", message: "", source: "Walk-in" })
+      fetchLeads()
+    }
+  }
+
+  const handleLeadStatus = async (leadId: string, status: string) => {
+    setUpdatingLeadId(leadId)
+    await fetch(`/api/console/${siteId}/leads/${leadId}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    })
+    setUpdatingLeadId(null)
+    fetchLeads()
+  }
+
+  const handleDeleteLead = async (leadId: string) => {
+    setDeletingLeadId(leadId)
+    await fetch(`/api/console/${siteId}/leads/${leadId}`, { method: "DELETE" })
+    setDeletingLeadId(null)
+    fetchLeads()
+  }
+
+  function timeAgo(dateStr: string) {
+    const diff = (Date.now() - new Date(dateStr).getTime()) / 1000
+    if (diff < 3600) return `${Math.max(1, Math.floor(diff / 60))}m ago`
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+    return `${Math.floor(diff / 86400)}d ago`
   }
 
   // ─── Derived data ────────────────────────────────────────────────────────────
@@ -411,25 +466,27 @@ export default function GymConsolePage() {
       )}
 
       {/* Tabs */}
-      <div className="border-b border-border bg-background">
+      <div className="border-b border-border bg-background overflow-x-auto scrollbar-none">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex gap-0">
+          <div className="flex min-w-max">
             {([
-              { key: "members", label: "Members", icon: Users },
-              { key: "plans", label: "Workout Plans", icon: Dumbbell },
-              { key: "earnings", label: "Earnings & Billing", icon: IndianRupee },
-              { key: "settings", label: "GST Settings", icon: Settings },
-            ] as const).map(({ key, label, icon: Icon }) => (
+              { key: "members",  label: "Members",            icon: Users,       badge: memberStats.expiring || undefined },
+              { key: "leads",    label: "Leads",              icon: Inbox,       badge: leads.filter(l => l.status === "new").length || undefined },
+              { key: "plans",    label: "Plans",              icon: Dumbbell,    badge: undefined },
+              { key: "earnings", label: "Earnings & Billing", icon: IndianRupee, badge: undefined },
+              { key: "settings", label: "GST Settings",       icon: Settings,    badge: undefined },
+            ] as Array<{ key: "members" | "leads" | "plans" | "earnings" | "settings"; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number }>).map(({ key, label, icon: Icon, badge }) => (
               <button
                 key={key}
                 onClick={() => setActiveTab(key)}
-                className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition ${
+                className={`relative flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
                   activeTab === key
                     ? "border-primary text-primary"
                     : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="w-4 h-4" />{label}
+                {badge ? <span className="absolute top-2 right-1.5 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">{badge}</span> : null}
               </button>
             ))}
           </div>
@@ -441,6 +498,19 @@ export default function GymConsolePage() {
         {/* ── MEMBERS TAB ── */}
         {activeTab === "members" && (
           <>
+            {/* Auto-reminder banner */}
+            {memberStats.expiring > 0 && (
+              <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5">
+                <Bell className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-amber-900">
+                    🔔 Auto-reminders scheduled for {memberStats.expiring} expiring member{memberStats.expiring > 1 ? "s" : ""}
+                  </p>
+                  <p className="text-xs text-amber-700 mt-0.5">WhatsApp &amp; email auto-sent 7d and 1d before expiry</p>
+                </div>
+              </div>
+            )}
+
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
@@ -567,6 +637,110 @@ export default function GymConsolePage() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── LEADS TAB ── */}
+        {activeTab === "leads" && (
+          <>
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: "New", value: leads.filter(l => l.status === "new").length, color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200" },
+                { label: "Contacted", value: leads.filter(l => l.status === "contacted").length, color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
+                { label: "Converted", value: leads.filter(l => l.status === "converted").length, color: "text-green-700", bg: "bg-green-50", border: "border-green-200" },
+              ].map(s => (
+                <div key={s.label} className={`${s.bg} border ${s.border} rounded-xl p-4 border-border/50`}>
+                  <p className={`text-xs font-semibold uppercase tracking-wider ${s.color} mb-2`}>{s.label}</p>
+                  <p className="text-3xl font-bold">{s.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Info callout */}
+            <div className="flex items-start gap-3 bg-primary/5 border border-primary/20 rounded-xl px-4 py-3.5">
+              <Globe className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <p className="text-sm text-foreground leading-relaxed">
+                <span className="font-bold">Leads from your gym website appear here automatically.</span>{" "}
+                Every WhatsApp click and contact form submission is captured — nothing to do manually. You can also add walk-in enquiries below.
+              </p>
+            </div>
+
+            {/* Add lead + list */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold">All Enquiries</h2>
+              <Button size="sm" onClick={() => setLeadDrawerOpen(true)}>
+                <Plus className="w-4 h-4 mr-1.5" />Add Lead
+              </Button>
+            </div>
+
+            {leads.length === 0 ? (
+              <div className="text-center py-20 border-2 border-dashed border-border rounded-xl">
+                <Inbox className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+                <p className="font-semibold text-muted-foreground">No leads yet</p>
+                <p className="text-xs text-muted-foreground mt-1">Leads from your gym website will appear here</p>
+                <Button size="sm" className="mt-4" onClick={() => setLeadDrawerOpen(true)}>
+                  <Plus className="w-4 h-4 mr-1.5" />Add walk-in enquiry
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {leads.map(lead => {
+                  const isNew = lead.status === "new"
+                  const isContacted = lead.status === "contacted"
+                  const isConverted = lead.status === "converted"
+                  return (
+                    <div key={lead.id} className="border border-border rounded-xl p-4 bg-card flex flex-col sm:flex-row sm:items-center gap-3 hover:bg-muted/20 transition-colors">
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                          {lead.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                            <p className="font-semibold text-sm">{lead.name}</p>
+                            {isNew && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">New</span>}
+                            {isContacted && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Contacted</span>}
+                            {isConverted && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700"><CheckCheck className="w-3 h-3" />Joined</span>}
+                            <span className="text-xs text-muted-foreground">{timeAgo(lead.enquiryDate)}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{lead.phone} · via {lead.source}</p>
+                          {lead.message && <p className="text-xs text-foreground/70 mt-1 italic">&ldquo;{lead.message}&rdquo;</p>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                        <a href={`https://wa.me/91${lead.phone}?text=${encodeURIComponent(`Hi ${lead.name.split(" ")[0]}, thanks for your enquiry at ${gymName}!`)}`}
+                          target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[#25D366]/10 text-[#25D366] text-xs font-semibold hover:bg-[#25D366]/20 transition-colors">
+                          <MessageCircle className="w-3.5 h-3.5" />WhatsApp
+                        </a>
+                        <a href={`tel:${lead.phone}`}
+                          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-blue-50 text-blue-600 text-xs font-semibold hover:bg-blue-100 transition-colors">
+                          <PhoneCall className="w-3.5 h-3.5" />Call
+                        </a>
+                        {isNew && (
+                          <button onClick={() => handleLeadStatus(lead.id, "contacted")} disabled={updatingLeadId === lead.id}
+                            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border text-xs font-semibold hover:bg-muted transition-colors">
+                            {updatingLeadId === lead.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCheck className="w-3.5 h-3.5" />}
+                            Contacted
+                          </button>
+                        )}
+                        {isContacted && (
+                          <button onClick={() => handleLeadStatus(lead.id, "converted")} disabled={updatingLeadId === lead.id}
+                            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-xs font-semibold hover:bg-green-100 transition-colors">
+                            {updatingLeadId === lead.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                            Joined
+                          </button>
+                        )}
+                        <button onClick={() => handleDeleteLead(lead.id)} disabled={deletingLeadId === lead.id}
+                          className="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition-colors">
+                          {deletingLeadId === lead.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             )}
           </>
@@ -1107,6 +1281,53 @@ export default function GymConsolePage() {
                 {editingDietPlan.id ? "Save Changes" : "Create Diet Plan"}
               </Button>
               <Button variant="outline" onClick={() => setDietPlanEditorOpen(false)}>Cancel</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── ADD LEAD DRAWER ── */}
+      {leadDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setLeadDrawerOpen(false)} />
+          <div className="relative w-full sm:max-w-md bg-card rounded-t-2xl sm:rounded-2xl shadow-2xl border border-border p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold">Add Enquiry</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Walk-in, phone, or referral lead</p>
+              </div>
+              <button onClick={() => setLeadDrawerOpen(false)} className="p-1.5 rounded-lg hover:bg-muted transition text-muted-foreground"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Name *</label>
+                <input value={leadForm.name} onChange={e => setLeadForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Rahul Sharma"
+                  className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Phone *</label>
+                <input value={leadForm.phone} onChange={e => setLeadForm(f => ({ ...f, phone: e.target.value }))} placeholder="+91 98765 43210" type="tel"
+                  className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Source</label>
+                <select value={leadForm.source} onChange={e => setLeadForm(f => ({ ...f, source: e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition">
+                  {["Walk-in", "Phone call", "WhatsApp", "Referral", "Website", "Instagram", "Other"].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Note / Enquiry</label>
+                <textarea value={leadForm.message} onChange={e => setLeadForm(f => ({ ...f, message: e.target.value }))}
+                  placeholder="e.g. Interested in 3-month plan, asked about timings…" rows={3}
+                  className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition resize-none" />
+              </div>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button onClick={handleAddLead} disabled={submittingLead || !leadForm.name.trim() || !leadForm.phone.trim()} className="flex-1">
+                {submittingLead ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}Add Enquiry
+              </Button>
+              <Button variant="outline" onClick={() => setLeadDrawerOpen(false)}>Cancel</Button>
             </div>
           </div>
         </div>

@@ -97,7 +97,7 @@ function PhoneTab({ onOpenChange }: { onOpenChange: (o: boolean) => void }) {
     if (cleaned.length !== 10) { setError("Enter a valid 10-digit mobile number"); return }
     setError("")
     setIsLoading(true)
-    track("phone_number_entered")
+    track("login_phone_submitted")
     try {
       const res = await fetch("/api/auth/send-otp", {
         method: "POST",
@@ -106,7 +106,7 @@ function PhoneTab({ onOpenChange }: { onOpenChange: (o: boolean) => void }) {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || "Failed to send OTP"); return }
-      track("otp_sent_phone")
+      track("login_otp_sent", { method: "phone" })
       setStep("otp")
       startTimer()
     } catch {
@@ -122,7 +122,7 @@ function PhoneTab({ onOpenChange }: { onOpenChange: (o: boolean) => void }) {
     try {
       const res = await signIn("phone", { phone: phone.replace(/\D/g, ""), otp, redirect: false })
       if (res?.error) { setError("Wrong OTP or it has expired.") }
-      else { track("otp_verified_phone"); onOpenChange(false); window.location.reload() }
+      else { track("login_success", { method: "phone" }); onOpenChange(false); window.location.reload() }
     } catch {
       setError("Verification failed. Try again.")
     } finally {
@@ -193,7 +193,7 @@ function EmailTab({ onOpenChange }: { onOpenChange: (o: boolean) => void }) {
     if (!email.includes("@")) { setError("Enter a valid email address"); return }
     setError("")
     setIsLoading(true)
-    track("email_entered")
+    track("login_email_submitted")
     try {
       const res = await fetch("/api/auth/send-email-otp", {
         method: "POST",
@@ -202,7 +202,7 @@ function EmailTab({ onOpenChange }: { onOpenChange: (o: boolean) => void }) {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || "Failed to send OTP"); return }
-      track("otp_sent_email")
+      track("login_otp_sent", { method: "email" })
       setStep("otp")
       startTimer()
     } catch {
@@ -218,7 +218,7 @@ function EmailTab({ onOpenChange }: { onOpenChange: (o: boolean) => void }) {
     try {
       const res = await signIn("email-otp", { email: email.trim().toLowerCase(), otp, redirect: false })
       if (res?.error) { setError("Wrong OTP or it has expired.") }
-      else { track("otp_verified_email"); onOpenChange(false); window.location.reload() }
+      else { track("login_success", { method: "email" }); onOpenChange(false); window.location.reload() }
     } catch {
       setError("Verification failed. Try again.")
     } finally {
@@ -309,7 +309,7 @@ function GoogleButton() {
       <Button
         variant="outline"
         className="w-full"
-        onClick={() => { setIsLoading(true); signIn("google", { callbackUrl: window.location.href }) }}
+        onClick={() => { setIsLoading(true); track("login_google_clicked"); signIn("google", { callbackUrl: window.location.href }) }}
         disabled={isLoading}
       >
         {isLoading ? <Loader2 className="mr-2 w-4 h-4 animate-spin" /> : (
@@ -332,7 +332,12 @@ type Tab = "phone" | "email"
 
 export function LoginModal({ open, onOpenChange, accent }: LoginModalProps) {
   const [tab, setTab] = useState<Tab>("phone")
-  useEffect(() => { if (open) setTab("phone") }, [open])
+  useEffect(() => {
+    if (open) {
+      setTab("phone")
+      track("login_modal_opened")
+    }
+  }, [open])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

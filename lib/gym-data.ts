@@ -178,8 +178,8 @@ export const GYM_CONFIG: SiteConfig = {
     text: "#1a0a0a",
     muted: "#6b7280",
   },
-  layout: "sport",
+  layout: "glass",
   fontStyle: "sans",
   animations: true,
-  theme: "light",
+  theme: "dark",
 }

@@ -55,11 +55,17 @@ export default function PreviewCanvasPage() {
     return <div style={{ minHeight: "100vh", background: "#fff" }} />
   }
 
+  const handleBusinessChange = (updated: BusinessData) => {
+    setBusiness(updated)
+    window.parent.postMessage({ type: "BUSINESS_UPDATE", business: updated }, "*")
+  }
+
   return (
     <SiteTemplate
       business={business}
       config={config}
-      isPreview={false}
+      isPreview={true}
+      onBusinessChange={handleBusinessChange}
     />
   )
 }

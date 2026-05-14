@@ -1,16 +1,18 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { Suspense, useState, useEffect, useRef } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import {
   SiteConfig, colorSchemes, layoutOptions,
 } from "@/lib/mock-data"
 import { GYM_BUSINESS, GYM_CONFIG } from "@/lib/gym-data"
 import { PageManager } from "@/components/page-manager"
 import { SiteTemplate } from "@/components/site-template"
+import { LoginModal } from "@/components/login-modal"
 import {
   Monitor, Tablet, Smartphone, Sparkles, ArrowRight,
   LayoutGrid, Paintbrush, ArrowLeft, Phone, Plus, Check,
-  MapPin, Dumbbell,
+  Dumbbell, Zap, ChevronLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -68,23 +70,43 @@ function TemplateThumbnail({ id, active }: { id: string; active: boolean }) {
   )
 }
 
-export default function GymTemplatePage() {
-  const [business, setBusiness] = useState(GYM_BUSINESS)
+function GymTemplateContent() {
+  const params = useSearchParams()
+  const router = useRouter()
+  const nameFromUrl = params.get("name") || ""
+  const fromOnboard = !!nameFromUrl
+
+  const [business, setBusiness] = useState(() => ({
+    ...GYM_BUSINESS,
+    name: nameFromUrl || GYM_BUSINESS.name,
+  }))
   const [config, setConfig] = useState<SiteConfig>(GYM_CONFIG)
   const [device, setDevice] = useState<"mobile" | "tablet" | "desktop">("desktop")
-  const [rightTab, setRightTab] = useState<"design" | "content">("design")
+  const [rightTab, setRightTab] = useState<"design" | "content">(fromOnboard ? "content" : "design")
   const [mobileTab, setMobileTab] = useState<"preview" | "design" | "content">("preview")
+  const [loginOpen, setLoginOpen] = useState(false)
 
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const iframeHeight = device === "mobile" ? 812 : device === "tablet" ? 1024 : 900
 
-  useEffect(() => { track("gym_template_viewed") }, [])
+  useEffect(() => { track("website_editor_viewed", { fromOnboard, gymName: nameFromUrl }) }, [])
 
   useEffect(() => {
     iframeRef.current?.contentWindow?.postMessage(
       { type: "CANVAS_UPDATE", business, config }, "*",
     )
   }, [business, config])
+
+  // Listen for inline edits made inside the iframe (photos, hero, text)
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data?.type === "BUSINESS_UPDATE" && e.data.business) {
+        setBusiness(e.data.business)
+      }
+    }
+    window.addEventListener("message", handleMessage)
+    return () => window.removeEventListener("message", handleMessage)
+  }, [])
 
   const pages = business.pages ?? {}
   const enabledPages = [
@@ -99,25 +121,33 @@ export default function GymTemplatePage() {
 
   return (
     <>
+      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
+
       {/* ── Mobile Builder ─────────────────────────────────────────── */}
       <div className="md:hidden flex flex-col h-screen bg-white text-gray-900 overflow-hidden">
 
         {/* Top bar */}
         <div className="flex-shrink-0 h-12 flex items-center gap-3 px-4 border-b bg-white border-gray-200 shadow-sm z-30">
-          <Link href="/gyms" className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md flex items-center justify-center bg-green-600">
-              <Dumbbell className="w-3.5 h-3.5 text-white" />
+          {fromOnboard ? (
+            <button onClick={() => router.push(`/onboard/preview?name=${encodeURIComponent(nameFromUrl)}`)} className="flex items-center gap-1 text-sm font-semibold text-gray-600 shrink-0">
+              <ChevronLeft className="w-4 h-4" /> Console
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md flex items-center justify-center bg-green-600">
+                <Dumbbell className="w-3.5 h-3.5 text-white" />
+              </div>
+              <span className="font-bold text-sm tracking-tight text-gray-900">MapToSite</span>
             </div>
-            <span className="font-bold text-sm tracking-tight text-gray-900">MapToSite</span>
-          </Link>
+          )}
           <div className="ml-auto">
-            <Link
-              href="/gyms"
+            <button
+              onClick={() => { track("website_golive_clicked", { source: "mobile_topbar" }); setLoginOpen(true) }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white"
               style={{ background: "#16a34a" }}
             >
-              Get Mine <ArrowRight className="w-3 h-3" />
-            </Link>
+              <Zap className="w-3 h-3" /> Go Live
+            </button>
           </div>
         </div>
 
@@ -125,7 +155,7 @@ export default function GymTemplatePage() {
         <div className="flex-1 overflow-hidden relative">
           {/* Preview */}
           <div className={cn("absolute inset-0 overflow-auto", mobileTab !== "preview" && "invisible")}>
-            <SiteTemplate business={business} config={config} isPreview={false} />
+            <SiteTemplate business={business} config={config} isPreview={true} onBusinessChange={setBusiness} />
           </div>
 
           {/* Floating pill */}
@@ -187,20 +217,26 @@ export default function GymTemplatePage() {
         {/* TOP BAR */}
         <div className="flex-shrink-0 h-[52px] flex items-center gap-3 px-4 border-b bg-white border-gray-200 shadow-sm">
 
-          {/* Logo */}
-          <Link href="/gyms" className="flex items-center gap-2 flex-shrink-0 mr-1">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm bg-green-600">
-              <Dumbbell className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-sm tracking-tight text-gray-900">MapToSite</span>
-          </Link>
+          {/* Logo / Back */}
+          {fromOnboard ? (
+            <button onClick={() => router.push(`/onboard/preview?name=${encodeURIComponent(nameFromUrl)}`)} className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-gray-900 transition flex-shrink-0 mr-1">
+              <ChevronLeft className="w-4 h-4" /> Back to Console
+            </button>
+          ) : (
+            <Link href="/gyms" className="flex items-center gap-2 flex-shrink-0 mr-1">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm bg-green-600">
+                <Dumbbell className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-bold text-sm tracking-tight text-gray-900">MapToSite</span>
+            </Link>
+          )}
 
           <div className="w-px h-5 flex-shrink-0 bg-gray-200" />
 
           {/* Badge */}
           <div className="flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest"
             style={{ background: "#DCFCE7", color: "#15803D", border: "1px solid #BBF7D0" }}>
-            Gym Website Templates
+            {business.name}
           </div>
 
           {/* Device Toggle */}
@@ -221,16 +257,15 @@ export default function GymTemplatePage() {
           <div className="flex-1" />
 
           {/* CTA */}
-          <Link
-            href="/gyms"
-            onClick={() => track("gym_template_cta_clicked")}
+          <button
+            onClick={() => { track("website_golive_clicked", { source: "topbar" }); setLoginOpen(true) }}
             className="flex-shrink-0 flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-white shadow-md transition-opacity hover:opacity-90"
             style={{ background: "#16a34a" }}
           >
-            <MapPin className="w-4 h-4" />
-            Generate My Gym Website
+            <Zap className="w-4 h-4" />
+            Go Live
             <ArrowRight className="w-4 h-4" />
-          </Link>
+          </button>
         </div>
 
         {/* MAIN AREA */}
@@ -360,22 +395,29 @@ export default function GymTemplatePage() {
             {/* CTA footer */}
             <div className="flex-shrink-0 p-4 border-t border-gray-100 space-y-2">
               <p className="text-center text-[10px] text-slate-400">
-                Like this template? Build yours in 60 seconds.
+                Happy with how it looks? Go live in 60 seconds — free.
               </p>
-              <Link
-                href="/gyms"
-                onClick={() => track("gym_template_cta_clicked")}
+              <button
+                onClick={() => { track("website_golive_clicked", { source: "sidebar_footer" }); setLoginOpen(true) }}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white shadow-md hover:opacity-90 transition-opacity"
                 style={{ background: "#16a34a" }}
               >
-                Generate My Gym Website
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+                <Zap className="w-4 h-4" />
+                Go Live — It&apos;s Free
+              </button>
             </div>
           </div>
         </div>
       </div>
     </>
+  )
+}
+
+export default function GymTemplatePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin" /></div>}>
+      <GymTemplateContent />
+    </Suspense>
   )
 }
 
@@ -523,78 +565,46 @@ function DesignPanel({
 function GymContentPanel({
   business,
   setBusiness,
-  pages,
 }: {
   business: typeof GYM_BUSINESS
   setBusiness: React.Dispatch<React.SetStateAction<typeof GYM_BUSINESS>>
   pages: Record<string, unknown>
 }) {
+  const inputCls = "w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 outline-none text-sm text-gray-800 placeholder-slate-300 focus:border-green-400"
+
   return (
     <div className="space-y-5">
+
+      <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-green-50 border border-green-200 text-xs text-green-800">
+        <span className="mt-0.5">✏️</span>
+        <span>Click directly on text, photos and sections in the preview to edit them.</span>
+      </div>
+
       <section>
         <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Gym Name</p>
-        <input
-          value={business.name}
-          onChange={e => setBusiness(p => ({ ...p, name: e.target.value }))}
-          placeholder="Your gym name"
-          className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 outline-none text-sm text-gray-800 placeholder-slate-300 focus:border-green-400"
-        />
+        <input value={business.name} onChange={e => setBusiness(p => ({ ...p, name: e.target.value }))}
+          placeholder="Your gym name" className={inputCls} />
       </section>
 
       <section>
         <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Contact Info</p>
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-xs">
           <Phone className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
-          <input
-            value={business.phone}
-            onChange={e => setBusiness(p => ({ ...p, phone: e.target.value }))}
-            placeholder="Phone number"
-            className="flex-1 bg-transparent outline-none text-gray-800 placeholder-slate-300 text-xs"
-          />
+          <input value={business.phone} onChange={e => setBusiness(p => ({ ...p, phone: e.target.value }))}
+            placeholder="Phone number" className="flex-1 bg-transparent outline-none text-gray-800 placeholder-slate-300 text-xs" />
         </div>
       </section>
 
       <section>
         <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Social Links</p>
         <div className="space-y-1.5">
-          {[
-            { key: "instagram", label: "Instagram" },
-            { key: "facebook",  label: "Facebook"  },
-          ].map(s => (
-            <div key={s.key}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs">
+          {[{ key: "instagram", label: "Instagram" }, { key: "facebook", label: "Facebook" }].map(s => (
+            <div key={s.key} className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs">
               <span className="w-16 flex-shrink-0 text-[10px] font-semibold text-slate-400">{s.label}</span>
-              <input
-                value={(business.socials as any)?.[s.key] || ""}
+              <input value={(business.socials as any)?.[s.key] || ""}
                 onChange={e => setBusiness(p => ({ ...p, socials: { ...p.socials, [s.key]: e.target.value } }))}
-                placeholder="URL"
-                className="flex-1 bg-transparent outline-none text-gray-700 placeholder-slate-300 text-xs"
-              />
+                placeholder="URL" className="flex-1 bg-transparent outline-none text-gray-700 placeholder-slate-300 text-xs" />
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-slate-400">Add Page</p>
-        <div className="space-y-1">
-          {([
-            { key: "services", label: "Memberships", enabled: !!pages.services },
-            { key: "products", label: "Products",    enabled: !!pages.products },
-            { key: "contact",  label: "Contact",     enabled: !!pages.contact  },
-            { key: "trainers", label: "Trainers",    enabled: !!(pages as any).trainers },
-          ]).map(({ key, label, enabled }) => (
-            <button key={key}
-              onClick={() => !enabled && setBusiness(p => ({ ...p, pages: { ...p.pages, [key]: true } }))}
-              disabled={enabled}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all"
-              style={enabled
-                ? { background: "#DCFCE7", color: "#15803D", cursor: "default" }
-                : { color: "#64748B", border: "1px dashed #E2E8F0" }}>
-              {enabled ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-              {label}
-              {enabled && <span className="ml-auto text-[10px] text-green-600">Active</span>}
-            </button>
           ))}
         </div>
       </section>

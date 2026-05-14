@@ -7,7 +7,8 @@ import {
   CheckCircle2, Zap, Sparkles, Users,
   ChevronDown, ChevronUp,
   CheckCircle, Clock, AlertCircle, Phone, Calendar,
-  IndianRupee, TrendingUp, Receipt, Search, Dumbbell, Plus,
+  IndianRupee, Search, Dumbbell, Plus,
+  Inbox,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -25,7 +26,7 @@ import { LoginModal } from "@/components/login-modal"
 import { GymHeroVisual } from "@/components/gym-hero-visual"
 import { PricingSection } from "@/components/pricing-section"
 import { Footer } from "@/components/footer"
-import { daysUntil, formatDate, fmtINR, getCurrentFY } from "@/lib/gym-utils"
+import { daysUntil, formatDate } from "@/lib/gym-utils"
 import { track } from "@/lib/analytics"
 
 // ─── Nav ─────────────────────────────────────────────────────────────────────
@@ -49,14 +50,14 @@ function GymNav() {
       <nav className="fixed top-10 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <MapPin className="w-4 h-4 text-primary-foreground" />
             </div>
             <span className="font-bold text-foreground">
               MapToSite <span className="text-primary">Fitness</span>
             </span>
-          </div>
+          </Link>
 
           {/* Desktop links */}
           <div className="hidden md:flex items-center gap-7">
@@ -208,8 +209,6 @@ function Hero() {
 
 // ─── Console Widget ───────────────────────────────────────────────────────────
 
-const WIDGET_FY = getCurrentFY()
-
 function makeWDate(offsetDays: number): string {
   const d = new Date()
   d.setDate(d.getDate() + offsetDays)
@@ -224,18 +223,6 @@ const WIDGET_MEMBERS = [
   { id: "m5", name: "Vikram Singh", phone: "9845671230", membershipTitle: "1-Month Plan", membershipPrice: "₹1,000/mo", durationMonths: 1, pricePerMonth: 1000, startDate: makeWDate(-70), endDate: makeWDate(-40), status: "expired" },
 ]
 
-const WIDGET_PAYMENTS = [
-  { id: "p1", invoiceNumber: `GYM/${WIDGET_FY}/0001`, invoiceDate: makeWDate(-68), memberName: "Rahul Sharma", planTitle: "3-Month Plan", taxableAmount: 4500, cgst: 112.50, sgst: 112.50, totalAmount: 4725 },
-  { id: "p2", invoiceNumber: `GYM/${WIDGET_FY}/0002`, invoiceDate: makeWDate(-130), memberName: "Priya Mehta", planTitle: "6-Month Plan", taxableAmount: 7200, cgst: 180, sgst: 180, totalAmount: 7560 },
-  { id: "p3", invoiceNumber: `GYM/${WIDGET_FY}/0003`, invoiceDate: makeWDate(-27), memberName: "Amit Patel", planTitle: "1-Month Plan", taxableAmount: 1000, cgst: 25, sgst: 25, totalAmount: 1050 },
-  { id: "p4", invoiceNumber: `GYM/${WIDGET_FY}/0004`, invoiceDate: makeWDate(-25), memberName: "Sunita Rao", planTitle: "1-Month Plan", taxableAmount: 900, cgst: 22.50, sgst: 22.50, totalAmount: 945 },
-  { id: "p5", invoiceNumber: `GYM/${WIDGET_FY}/0005`, invoiceDate: makeWDate(-70), memberName: "Vikram Singh", planTitle: "1-Month Plan", taxableAmount: 1000, cgst: 25, sgst: 25, totalAmount: 1050 },
-]
-
-const WIDGET_PLANS = [
-  { id: "wp1", name: "Beginner Strength", goal: "Muscle Gain", sessions: 3 },
-  { id: "wp2", name: "Weight Loss Cardio", goal: "Weight Loss", sessions: 2 },
-]
 
 function widgetStatusBadge(member: typeof WIDGET_MEMBERS[0]) {
   const days = daysUntil(new Date(member.endDate))
@@ -247,9 +234,9 @@ function widgetStatusBadge(member: typeof WIDGET_MEMBERS[0]) {
 }
 
 function ConsoleWidget() {
-  const [activeTab, setActiveTab] = useState<"members" | "earnings" | "plans">("members")
+  const activeTab = "members" as const
 
-  useEffect(() => { track("console_widget_viewed") }, [])
+  useEffect(() => { track("console_demo_viewed") }, [])
 
   const memberStats = {
     total: WIDGET_MEMBERS.length,
@@ -257,10 +244,6 @@ function ConsoleWidget() {
     expiring: WIDGET_MEMBERS.filter((m) => m.status === "active" && daysUntil(new Date(m.endDate)) >= 0 && daysUntil(new Date(m.endDate)) <= 7).length,
     expired: WIDGET_MEMBERS.filter((m) => m.status === "expired" || daysUntil(new Date(m.endDate)) < 0).length,
   }
-
-  const totalRevenue = WIDGET_PAYMENTS.reduce((s, p) => s + p.totalAmount, 0)
-  const totalGST = WIDGET_PAYMENTS.reduce((s, p) => s + p.cgst + p.sgst, 0)
-  const thisMonthRevenue = WIDGET_PAYMENTS.slice(-2).reduce((s, p) => s + p.totalAmount, 0)
 
   return (
     <section id="how-it-works" className="py-24 px-4 bg-gray-50">
@@ -282,7 +265,7 @@ function ConsoleWidget() {
 
         <motion.div
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
-          className="rounded-2xl border border-border shadow-2xl overflow-hidden bg-background"
+          className="rounded-2xl border border-border shadow-2xl overflow-hidden bg-background pointer-events-none select-none"
         >
           {/* Browser chrome */}
           <div className="bg-muted/60 px-4 py-2.5 border-b border-border flex items-center gap-3">
@@ -312,19 +295,20 @@ function ConsoleWidget() {
           <div className="border-b border-border bg-background overflow-x-auto">
             <div className="flex gap-0 min-w-max">
               {([
-                { key: "members" as const, label: "Members", icon: Users },
+                { key: "members" as const, label: "Members", icon: Users, badge: 1 },
+                { key: "leads" as const, label: "Leads", icon: Inbox, badge: 2 },
                 { key: "earnings" as const, label: "Earnings & Billing", icon: IndianRupee },
                 { key: "plans" as const, label: "Workout Plans", icon: Dumbbell },
-              ]).map(({ key, label, icon: Icon }) => (
-                <button
+              ]).map(({ key, label, icon: Icon, badge }) => (
+                <div
                   key={key}
-                  onClick={() => { setActiveTab(key); track("console_widget_tab_clicked", { tab: key }) }}
-                  className={`flex items-center gap-2 px-4 sm:px-5 py-3.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
-                    activeTab === key ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+                  className={`flex items-center gap-2 px-4 sm:px-5 py-3.5 text-sm font-medium border-b-2 whitespace-nowrap ${
+                    activeTab === key ? "border-primary text-primary" : "border-transparent text-muted-foreground"
                   }`}
                 >
                   <Icon className="w-4 h-4" />{label}
-                </button>
+                  {badge ? <span className="ml-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">{badge}</span> : null}
+                </div>
               ))}
             </div>
           </div>
@@ -360,7 +344,7 @@ function ConsoleWidget() {
                     </div>
                   </div>
                   <button
-                    onClick={() => track("console_widget_add_member_clicked")}
+                    onClick={() => {}}
                     className="flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold shrink-0"
                   >
                     <Plus className="w-4 h-4" /><span className="hidden sm:inline">Add Member</span>
@@ -414,122 +398,7 @@ function ConsoleWidget() {
               </>
             )}
 
-            {/* ── EARNINGS TAB ── */}
-            {activeTab === "earnings" && (
-              <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {[
-                    { label: "This Month", value: fmtINR(thisMonthRevenue), icon: Calendar, color: "text-blue-600", bg: "bg-blue-50" },
-                    { label: `FY ${WIDGET_FY}`, value: fmtINR(totalRevenue), icon: TrendingUp, color: "text-primary", bg: "bg-primary/5" },
-                    { label: "GST Collected", value: fmtINR(totalGST), icon: Receipt, color: "text-green-600", bg: "bg-green-50" },
-                  ].map((s) => (
-                    <div key={s.label} className={`${s.bg} rounded-xl p-3 sm:p-4 border border-border/50`}>
-                      <div className={`flex items-center gap-1.5 mb-1.5 ${s.color}`}>
-                        <s.icon className="w-3.5 h-3.5 shrink-0" />
-                        <span className="text-xs font-semibold uppercase tracking-wider">{s.label}</span>
-                      </div>
-                      <p className="text-xl sm:text-2xl font-bold">{s.value}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="rounded-xl border border-border overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-border bg-muted/30">
-                          <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Invoice</th>
-                          <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Member</th>
-                          <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden sm:table-cell">Plan</th>
-                          <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">GST</th>
-                          <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {WIDGET_PAYMENTS.map((p, i) => (
-                          <tr key={p.id} className={`border-b border-border last:border-0 ${i % 2 === 0 ? "" : "bg-muted/10"}`}>
-                            <td className="px-4 py-3">
-                              <p className="font-mono text-xs font-semibold">{p.invoiceNumber}</p>
-                              <span className="text-xs px-1.5 py-0.5 rounded bg-green-100 text-green-700">new</span>
-                            </td>
-                            <td className="px-4 py-3 font-medium">{p.memberName}</td>
-                            <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{p.planTitle}</td>
-                            <td className="px-4 py-3 text-right text-muted-foreground hidden md:table-cell">{fmtINR(p.cgst + p.sgst)}</td>
-                            <td className="px-4 py-3 text-right font-bold">{fmtINR(p.totalAmount)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* ── PLANS TAB ── */}
-            {activeTab === "plans" && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-base font-bold">Workout Plans</h2>
-                    <p className="text-sm text-muted-foreground">Create plans once, assign to any member</p>
-                  </div>
-                  <button
-                    onClick={() => track("console_widget_new_plan_clicked")}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold"
-                  >
-                    <Plus className="w-4 h-4" />New Plan
-                  </button>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {WIDGET_PLANS.map((plan) => (
-                    <div key={plan.id} className="bg-card border border-border rounded-xl p-5 flex flex-col gap-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h3 className="font-semibold">{plan.name}</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">{plan.goal}</p>
-                        </div>
-                        <span className="shrink-0 text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                          {plan.sessions} sessions
-                        </span>
-                      </div>
-                      <div className="flex gap-2 mt-auto pt-1">
-                        <button className="flex-1 px-3 py-2 rounded-lg border border-border text-xs font-semibold text-foreground hover:bg-muted transition">
-                          Edit
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="rounded-xl border-2 border-dashed border-border p-8 text-center text-muted-foreground text-sm">
-                  <Dumbbell className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                  Create plans and assign them to members with one click
-                </div>
-              </div>
-            )}
           </div>
-        </motion.div>
-
-        {/* CTA row */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10"
-        >
-          <a
-            href="/demo-console"
-            onClick={() => track("console_widget_try_demo")}
-            className="inline-flex items-center gap-2 h-12 px-8 font-black bg-primary text-primary-foreground shadow-lg rounded-xl text-sm transition hover:bg-primary/90"
-          >
-            <Zap className="w-4 h-4" />Try Full Interactive Demo
-          </a>
-          <a
-            href="/gyms/template"
-            onClick={() => track("console_widget_try_website_editor")}
-            className="inline-flex items-center gap-2 h-12 px-8 font-black border-2 border-border rounded-xl text-sm hover:bg-muted/60 transition"
-          >
-            🌐 Try Website Editor
-          </a>
         </motion.div>
       </div>
     </section>
