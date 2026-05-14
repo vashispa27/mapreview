@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import {
   SiteConfig, colorSchemes, layoutOptions,
 } from "@/lib/mock-data"
@@ -73,14 +74,25 @@ function TemplateThumbnail({ id, active }: { id: string; active: boolean }) {
 function GymTemplateContent() {
   const params = useSearchParams()
   const router = useRouter()
+  const { data: session } = useSession()
   const nameFromUrl = params.get("name") || ""
+  const themeParam = params.get("theme") || ""
   const fromOnboard = !!nameFromUrl
 
   const [business, setBusiness] = useState(() => ({
     ...GYM_BUSINESS,
     name: nameFromUrl || GYM_BUSINESS.name,
+    description: nameFromUrl
+      ? `${nameFromUrl} is your trusted fitness destination. With state-of-the-art equipment, certified coaches, and a community that pushes each other — this is where results are built.`
+      : GYM_BUSINESS.description,
   }))
-  const [config, setConfig] = useState<SiteConfig>(GYM_CONFIG)
+  const [config, setConfig] = useState<SiteConfig>(() => {
+    if (themeParam === "coastal") {
+      const coastalScheme = colorSchemes.find(s => s.id === "ocean") ?? colorSchemes[0]
+      return { ...GYM_CONFIG, layout: "coastal", theme: "light", colorScheme: coastalScheme }
+    }
+    return GYM_CONFIG
+  })
   const [device, setDevice] = useState<"mobile" | "tablet" | "desktop">("desktop")
   const [rightTab, setRightTab] = useState<"design" | "content">(fromOnboard ? "content" : "design")
   const [mobileTab, setMobileTab] = useState<"preview" | "design" | "content">("preview")
@@ -125,6 +137,21 @@ function GymTemplateContent() {
 
       {/* ── Mobile Builder ─────────────────────────────────────────── */}
       <div className="md:hidden flex flex-col h-screen bg-white text-gray-900 overflow-hidden">
+
+        {/* Sign-in banner — non-logged-in only */}
+        {!session && (
+          <div className="flex-shrink-0 bg-amber-50 border-b border-amber-200 px-4 py-2.5 flex items-center justify-between gap-3">
+            <p className="text-xs text-amber-800 leading-snug flex-1">
+              <span className="font-black">Get real photos & reviews</span> — sign in and search your gym on Google Maps
+            </p>
+            <button
+              onClick={() => setLoginOpen(true)}
+              className="shrink-0 text-xs font-black text-amber-700 underline underline-offset-2"
+            >
+              Sign in →
+            </button>
+          </div>
+        )}
 
         {/* Top bar */}
         <div className="flex-shrink-0 h-12 flex items-center gap-3 px-4 border-b bg-white border-gray-200 shadow-sm z-30">
@@ -213,6 +240,22 @@ function GymTemplateContent() {
 
       {/* ── Desktop Builder ─────────────────────────────────────────── */}
       <div className="hidden md:flex h-screen flex-col overflow-hidden bg-[#F0F2F7] text-gray-900">
+
+        {/* Sign-in banner — non-logged-in only */}
+        {!session && (
+          <div className="flex-shrink-0 bg-amber-50 border-b border-amber-200 px-6 py-2 flex items-center justify-between gap-4">
+            <p className="text-xs text-amber-800">
+              <span className="font-black">Want real photos, reviews & hours?</span>{" "}
+              Sign in and search your gym on Google Maps — we pull everything automatically.
+            </p>
+            <button
+              onClick={() => setLoginOpen(true)}
+              className="shrink-0 text-xs font-black px-3 py-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-800 transition-colors whitespace-nowrap"
+            >
+              Sign in to pull real data →
+            </button>
+          </div>
+        )}
 
         {/* TOP BAR */}
         <div className="flex-shrink-0 h-[52px] flex items-center gap-3 px-4 border-b bg-white border-gray-200 shadow-sm">

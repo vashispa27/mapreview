@@ -84,10 +84,8 @@ function OnboardStep1() {
         body: JSON.stringify({ gymName: place.name, mapsUrl: place.url, step: "maps_selected" }),
       })
     } catch { /* non-blocking */ }
-    // Logged-in users stay on this page to confirm — not-logged-in go straight to preview
-    if (!session) {
-      go(`/onboard/preview?name=${encodeURIComponent(place.name)}&url=${encodeURIComponent(place.url)}`)
-    }
+    // Always stay on page so user can confirm with Continue button
+
   }
 
   const handleContinue = async () => {
@@ -193,18 +191,19 @@ function OnboardStep1() {
 
             {/* Divider */}
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Optional</span>
-              <div className="flex-1 h-px bg-border" />
+              <div className="flex-1 h-px bg-primary/20" />
+              <span className="text-xs font-black text-primary uppercase tracking-widest">Recommended</span>
+              <div className="flex-1 h-px bg-primary/20" />
             </div>
 
             {/* Field 2: Maps search */}
             <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-2">
-                Find on Google Maps
-              </label>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Search on Google Maps</span>
+                <span className="text-[10px] font-black text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">Pulls real photos &amp; reviews</span>
+              </div>
               <p className="text-xs text-muted-foreground mb-2">
-                Search your gym to auto-fill photos, reviews, ratings &amp; hours — nothing to enter manually.
+                Search your gym to auto-fill real photos, reviews, ratings &amp; hours — nothing to enter manually.
               </p>
 
               {/* Show success state if place selected */}
