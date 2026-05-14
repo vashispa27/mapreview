@@ -313,7 +313,7 @@ export function GymSearchBlock({
             onClick={() => handleGenerate()}
             disabled={isLoading}
           >
-            {isLoading ? <><Loader2 className="mr-2 w-4 h-4 animate-spin" />Building...</> : <>Go Live<ArrowRight className="ml-2 w-4 h-4" /></>}
+            {isLoading ? <><Loader2 className="mr-2 w-4 h-4 animate-spin" />Building...</> : <>Setup My Gym<ArrowRight className="ml-2 w-4 h-4" /></>}
           </Button>
         </div>
 

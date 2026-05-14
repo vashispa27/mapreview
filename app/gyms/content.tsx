@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   MapPin, X, LayoutGrid, LogOut, Menu as MenuIcon,
-  CheckCircle2, AlertTriangle, Zap, Sparkles, Users,
-  MessageSquare, BarChart2, RefreshCw, Shield,
+  CheckCircle2, Zap, Sparkles, Users,
   ChevronDown, ChevronUp,
+  CheckCircle, Clock, AlertCircle, Phone, Calendar,
+  IndianRupee, TrendingUp, Receipt, Search, Dumbbell, Plus,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -24,6 +25,8 @@ import { LoginModal } from "@/components/login-modal"
 import { GymHeroVisual } from "@/components/gym-hero-visual"
 import { PricingSection } from "@/components/pricing-section"
 import { Footer } from "@/components/footer"
+import { daysUntil, formatDate, fmtINR, getCurrentFY } from "@/lib/gym-utils"
+import { track } from "@/lib/analytics"
 
 // ─── Nav ─────────────────────────────────────────────────────────────────────
 
@@ -35,7 +38,7 @@ function GymNav() {
   const links = [
     { label: "Home", href: "#" },
     { label: "Features", href: "#features" },
-    { label: "How it works", href: "#how-it-works" },
+    { label: "Console Demo", href: "#how-it-works" },
     { label: "Pricing", href: "#pricing" },
     { label: "Blog", href: "/blog" },
   ]
@@ -188,35 +191,6 @@ function Hero() {
               <span className="font-black text-foreground">Gym website included.</span> Ditch the spreadsheets. No tech knowledge needed.
             </motion.p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}
-              className="flex flex-col items-center md:items-start gap-4"
-            >
-              <Button
-                size="lg"
-                className="h-14 px-8 font-black text-base shadow-lg shadow-primary/25"
-                onClick={() => window.dispatchEvent(new Event("focus-gym-input"))}
-              >
-                Set Up My Gym Now
-                <Zap className="ml-2 w-5 h-5" />
-              </Button>
-
-              {/* Secondary actions */}
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-1">
-                <a
-                  href="/demo-console"
-                  className="inline-flex items-center gap-1.5 h-11 px-5 text-sm font-black border-2 border-primary text-primary hover:bg-primary/5 rounded-xl transition-colors"
-                >
-                  📊 Try Instant Demo
-                </a>
-                <a
-                  href="/gyms/template"
-                  className="inline-flex items-center gap-1.5 h-11 px-5 text-sm font-black border-2 border-border text-foreground hover:bg-muted/60 rounded-xl transition-colors"
-                >
-                  🌐 Try Website Editor
-                </a>
-              </div>
-            </motion.div>
           </motion.div>
 
             {/* Right — visual */}
@@ -232,78 +206,330 @@ function Hero() {
   )
 }
 
-// ─── Problem ─────────────────────────────────────────────────────────────────
+// ─── Console Widget ───────────────────────────────────────────────────────────
 
-function Problem() {
-  const pains = [
-    { icon: "📊", title: "Members tracked in Excel or WhatsApp", desc: "You're managing renewals, payments and plans across chat threads and spreadsheets. Things get missed." },
-    { icon: "🏃", title: "Leads go to competitors", desc: "The gym down the street has a proper website. You don't. They get the booking. You don't." },
-    { icon: "🔕", title: "Renewals slip through", desc: "No system to remind members when their plan ends. You chase them manually — or just lose them." },
-    { icon: "💸", title: "No record of who has paid", desc: "Payment tracking in WhatsApp or a notebook means you're always guessing who has paid and who hasn't." },
-  ]
+const WIDGET_FY = getCurrentFY()
 
-  return (
-    <section className="py-24 px-4 bg-gray-50">
-      <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="text-center mb-14"
-        >
-          <span className="inline-flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-red-200 mb-5">
-            <AlertTriangle className="w-3 h-3" /> The Problem
-          </span>
-          <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4">
-            Why Your Gym Isn&apos;t Getting<br />Enough Enquiries
-          </h2>
-        </motion.div>
-
-        <div className="grid sm:grid-cols-2 gap-5 mb-10">
-          {pains.map(({ icon, title, desc }, i) => (
-            <motion.div
-              key={title}
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-              className="bg-white border border-border rounded-2xl p-6"
-            >
-              <div className="flex items-start gap-4">
-                <span className="text-2xl leading-none shrink-0 mt-0.5">{icon}</span>
-                <div>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <X className="w-4 h-4 text-red-500 shrink-0 stroke-[3]" />
-                    <h3 className="font-bold text-sm text-foreground leading-tight">{title}</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="bg-primary text-primary-foreground rounded-2xl p-8 text-center"
-        >
-          <p className="text-xl font-black mb-1">Your gym is growing. Your tools are not.</p>
-          <p className="text-xl font-black opacity-80">It&apos;s time to ditch the spreadsheets.</p>
-        </motion.div>
-      </div>
-    </section>
-  )
+function makeWDate(offsetDays: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() + offsetDays)
+  return d.toISOString().slice(0, 10)
 }
 
-// ─── Solution ─────────────────────────────────────────────────────────────────
+const WIDGET_MEMBERS = [
+  { id: "m1", name: "Rahul Sharma", phone: "9876543210", membershipTitle: "3-Month Plan", membershipPrice: "₹1,500/mo", durationMonths: 3, pricePerMonth: 1500, startDate: makeWDate(-68), endDate: makeWDate(22), status: "active" },
+  { id: "m2", name: "Priya Mehta", phone: "9123456789", membershipTitle: "6-Month Plan", membershipPrice: "₹1,200/mo", durationMonths: 6, pricePerMonth: 1200, startDate: makeWDate(-130), endDate: makeWDate(50), status: "active" },
+  { id: "m3", name: "Amit Patel", phone: "9988776655", membershipTitle: "1-Month Plan", membershipPrice: "₹1,000/mo", durationMonths: 1, pricePerMonth: 1000, startDate: makeWDate(-27), endDate: makeWDate(3), status: "active" },
+  { id: "m4", name: "Sunita Rao", phone: "9871234560", membershipTitle: "1-Month Plan", membershipPrice: "₹900/mo", durationMonths: 1, pricePerMonth: 900, startDate: makeWDate(-25), endDate: makeWDate(5), status: "active" },
+  { id: "m5", name: "Vikram Singh", phone: "9845671230", membershipTitle: "1-Month Plan", membershipPrice: "₹1,000/mo", durationMonths: 1, pricePerMonth: 1000, startDate: makeWDate(-70), endDate: makeWDate(-40), status: "expired" },
+]
 
-function Solution() {
+const WIDGET_PAYMENTS = [
+  { id: "p1", invoiceNumber: `GYM/${WIDGET_FY}/0001`, invoiceDate: makeWDate(-68), memberName: "Rahul Sharma", planTitle: "3-Month Plan", taxableAmount: 4500, cgst: 112.50, sgst: 112.50, totalAmount: 4725 },
+  { id: "p2", invoiceNumber: `GYM/${WIDGET_FY}/0002`, invoiceDate: makeWDate(-130), memberName: "Priya Mehta", planTitle: "6-Month Plan", taxableAmount: 7200, cgst: 180, sgst: 180, totalAmount: 7560 },
+  { id: "p3", invoiceNumber: `GYM/${WIDGET_FY}/0003`, invoiceDate: makeWDate(-27), memberName: "Amit Patel", planTitle: "1-Month Plan", taxableAmount: 1000, cgst: 25, sgst: 25, totalAmount: 1050 },
+  { id: "p4", invoiceNumber: `GYM/${WIDGET_FY}/0004`, invoiceDate: makeWDate(-25), memberName: "Sunita Rao", planTitle: "1-Month Plan", taxableAmount: 900, cgst: 22.50, sgst: 22.50, totalAmount: 945 },
+  { id: "p5", invoiceNumber: `GYM/${WIDGET_FY}/0005`, invoiceDate: makeWDate(-70), memberName: "Vikram Singh", planTitle: "1-Month Plan", taxableAmount: 1000, cgst: 25, sgst: 25, totalAmount: 1050 },
+]
+
+const WIDGET_PLANS = [
+  { id: "wp1", name: "Beginner Strength", goal: "Muscle Gain", sessions: 3 },
+  { id: "wp2", name: "Weight Loss Cardio", goal: "Weight Loss", sessions: 2 },
+]
+
+function widgetStatusBadge(member: typeof WIDGET_MEMBERS[0]) {
+  const days = daysUntil(new Date(member.endDate))
+  if (member.status === "expired" || days < 0)
+    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700"><AlertCircle className="w-3 h-3" />Expired</span>
+  if (days <= 7)
+    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700"><Clock className="w-3 h-3" />Expires in {days}d</span>
+  return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700"><CheckCircle className="w-3 h-3" />Active</span>
+}
+
+function ConsoleWidget() {
+  const [activeTab, setActiveTab] = useState<"members" | "earnings" | "plans">("members")
+
+  useEffect(() => { track("console_widget_viewed") }, [])
+
+  const memberStats = {
+    total: WIDGET_MEMBERS.length,
+    active: WIDGET_MEMBERS.filter((m) => m.status === "active" && daysUntil(new Date(m.endDate)) > 7).length,
+    expiring: WIDGET_MEMBERS.filter((m) => m.status === "active" && daysUntil(new Date(m.endDate)) >= 0 && daysUntil(new Date(m.endDate)) <= 7).length,
+    expired: WIDGET_MEMBERS.filter((m) => m.status === "expired" || daysUntil(new Date(m.endDate)) < 0).length,
+  }
+
+  const totalRevenue = WIDGET_PAYMENTS.reduce((s, p) => s + p.totalAmount, 0)
+  const totalGST = WIDGET_PAYMENTS.reduce((s, p) => s + p.cgst + p.sgst, 0)
+  const thisMonthRevenue = WIDGET_PAYMENTS.slice(-2).reduce((s, p) => s + p.totalAmount, 0)
+
   return (
-    <section className="py-24 px-4">
-      <div className="max-w-5xl mx-auto text-center">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+    <section id="how-it-works" className="py-24 px-4 bg-gray-50">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          className="text-center mb-12"
+        >
           <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20 mb-5">
-            <CheckCircle2 className="w-3 h-3" /> The Solution
+            <Dumbbell className="w-3 h-3" /> Management Console
           </span>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            MapToSite turns your Google traffic into actual enquiries using a simple, automated system —
-            built from your Google Maps listing in 60 seconds.
+          <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
+            Your Gym Dashboard,<br />Ready in 60 Seconds
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Members, payments, GST invoices and workout plans — all from one place. This is the actual console you get.
           </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
+          className="rounded-2xl border border-border shadow-2xl overflow-hidden bg-background"
+        >
+          {/* Browser chrome */}
+          <div className="bg-muted/60 px-4 py-2.5 border-b border-border flex items-center gap-3">
+            <div className="flex gap-1.5 shrink-0">
+              <div className="w-3 h-3 rounded-full bg-red-400" />
+              <div className="w-3 h-3 rounded-full bg-amber-400" />
+              <div className="w-3 h-3 rounded-full bg-green-400" />
+            </div>
+            <div className="flex-1 bg-background/70 rounded-md px-3 py-1 text-xs text-muted-foreground font-mono hidden sm:block truncate">
+              maptosite.app/console/iron-arena-fitness
+            </div>
+            <span className="text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full font-semibold shrink-0 ml-auto sm:ml-0">Demo</span>
+          </div>
+
+          {/* Console header bar */}
+          <div className="border-b border-border bg-background px-4 h-14 flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                <Dumbbell className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <span className="font-semibold text-foreground text-sm">Iron Arena Fitness</span>
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-medium hidden sm:inline">Console</span>
+            </div>
+          </div>
+
+          {/* Tab bar */}
+          <div className="border-b border-border bg-background overflow-x-auto">
+            <div className="flex gap-0 min-w-max">
+              {([
+                { key: "members" as const, label: "Members", icon: Users },
+                { key: "earnings" as const, label: "Earnings & Billing", icon: IndianRupee },
+                { key: "plans" as const, label: "Workout Plans", icon: Dumbbell },
+              ]).map(({ key, label, icon: Icon }) => (
+                <button
+                  key={key}
+                  onClick={() => { setActiveTab(key); track("console_widget_tab_clicked", { tab: key }) }}
+                  className={`flex items-center gap-2 px-4 sm:px-5 py-3.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+                    activeTab === key ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />{label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tab content */}
+          <div className="p-4 sm:p-6 space-y-4 bg-background">
+
+            {/* ── MEMBERS TAB ── */}
+            {activeTab === "members" && (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { label: "Total Members", value: memberStats.total, icon: Users, color: "text-foreground", bg: "bg-muted/50" },
+                    { label: "Active", value: memberStats.active, icon: CheckCircle, color: "text-green-600", bg: "bg-green-50" },
+                    { label: "Expiring Soon", value: memberStats.expiring, icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
+                    { label: "Expired", value: memberStats.expired, icon: AlertCircle, color: "text-red-600", bg: "bg-red-50" },
+                  ].map((s) => (
+                    <div key={s.label} className={`${s.bg} rounded-xl p-3 sm:p-4 border border-border/50`}>
+                      <div className={`flex items-center gap-1.5 mb-1.5 ${s.color}`}>
+                        <s.icon className="w-3.5 h-3.5 shrink-0" />
+                        <span className="text-xs font-semibold uppercase tracking-wider leading-tight">{s.label}</span>
+                      </div>
+                      <p className="text-2xl sm:text-3xl font-bold">{s.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <div className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border bg-muted/30 text-sm text-muted-foreground select-none">
+                      Search by name, phone or email…
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => track("console_widget_add_member_clicked")}
+                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold shrink-0"
+                  >
+                    <Plus className="w-4 h-4" /><span className="hidden sm:inline">Add Member</span>
+                  </button>
+                </div>
+
+                <div className="rounded-xl border border-border overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border bg-muted/30">
+                          <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Member</th>
+                          <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">Contact</th>
+                          <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Plan</th>
+                          <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden sm:table-cell">Expires</th>
+                          <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {WIDGET_MEMBERS.map((member, i) => (
+                          <tr key={member.id} className={`border-b border-border last:border-0 ${i % 2 === 0 ? "" : "bg-muted/10"}`}>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                                  {member.name.charAt(0)}
+                                </div>
+                                <span className="font-medium">{member.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 hidden md:table-cell">
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <Phone className="w-3 h-3" />{member.phone}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <p className="font-medium">{member.membershipTitle}</p>
+                              <p className="text-xs text-muted-foreground">{member.membershipPrice}</p>
+                            </td>
+                            <td className="px-4 py-3 hidden sm:table-cell">
+                              <div className="flex items-center gap-1.5 text-muted-foreground">
+                                <Calendar className="w-3.5 h-3.5" />{formatDate(new Date(member.endDate))}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">{widgetStatusBadge(member)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── EARNINGS TAB ── */}
+            {activeTab === "earnings" && (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {[
+                    { label: "This Month", value: fmtINR(thisMonthRevenue), icon: Calendar, color: "text-blue-600", bg: "bg-blue-50" },
+                    { label: `FY ${WIDGET_FY}`, value: fmtINR(totalRevenue), icon: TrendingUp, color: "text-primary", bg: "bg-primary/5" },
+                    { label: "GST Collected", value: fmtINR(totalGST), icon: Receipt, color: "text-green-600", bg: "bg-green-50" },
+                  ].map((s) => (
+                    <div key={s.label} className={`${s.bg} rounded-xl p-3 sm:p-4 border border-border/50`}>
+                      <div className={`flex items-center gap-1.5 mb-1.5 ${s.color}`}>
+                        <s.icon className="w-3.5 h-3.5 shrink-0" />
+                        <span className="text-xs font-semibold uppercase tracking-wider">{s.label}</span>
+                      </div>
+                      <p className="text-xl sm:text-2xl font-bold">{s.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-xl border border-border overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border bg-muted/30">
+                          <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Invoice</th>
+                          <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Member</th>
+                          <th className="text-left px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden sm:table-cell">Plan</th>
+                          <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">GST</th>
+                          <th className="text-right px-4 py-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {WIDGET_PAYMENTS.map((p, i) => (
+                          <tr key={p.id} className={`border-b border-border last:border-0 ${i % 2 === 0 ? "" : "bg-muted/10"}`}>
+                            <td className="px-4 py-3">
+                              <p className="font-mono text-xs font-semibold">{p.invoiceNumber}</p>
+                              <span className="text-xs px-1.5 py-0.5 rounded bg-green-100 text-green-700">new</span>
+                            </td>
+                            <td className="px-4 py-3 font-medium">{p.memberName}</td>
+                            <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{p.planTitle}</td>
+                            <td className="px-4 py-3 text-right text-muted-foreground hidden md:table-cell">{fmtINR(p.cgst + p.sgst)}</td>
+                            <td className="px-4 py-3 text-right font-bold">{fmtINR(p.totalAmount)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── PLANS TAB ── */}
+            {activeTab === "plans" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-base font-bold">Workout Plans</h2>
+                    <p className="text-sm text-muted-foreground">Create plans once, assign to any member</p>
+                  </div>
+                  <button
+                    onClick={() => track("console_widget_new_plan_clicked")}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold"
+                  >
+                    <Plus className="w-4 h-4" />New Plan
+                  </button>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {WIDGET_PLANS.map((plan) => (
+                    <div key={plan.id} className="bg-card border border-border rounded-xl p-5 flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h3 className="font-semibold">{plan.name}</h3>
+                          <p className="text-xs text-muted-foreground mt-0.5">{plan.goal}</p>
+                        </div>
+                        <span className="shrink-0 text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                          {plan.sessions} sessions
+                        </span>
+                      </div>
+                      <div className="flex gap-2 mt-auto pt-1">
+                        <button className="flex-1 px-3 py-2 rounded-lg border border-border text-xs font-semibold text-foreground hover:bg-muted transition">
+                          Edit
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-xl border-2 border-dashed border-border p-8 text-center text-muted-foreground text-sm">
+                  <Dumbbell className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  Create plans and assign them to members with one click
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* CTA row */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10"
+        >
+          <a
+            href="/demo-console"
+            onClick={() => track("console_widget_try_demo")}
+            className="inline-flex items-center gap-2 h-12 px-8 font-black bg-primary text-primary-foreground shadow-lg rounded-xl text-sm transition hover:bg-primary/90"
+          >
+            <Zap className="w-4 h-4" />Try Full Interactive Demo
+          </a>
+          <a
+            href="/gyms/template"
+            onClick={() => track("console_widget_try_website_editor")}
+            className="inline-flex items-center gap-2 h-12 px-8 font-black border-2 border-border rounded-xl text-sm hover:bg-muted/60 transition"
+          >
+            🌐 Try Website Editor
+          </a>
         </motion.div>
       </div>
     </section>
@@ -388,74 +614,6 @@ function ExampleSites() {
             </motion.a>
           ))}
         </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── How it works ─────────────────────────────────────────────────────────────
-
-function HowItWorks() {
-  const steps = [
-    { number: "01", emoji: "🔍", title: "Someone finds your gym on Google", desc: "They search 'gym near me' and your listing appears. Your Google reviews, photos, and location are all there already." },
-    { number: "02", emoji: "🌐", title: "They land on your optimized page", desc: "MapToSite builds a professional page from your listing — your photos, reviews, membership plans, and a clear CTA to contact you." },
-    { number: "03", emoji: "💬", title: "They message or book instantly", desc: "A WhatsApp enquiry button and booking form removes all friction. No missed calls, no lost leads — it goes straight to you." },
-  ]
-
-  const results = [
-    { icon: BarChart2, label: "More enquiries from Google" },
-    { icon: Users, label: "Increased walk-ins" },
-    { icon: Sparkles, label: "Better first impression" },
-    { icon: RefreshCw, label: "Less manual follow-up" },
-  ]
-
-  return (
-    <section id="how-it-works" className="py-24 px-4 bg-gray-50">
-      <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">How It Works</h2>
-          <p className="text-lg text-muted-foreground">Three steps. Fully automated.</p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {steps.map(({ number, emoji, title, desc }, i) => (
-            <motion.div
-              key={number}
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-              className="relative text-center"
-            >
-              <div className="text-8xl font-black text-primary/6 absolute -top-4 left-1/2 -translate-x-1/2 select-none pointer-events-none leading-none">
-                {number}
-              </div>
-              <div className="relative z-10">
-                <div className="text-5xl mb-4">{emoji}</div>
-                <h3 className="text-lg font-black mb-3 tracking-tight">{title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-              </div>
-              {i < 2 && <span className="hidden md:block absolute top-8 -right-5 text-primary/30 text-2xl font-black">→</span>}
-            </motion.div>
-          ))}
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="bg-white border border-border rounded-2xl p-8"
-        >
-          <p className="text-center text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6">What changes after this</p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {results.map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-3 bg-primary/5 rounded-xl p-4">
-                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-primary" />
-                </div>
-                <span className="text-sm font-bold text-foreground">{label}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
       </div>
     </section>
   )
@@ -665,8 +823,7 @@ export function GymLanding() {
       <ChallengeBanner />
       <GymNav />
       <Hero />
-      <Problem />
-      <HowItWorks />
+      <ConsoleWidget />
       <ExampleSites />
       <WhatYouGet />
       <div id="pricing">
