@@ -13,7 +13,7 @@ import { LoginModal } from "@/components/login-modal"
 import {
   Monitor, Tablet, Smartphone, Sparkles, ArrowRight,
   LayoutGrid, Paintbrush, ArrowLeft, Phone, Plus, Check,
-  Dumbbell, Zap, ChevronLeft,
+  Dumbbell, Zap, ChevronLeft, Loader2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -74,9 +74,10 @@ function TemplateThumbnail({ id, active }: { id: string; active: boolean }) {
 function GymTemplateContent() {
   const params = useSearchParams()
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
   const nameFromUrl = params.get("name") || ""
   const themeParam = params.get("theme") || ""
+  const mapsUrlParam = params.get("url") || ""
   const fromOnboard = !!nameFromUrl
 
   const [business, setBusiness] = useState(() => ({
@@ -87,9 +88,18 @@ function GymTemplateContent() {
       : GYM_BUSINESS.description,
   }))
   const [config, setConfig] = useState<SiteConfig>(() => {
-    if (themeParam === "coastal") {
-      const coastalScheme = colorSchemes.find(s => s.id === "ocean") ?? colorSchemes[0]
-      return { ...GYM_CONFIG, layout: "coastal", theme: "light", colorScheme: coastalScheme }
+    if (themeParam === "retro") {
+      const retroScheme = {
+        id: "retro",
+        name: "Retro",
+        primary: "#c9a84c",
+        secondary: "#8B5E3C",
+        accent: "#e8d5a3",
+        background: "#FBF6EE",
+        text: "#2C1A0E",
+        muted: "#9C8B7A",
+      }
+      return { ...GYM_CONFIG, layout: "retro", theme: "light", colorScheme: retroScheme }
     }
     return GYM_CONFIG
   })
@@ -97,11 +107,53 @@ function GymTemplateContent() {
   const [rightTab, setRightTab] = useState<"design" | "content">(fromOnboard ? "content" : "design")
   const [mobileTab, setMobileTab] = useState<"preview" | "design" | "content">("preview")
   const [loginOpen, setLoginOpen] = useState(false)
+  const [redirecting, setRedirecting] = useState(false)
 
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const iframeHeight = device === "mobile" ? 812 : device === "tablet" ? 1024 : 900
+  const hasRedirected = useRef(false)
+  const wasUnauthenticated = useRef(false)
 
   useEffect(() => { track("website_editor_viewed", { fromOnboard, gymName: nameFromUrl }) }, [])
+
+  // Track that the user started unauthenticated (so we don't redirect already-logged-in users)
+  useEffect(() => {
+    if (sessionStatus === "unauthenticated") wasUnauthenticated.current = true
+  }, [sessionStatus])
+
+  // On login: create site and go to my-sites
+  useEffect(() => {
+    if (sessionStatus !== "authenticated" || !session || !wasUnauthenticated.current || hasRedirected.current) return
+    hasRedirected.current = true
+    setRedirecting(true)
+
+    if (mapsUrlParam) {
+      fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: mapsUrlParam }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.jobId) {
+            localStorage.setItem("challenge_start_time", Date.now().toString())
+            localStorage.setItem("challenge_site_id", data.jobId)
+          }
+          router.push("/my-sites")
+        })
+        .catch(() => router.push("/my-sites"))
+    } else if (nameFromUrl) {
+      fetch("/api/sites/create-template", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gymName: nameFromUrl }),
+      })
+        .then(() => router.push("/my-sites"))
+        .catch(() => router.push("/my-sites"))
+    } else {
+      router.push("/my-sites")
+    }
+  }, [sessionStatus, session, mapsUrlParam, nameFromUrl, router])
 
   useEffect(() => {
     iframeRef.current?.contentWindow?.postMessage(
@@ -134,6 +186,17 @@ function GymTemplateContent() {
   return (
     <>
       <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
+
+      {/* Redirect loading overlay */}
+      {redirecting && (
+        <div className="fixed inset-0 z-[200] bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          <p className="text-sm font-bold text-foreground">
+            {mapsUrlParam ? "Pulling real photos & reviews…" : "Setting up your website…"}
+          </p>
+          <p className="text-xs text-muted-foreground">Taking you to your sites</p>
+        </div>
+      )}
 
       {/* ── Mobile Builder ─────────────────────────────────────────── */}
       <div className="md:hidden flex flex-col h-screen bg-white text-gray-900 overflow-hidden">

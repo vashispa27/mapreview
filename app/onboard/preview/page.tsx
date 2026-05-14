@@ -591,7 +591,7 @@ function OnboardPreview() {
               <Globe className="w-4 h-4 shrink-0" />
               <span>🎉 <span className="font-black">{gymName}</span>&apos;s free website is ready!</span>
             </div>
-            <Link href={`/gyms/template?name=${encodeURIComponent(gymName)}&theme=coastal`}
+            <Link href={`/gyms/template?name=${encodeURIComponent(gymName)}&theme=retro${mapsUrl ? `&url=${encodeURIComponent(mapsUrl)}` : ""}`}
               onClick={() => track("onboard_edit_website_clicked", { gymName })}
               className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 border border-white/30 rounded-lg px-3 py-1.5 text-xs font-black transition-colors shrink-0">
               ✏️ Edit Your Website
