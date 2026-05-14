@@ -168,7 +168,7 @@ function MySitesContent() {
             </Button>
           ) : (
             <Button asChild>
-              <Link href="/">
+              <Link href="/onboard">
                 <Plus className="w-4 h-4 mr-2" />
                 Create New Site
               </Link>
@@ -234,7 +234,7 @@ function MySitesContent() {
               </Button>
             ) : (
               <Button asChild>
-                <Link href="/">
+                <Link href="/onboard">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Your First Site
                 </Link>

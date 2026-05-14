@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MapPin, Search, ArrowRight, Loader2, CheckCircle } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -15,6 +16,7 @@ interface SearchResult {
 function OnboardStep1() {
   const router = useRouter()
   const params = useSearchParams()
+  const { data: session } = useSession()
   const initialName = params.get("name") || ""
 
   const [gymName, setGymName] = useState(initialName)
@@ -24,6 +26,7 @@ function OnboardStep1() {
   const [showDropdown, setShowDropdown] = useState(false)
   const [selectedPlace, setSelectedPlace] = useState<SearchResult | null>(null)
   const [isNavigating, setIsNavigating] = useState(false)
+  const [apiError, setApiError] = useState("")
 
   const mapsRef = useRef<HTMLDivElement>(null)
   const clientCache = useRef(new Map<string, SearchResult[]>())
@@ -73,6 +76,7 @@ function OnboardStep1() {
     setGymName(place.name)
     setMapsQuery(place.name)
     setShowDropdown(false)
+    setApiError("")
     track("onboard_maps_place_selected", { placeName: place.name })
     try {
       await fetch("/api/onboarding/lead", {
@@ -80,12 +84,16 @@ function OnboardStep1() {
         body: JSON.stringify({ gymName: place.name, mapsUrl: place.url, step: "maps_selected" }),
       })
     } catch { /* non-blocking */ }
-    go(`/onboard/preview?name=${encodeURIComponent(place.name)}&url=${encodeURIComponent(place.url)}`)
+    // Logged-in users stay on this page to confirm — not-logged-in go straight to preview
+    if (!session) {
+      go(`/onboard/preview?name=${encodeURIComponent(place.name)}&url=${encodeURIComponent(place.url)}`)
+    }
   }
 
   const handleContinue = async () => {
     const name = gymName.trim()
     if (!name) return
+    setApiError("")
     const step = selectedPlace ? "maps_selected" : "maps_skipped"
     track("onboard_continued", { gymName: name, usedMaps: step === "maps_selected" })
     try {
@@ -94,6 +102,39 @@ function OnboardStep1() {
         body: JSON.stringify({ gymName: name, mapsUrl: selectedPlace?.url || null, step }),
       })
     } catch { /* non-blocking */ }
+
+    if (session) {
+      setIsNavigating(true)
+      try {
+        if (selectedPlace?.url) {
+          const res = await fetch("/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: selectedPlace.url }),
+          })
+          const data = await res.json()
+          if (data.error) { setApiError(data.error); setIsNavigating(false); return }
+          if (data.jobId) {
+            localStorage.setItem("challenge_start_time", Date.now().toString())
+            localStorage.setItem("challenge_site_id", data.jobId)
+          }
+        } else {
+          const res = await fetch("/api/sites/create-template", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ gymName: name }),
+          })
+          const data = await res.json()
+          if (data.error) { setApiError(data.error); setIsNavigating(false); return }
+        }
+        router.push("/my-sites")
+      } catch {
+        setApiError("Something went wrong. Please try again.")
+        setIsNavigating(false)
+      }
+      return
+    }
+
     const url = selectedPlace
       ? `/onboard/preview?name=${encodeURIComponent(name)}&url=${encodeURIComponent(selectedPlace.url)}`
       : `/onboard/preview?name=${encodeURIComponent(name)}`
@@ -239,14 +280,15 @@ function OnboardStep1() {
             </div>
 
             {/* Continue button */}
+            {apiError && <p className="text-destructive text-sm">{apiError}</p>}
             <Button
               onClick={handleContinue}
               disabled={!gymName.trim() || isNavigating}
               className="w-full h-12 font-bold text-sm mt-2"
             >
               {isNavigating
-                ? <><Loader2 className="mr-2 w-4 h-4 animate-spin" />Loading…</>
-                : <>Continue <ArrowRight className="ml-2 w-4 h-4" /></>}
+                ? <><Loader2 className="mr-2 w-4 h-4 animate-spin" />{selectedPlace?.url && session ? "Creating Website…" : "Loading…"}</>
+                : session ? <>Set Up My Gym <ArrowRight className="ml-2 w-4 h-4" /></> : <>Continue <ArrowRight className="ml-2 w-4 h-4" /></>}
             </Button>
 
           </div>
