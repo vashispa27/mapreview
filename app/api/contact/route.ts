@@ -25,19 +25,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, reason: "site_not_found" }, { status: 404 })
     }
 
-    const ownerEmail = site.user?.email
-    if (!ownerEmail) {
-      console.warn("[Contact Form] Owner email is null for siteId:", site.id)
-      return NextResponse.json({ ok: false, reason: "no_owner_email" }, { status: 500 })
-    }
+    // Save lead to database so it appears in the gym console
+    await db.gymLead.create({
+      data: {
+        siteId: site.id,
+        name: name || "Anonymous",
+        phone: phone || "",
+        email: email || null,
+        message: service ? `[${service}] ${message || ""}`.trim() : (message || null),
+        source: "Website",
+        status: "new",
+      },
+    }).catch(err => console.error("[Contact Form] Failed to save lead:", err))
 
-    await sendInquiryEmail(ownerEmail, businessName || "your business", {
-      name: name || "Anonymous",
-      email: email || "",
-      phone,
-      service,
-      message: message || "",
-    })
+    const ownerEmail = site.user?.email
+    if (ownerEmail) {
+      await sendInquiryEmail(ownerEmail, businessName || "your business", {
+        name: name || "Anonymous",
+        email: email || "",
+        phone,
+        service,
+        message: message || "",
+      }).catch(err => console.error("[Contact Form] Failed to send email:", err))
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err) {
