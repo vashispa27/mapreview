@@ -2,24 +2,27 @@ import { Metadata } from "next"
 import { GymLanding } from "./content"
 
 export const metadata: Metadata = {
-  title: "Turn Your Gym's Google Visitors into Paying Members | MapToSite Fitness",
+  title: "Automated Gym Management System + Website | MapToSite Fitness",
   description:
-    "Most gyms get views on Google but don't convert them. MapToSite builds a professional gym website from your Google Maps listing in 60 seconds — with WhatsApp enquiries, member management, and automated renewal reminders.",
+    "Automated fitness management system for gyms in India. Auto renewal reminders, GST billing, lead tracking & a gym website — all live in 60 seconds from your Google Maps listing.",
   keywords: [
-    "gym website builder India",
-    "gym website from Google Maps",
-    "gym member management software",
-    "gym WhatsApp enquiry system",
-    "gym lead tracking",
+    "automated fitness management system",
+    "automated gym management system",
+    "gym management software India",
+    "gym management system",
     "gym software India",
+    "gym member management software",
+    "automated renewal reminders gym",
+    "gym website builder India",
+    "gym lead tracking",
   ].join(", "),
   alternates: {
     canonical: "https://maptosite.app/gyms",
   },
   openGraph: {
-    title: "Turn Your Gym's Google Visitors into Paying Members",
+    title: "Automated Gym Management System + Website in 60 Seconds",
     description:
-      "MapToSite builds a professional gym website from your Google Maps listing in 60 seconds — with WhatsApp enquiries, member management, and automated renewal reminders.",
+      "Automated fitness management system for gyms — renewal reminders, GST billing, lead tracking & gym website. Live in 60 seconds from your Google Maps listing.",
     url: "https://maptosite.app/gyms",
     siteName: "MapToSite Fitness",
     type: "website",

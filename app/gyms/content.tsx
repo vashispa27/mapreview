@@ -179,8 +179,8 @@ function Hero() {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
               className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-[1.1] tracking-tight mb-5"
             >
-              Gym Management Software{" "}
-              <span className="text-primary">+ Website</span>
+              Automated Gym Management{" "}
+              <span className="text-primary">System + Website</span>
               {" "}— Live in 60 Seconds
             </motion.h1>
 
@@ -188,8 +188,8 @@ function Hero() {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
               className="text-base md:text-lg text-muted-foreground mb-8 leading-relaxed"
             >
-              Manage members, payment reminders, GST filing &amp; leads — all from one dashboard.{" "}
-              <span className="font-black text-foreground">Gym website included.</span> Ditch the spreadsheets. No tech knowledge needed.
+              Automated renewal reminders, GST billing, lead tracking &amp; member management — all from one dashboard.{" "}
+              <span className="font-black text-foreground">Free gym website included.</span> No spreadsheets. No tech knowledge needed.
             </motion.p>
 
           </motion.div>
