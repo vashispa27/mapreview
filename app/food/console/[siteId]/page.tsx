@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import {
-  UtensilsCrossed, Loader2, ChevronLeft, Globe, MessageSquare,
+  UtensilsCrossed, Loader2, ChevronLeft, MessageSquare,
   PhoneCall, CheckCheck, Inbox, CalendarCheck, Clock, CheckCircle,
   XCircle, Users, Plus, X, ExternalLink,
 } from "lucide-react"
@@ -123,7 +123,7 @@ function RestaurantConsole() {
   const [siteName, setSiteName] = useState("")
   const [siteSlug, setSiteSlug] = useState("")
   const [leads, setLeads] = useState<Lead[]>([])
-  const [bookings] = useState<Booking[]>([]) // real bookings coming soon
+  const [bookings, setBookings] = useState<Booking[]>([])
   const [activeTab, setActiveTab] = useState<Tab>("leads")
   const [loading, setLoading] = useState(true)
   const [showAddLead, setShowAddLead] = useState(false)
@@ -138,9 +138,10 @@ function RestaurantConsole() {
 
     const load = async () => {
       try {
-        const [siteRes, leadsRes] = await Promise.all([
+        const [siteRes, leadsRes, bookingsRes] = await Promise.all([
           fetch(`/api/sites/${siteId}`),
           fetch(`/api/console/${siteId}/leads`),
+          fetch(`/api/console/${siteId}/bookings`),
         ])
         if (!siteRes.ok) { router.push("/food/sites"); return }
         const siteData = await siteRes.json()
@@ -149,6 +150,10 @@ function RestaurantConsole() {
         if (leadsRes.ok) {
           const leadsData = await leadsRes.json()
           setLeads(leadsData.leads || [])
+        }
+        if (bookingsRes.ok) {
+          const bookingsData = await bookingsRes.json()
+          setBookings(bookingsData.bookings || [])
         }
       } catch { router.push("/food/sites") }
       finally { setLoading(false) }
@@ -172,11 +177,20 @@ function RestaurantConsole() {
     }).catch(() => {})
   }
 
+  const handleBookingStatus = async (id: string, status: BookingStatus) => {
+    setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b))
+    await fetch(`/api/console/${siteId}/bookings/${id}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    }).catch(() => {})
+  }
+
   const filteredLeads = leads.filter(l =>
     !leadSearch || l.name.toLowerCase().includes(leadSearch.toLowerCase()) || l.phone.includes(leadSearch)
   )
 
   const newLeads = leads.filter(l => l.status === "new").length
+  const pendingBookings = bookings.filter(b => b.status === "pending").length
 
   if (sessionStatus === "loading" || loading) {
     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
@@ -184,7 +198,7 @@ function RestaurantConsole() {
 
   const tabs: { key: Tab; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number }[] = [
     { key: "leads", label: "Leads", icon: Inbox, badge: newLeads || undefined },
-    { key: "bookings", label: "Table Bookings", icon: CalendarCheck },
+    { key: "bookings", label: "Table Bookings", icon: CalendarCheck, badge: pendingBookings || undefined },
   ]
 
   return (
@@ -342,13 +356,6 @@ function RestaurantConsole() {
                     ))}
                   </div>
 
-                  <div className="flex items-start gap-3 rounded-xl px-4 py-3 bg-red-50 border border-red-100">
-                    <Globe className="w-4 h-4 shrink-0 mt-0.5" style={{ color: ACCENT }} />
-                    <p className="text-xs leading-relaxed" style={{ color: ACCENT }}>
-                      <span className="font-bold">Table bookings from your website appear here automatically.</span> Add a booking form to your site from the editor.
-                    </p>
-                  </div>
-
                   {bookings.length === 0 ? (
                     <div className="text-center py-12 text-muted-foreground">
                       <CalendarCheck className="w-10 h-10 mx-auto mb-3 opacity-30" />
@@ -373,7 +380,7 @@ function RestaurantConsole() {
                               {booking.notes && <p className="text-xs text-foreground/70 mt-1 italic">&ldquo;{booking.notes}&rdquo;</p>}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-2 shrink-0 flex-wrap">
                             <a href={`https://wa.me/91${booking.phone}`} target="_blank" rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-[#25D366]/10 text-[#25D366] text-xs font-semibold hover:bg-[#25D366]/20 transition-colors">
                               <MessageSquare className="w-3.5 h-3.5" />WhatsApp
@@ -382,6 +389,19 @@ function RestaurantConsole() {
                               className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-blue-50 text-blue-600 text-xs font-semibold hover:bg-blue-100 transition-colors">
                               <PhoneCall className="w-3.5 h-3.5" />Call
                             </a>
+                            {booking.status === "pending" && (
+                              <button onClick={() => handleBookingStatus(booking.id, "confirmed")}
+                                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                                style={{ background: ACCENT }}>
+                                <CheckCircle className="w-3.5 h-3.5" />Confirm
+                              </button>
+                            )}
+                            {booking.status !== "cancelled" && (
+                              <button onClick={() => handleBookingStatus(booking.id, "cancelled")}
+                                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border text-xs font-semibold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
+                                <XCircle className="w-3.5 h-3.5" />Cancel
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}

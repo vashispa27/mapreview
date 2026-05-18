@@ -116,7 +116,8 @@ model Site {
   gymPayments  GymPayment[]
   workoutPlans GymWorkoutPlan[]
   dietPlans    GymDietPlan[]
-  gymLeads     GymLead[]
+  gymLeads            GymLead[]
+  restaurantBookings  RestaurantBooking[]
 }
 
 model GymMember {
@@ -272,6 +273,25 @@ model GymLead {
 
   enquiryDate DateTime @default(now())
   createdAt   DateTime @default(now())
+
+  @@index([siteId])
+  @@index([createdAt])
+}
+
+model RestaurantBooking {
+  id     String @id @default(cuid())
+  siteId String
+  site   Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  name   String
+  phone  String
+  guests Int
+  date   String
+  time   String
+  notes  String?
+  status String  @default("pending") // pending | confirmed | cancelled
+
+  createdAt DateTime @default(now())
 
   @@index([siteId])
   @@index([createdAt])

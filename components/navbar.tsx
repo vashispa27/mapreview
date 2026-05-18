@@ -182,12 +182,6 @@ export function Navbar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/my-sites" className="flex items-center gap-2 cursor-pointer">
-                      <LayoutGrid className="w-4 h-4" />
-                      My Sites
-                    </Link>
-                  </DropdownMenuItem>
                   {!isAdminMode && (session?.user?.plan === "base" || session?.user?.plan === "pro") && (
                     <DropdownMenuItem
                       className="flex items-center gap-2 cursor-pointer text-muted-foreground"
@@ -281,10 +275,6 @@ export function Navbar() {
                         className="w-full"
                         asChild
                       >
-                        <Link href="/my-sites" onClick={() => setMobileMenuOpen(false)}>
-                          <LayoutGrid className="w-4 h-4 mr-2" />
-                          My Sites
-                        </Link>
                       </Button>
                       <Button 
                         variant="outline" 
