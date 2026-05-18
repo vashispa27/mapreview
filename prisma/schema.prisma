@@ -56,7 +56,7 @@ model User {
   // Payment Fields
   plan           String    @default("free") // free | base | pro
   planExpiresAt  DateTime?
-  subscriptionId String?   // DodoPayments subscription_id for cancellation
+  subscriptionId String? // DodoPayments subscription_id for cancellation
   payments       Payment[]
 
   accounts Account[]
@@ -87,20 +87,20 @@ model EmailOtp {
 }
 
 model Payment {
-  id            String   @id
-  amount        Int      // In lowest denomination
-  currency      String
-  status        String   // succeeded | failed | pending
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt     DateTime @default(now())
+  id        String   @id
+  amount    Int // In lowest denomination
+  currency  String
+  status    String // succeeded | failed | pending
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
 model Site {
-  id           String   @id  // This will be the jobId
+  id           String   @id // This will be the jobId
   userId       String
   slug         String?  @unique // Custom URL chosen by user
-  url          String           // The original Google Maps URL
+  url          String // The original Google Maps URL
   businessName String?
   status       String   @default("QUEUED") // QUEUED | COMPLETED | FAILED
   createdAt    DateTime @default(now())
@@ -108,7 +108,7 @@ model Site {
   // Store the full generated site data and config as JSON
   businessData Json?
   config       Json?
-  deleted      Boolean  @default(false)
+  deleted      Boolean @default(false)
 
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   members      GymMember[]
@@ -120,31 +120,31 @@ model Site {
 }
 
 model GymMember {
-  id               String   @id @default(cuid())
-  siteId           String
-  site             Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  siteId String
+  site   Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
-  name             String
-  email            String?
-  phone            String
+  name  String
+  email String?
+  phone String
 
   membershipPlanId String
   membershipTitle  String
   membershipPrice  String
-  durationMonths   Int      @default(1)
-  pricePerMonth    Int      @default(0)
+  durationMonths   Int    @default(1)
+  pricePerMonth    Int    @default(0)
 
-  startDate        DateTime
-  endDate          DateTime
-  status           String   @default("active") // active | expired
+  startDate DateTime
+  endDate   DateTime
+  status    String   @default("active") // active | expired
 
   // Notification flags — reset on each renewal
-  notifiedEnroll   Boolean  @default(false)
-  notified7Days    Boolean  @default(false)
-  notified1Day     Boolean  @default(false)
-  notifiedExpired  Boolean  @default(false)
+  notifiedEnroll  Boolean @default(false)
+  notified7Days   Boolean @default(false)
+  notified1Day    Boolean @default(false)
+  notifiedExpired Boolean @default(false)
 
-  createdAt        DateTime @default(now())
+  createdAt DateTime @default(now())
 
   assignedPlanId     String?
   assignedPlan       GymWorkoutPlan? @relation(fields: [assignedPlanId], references: [id], onDelete: SetNull)
@@ -191,51 +191,55 @@ model GymDietPlan {
 }
 
 model GymSettings {
-  id             String   @id @default(cuid())
-  siteId         String   @unique
-  site           Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  siteId String @unique
+  site   Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   gstin          String?
   businessName   String?
   address        String?
   state          String?
-  isComposition  Boolean  @default(false)
-  invoicePrefix  String   @default("INV")
-  invoiceCounter Int      @default(0)
+  isComposition  Boolean @default(false)
+  invoicePrefix  String  @default("INV")
+  invoiceCounter Int     @default(0)
   currentFY      String?
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model OnboardingLead {
-  id         String   @id @default(cuid())
-  gymName    String
-  mapsUrl    String?
-  step       String   // hero | maps_selected | maps_skipped | preview_viewed | login_prompted | login_success
-  sessionId  String?
-  userId     String?
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  gymName   String
+  mapsUrl   String?
+  step      String // hero | maps_selected | maps_skipped | preview_viewed | login_prompted | login_success | phone_entered | email_entered
+  phone     String?
+  email     String?
+  sessionId String?
+  userId    String?
+  createdAt DateTime @default(now())
 
   @@index([gymName])
+  @@index([phone])
+  @@index([email])
   @@index([createdAt])
 }
 
 model GymPayment {
-  id            String    @id @default(cuid())
-  siteId        String
-  site          Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  memberId      String
-  member        GymMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  id       String    @id @default(cuid())
+  siteId   String
+  site     Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  memberId String
+  member   GymMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   invoiceNumber String
-  invoiceDate   DateTime  @default(now())
+  invoiceDate   DateTime @default(now())
   financialYear String
 
-  memberName    String
-  memberPhone   String
-  memberEmail   String?
-  planTitle     String
+  memberName     String
+  memberPhone    String
+  memberEmail    String?
+  planTitle      String
   durationMonths Int
 
   taxableAmount Float
@@ -243,11 +247,11 @@ model GymPayment {
   sgst          Float
   igst          Float
   totalAmount   Float
-  isInterstate  Boolean  @default(false)
+  isInterstate  Boolean @default(false)
 
-  type          String   @default("enrollment") // enrollment | renewal
+  type String @default("enrollment") // enrollment | renewal
 
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([siteId])
   @@index([financialYear])
@@ -255,16 +259,16 @@ model GymPayment {
 }
 
 model GymLead {
-  id          String   @id @default(cuid())
-  siteId      String
-  site        Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  siteId String
+  site   Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
-  name        String
-  phone       String
-  email       String?
-  message     String?
-  source      String   @default("Website") // Website | WhatsApp | Walk-in | Referral
-  status      String   @default("new")     // new | contacted | converted
+  name    String
+  phone   String
+  email   String?
+  message String?
+  source  String  @default("Website") // Website | WhatsApp | Walk-in | Referral
+  status  String  @default("new") // new | contacted | converted
 
   enquiryDate DateTime @default(now())
   createdAt   DateTime @default(now())

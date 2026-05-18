@@ -90,8 +90,13 @@ function RestaurantNav() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/my-sites" className="flex items-center gap-2 cursor-pointer">
-                      <LayoutGrid className="w-4 h-4" /> My Sites
+                    <Link href="/gym/sites" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutGrid className="w-4 h-4" /> Gym Sites
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/food/sites" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutGrid className="w-4 h-4" /> Food Sites
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -126,7 +131,10 @@ function RestaurantNav() {
                 {session ? (
                   <>
                     <Button variant="outline" size="sm" className="w-full justify-start gap-2" asChild>
-                      <Link href="/my-sites" onClick={() => setMobileOpen(false)}><LayoutGrid className="w-4 h-4" /> My Sites</Link>
+                      <Link href="/gym/sites" onClick={() => setMobileOpen(false)}><LayoutGrid className="w-4 h-4" /> Gym Sites</Link>
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full justify-start gap-2" asChild>
+                      <Link href="/food/sites" onClick={() => setMobileOpen(false)}><LayoutGrid className="w-4 h-4" /> Food Sites</Link>
                     </Button>
                     <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-destructive" onClick={() => signOut()}>
                       <LogOut className="w-4 h-4" /> Sign out

@@ -66,12 +66,6 @@ function RestaurantNav() {
           {/* Desktop right */}
           <div className="hidden md:flex items-center gap-3">
             <a href="#examples" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">Examples</a>
-            <a
-              href="#pricing"
-              className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Pricing
-            </a>
             {status === "loading" ? (
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
             ) : session ? (
@@ -94,8 +88,13 @@ function RestaurantNav() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/my-sites?from=food" className="flex items-center gap-2 cursor-pointer">
-                      <LayoutGrid className="w-4 h-4" /> My Sites
+                    <Link href="/gym/sites" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutGrid className="w-4 h-4" /> Gym Sites
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/food/sites" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutGrid className="w-4 h-4" /> Food Sites
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -132,13 +131,6 @@ function RestaurantNav() {
               className="md:hidden border-t border-border bg-background/95 backdrop-blur-lg px-4 py-4 flex flex-col gap-3"
             >
               <a href="#examples" className="text-sm font-semibold py-2 border-b border-border" onClick={() => setMobileOpen(false)}>Examples</a>
-              <a
-                href="#pricing"
-                className="text-sm font-semibold py-2 border-b border-border"
-                onClick={() => setMobileOpen(false)}
-              >
-                Pricing
-              </a>
               {session ? (
                 <>
                   <div className="flex items-center gap-3 pb-3 border-b border-border">
@@ -152,7 +144,10 @@ function RestaurantNav() {
                     </div>
                   </div>
                   <Button variant="outline" size="sm" className="w-full justify-start gap-2" asChild>
-                    <Link href="/my-sites?from=food" onClick={() => setMobileOpen(false)}><LayoutGrid className="w-4 h-4" /> My Sites</Link>
+                    <Link href="/gym/sites" onClick={() => setMobileOpen(false)}><LayoutGrid className="w-4 h-4" /> Gym Sites</Link>
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full justify-start gap-2" asChild>
+                    <Link href="/food/sites" onClick={() => setMobileOpen(false)}><LayoutGrid className="w-4 h-4" /> Food Sites</Link>
                   </Button>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-destructive" onClick={() => signOut()}>
                     <LogOut className="w-4 h-4" /> Sign out
@@ -376,8 +371,8 @@ function Hero() {
       const data = await res.json()
       if (!res.ok) { setError(data.error || "Failed to generate site"); return }
       window.dispatchEvent(new Event("challenge-start"))
-      toast({ title: "Site Generation Started!", description: "Your restaurant page is being built. Check your My Sites dashboard." })
-      router.push("/my-sites?from=food")
+      toast({ title: "Site Generation Started!", description: "Your restaurant page is being built. Check your Food Sites dashboard." })
+      router.push("/food/sites")
     } catch { setError("Something went wrong. Please try again.") } finally { setIsLoading(false) }
   }
 
@@ -1314,7 +1309,7 @@ export function RestaurantLanding() {
       <WhatYouGet />
       <LoyaltySpotlight />
       <HowItWorks />
-      <RestaurantPricing />
+      {/* <RestaurantPricing /> */}
       <FAQ />
       <FinalCTA />
       <Footer />

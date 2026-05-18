@@ -226,10 +226,10 @@ export default function GymConsolePage() {
     fetch(`/api/sites/${siteId}`)
       .then((r) => r.json())
       .then((data) => {
-        if (!data.businessData?.isGym) { router.push("/my-sites"); return }
+        if (!data.businessData?.isGym) { router.push("/gym/sites"); return }
         setSite(data)
       })
-      .catch(() => router.push("/my-sites"))
+      .catch(() => router.push("/gym/sites"))
   }, [session, siteId])
 
   const fetchMembers = () =>
@@ -422,8 +422,8 @@ export default function GymConsolePage() {
       <header className="border-b border-border bg-background/80 backdrop-blur-lg sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/my-sites" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
-              <ChevronLeft className="w-4 h-4" />My Sites
+            <Link href="/gym/sites" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
+              <ChevronLeft className="w-4 h-4" />Gym Sites
             </Link>
             <span className="text-muted-foreground/40">/</span>
             <div className="flex items-center gap-2">

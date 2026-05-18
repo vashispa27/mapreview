@@ -139,19 +139,19 @@ function GymTemplateContent() {
             localStorage.setItem("challenge_start_time", Date.now().toString())
             localStorage.setItem("challenge_site_id", data.jobId)
           }
-          router.push("/my-sites")
+          router.push("/gym/sites")
         })
-        .catch(() => router.push("/my-sites"))
+        .catch(() => router.push("/gym/sites"))
     } else if (nameFromUrl) {
       fetch("/api/sites/create-template", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gymName: nameFromUrl }),
       })
-        .then(() => router.push("/my-sites"))
-        .catch(() => router.push("/my-sites"))
+        .then(() => router.push("/gym/sites"))
+        .catch(() => router.push("/gym/sites"))
     } else {
-      router.push("/my-sites")
+      router.push("/gym/sites")
     }
   }, [sessionStatus, session, mapsUrlParam, nameFromUrl, router])
 

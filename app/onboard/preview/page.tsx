@@ -140,11 +140,22 @@ function emptyDietPlan(): DietPlan {
 
 // ─── Add Member Modal ─────────────────────────────────────────────────────────
 
-function AddMemberModal({ open, onClose, onAdd }: { open: boolean; onClose: () => void; onAdd: (m: Member) => void }) {
+function AddMemberModal({ open, onClose, onAdd, gymName, mapsUrl }: { open: boolean; onClose: () => void; onAdd: (m: Member) => void; gymName: string; mapsUrl: string }) {
   const [name, setName] = useState(""); const [phone, setPhone] = useState(""); const [planIdx, setPlanIdx] = useState(0)
   const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [submitting, setSubmitting] = useState(false)
-  const reset = () => { setName(""); setPhone(""); setPlanIdx(0); setStartDate(new Date().toISOString().slice(0, 10)) }
+  const phoneSaved = useRef(false)
+  const reset = () => { setName(""); setPhone(""); setPlanIdx(0); setStartDate(new Date().toISOString().slice(0, 10)); phoneSaved.current = false }
+
+  useEffect(() => {
+    const digits = phone.replace(/\D/g, "")
+    if (digits.length < 10 || phoneSaved.current) return
+    phoneSaved.current = true
+    fetch("/api/onboarding/lead", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gymName, mapsUrl: mapsUrl || null, step: "phone_entered", phone: digits }),
+    }).catch(() => {})
+  }, [phone, gymName, mapsUrl])
   const handleAdd = () => {
     if (!name.trim() || !phone.trim()) return
     setSubmitting(true)
@@ -536,17 +547,17 @@ function OnboardPreview() {
               localStorage.setItem("challenge_start_time", Date.now().toString())
               localStorage.setItem("challenge_site_id", data.jobId)
             }
-            router.push("/my-sites")
+            router.push("/gym/sites")
           })
-          .catch(() => router.push("/my-sites"))
+          .catch(() => router.push("/gym/sites"))
       } else {
         fetch("/api/sites/create-template", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ gymName }),
         })
-          .then(() => router.push("/my-sites"))
-          .catch(() => router.push("/my-sites"))
+          .then(() => router.push("/gym/sites"))
+          .catch(() => router.push("/gym/sites"))
       }
     }
   }, [session, sessionStatus, gymName, mapsUrl, router])
@@ -578,7 +589,7 @@ function OnboardPreview() {
   return (
     <>
       <LoginModal open={loginModalOpen} onOpenChange={setLoginModalOpen} />
-      {showAddMember && <AddMemberModal open onClose={() => setShowAddMember(false)} onAdd={handleAddMember} />}
+      {showAddMember && <AddMemberModal open onClose={() => setShowAddMember(false)} onAdd={handleAddMember} gymName={gymName} mapsUrl={mapsUrl} />}
       {editingPlan && <WorkoutPlanEditor plan={editingPlan} onSave={p => { setWorkoutPlans(prev => prev.some(x => x.id === p.id) ? prev.map(x => x.id === p.id ? p : x) : [...prev, p]); setEditingPlan(null) }} onClose={() => setEditingPlan(null)} />}
       {editingDietPlan && <DietPlanEditor plan={editingDietPlan} onSave={p => { setDietPlans(prev => prev.some(x => x.id === p.id) ? prev.map(x => x.id === p.id ? p : x) : [...prev, p]); setEditingDietPlan(null) }} onClose={() => setEditingDietPlan(null)} />}
 

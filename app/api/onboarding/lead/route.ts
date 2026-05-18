@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth"
 
 export async function POST(req: NextRequest) {
   try {
-    const { gymName, mapsUrl, step, sessionId } = await req.json()
+    const { gymName, mapsUrl, step, sessionId, phone, email } = await req.json()
 
     if (!gymName || !step) {
       return NextResponse.json({ error: "gymName and step are required" }, { status: 400 })
@@ -17,6 +17,8 @@ export async function POST(req: NextRequest) {
         gymName: gymName.trim().slice(0, 200),
         mapsUrl: mapsUrl || null,
         step,
+        phone: phone?.trim().slice(0, 20) || null,
+        email: email?.trim().toLowerCase().slice(0, 200) || null,
         sessionId: sessionId || null,
         userId: session?.user?.id || null,
       },

@@ -98,6 +98,7 @@ function RestaurantPreview() {
   const [bannerDismissed, setBannerDismissed] = useState(false)
   const hasRedirected = useRef(false)
   const hasTracked = useRef(false)
+  const wasUnauthenticated = useRef(false)
 
   useEffect(() => {
     if (hasTracked.current) return; hasTracked.current = true
@@ -113,34 +114,39 @@ function RestaurantPreview() {
     if (tabClicks >= 2 && !bannerDismissed) setShowLoginBanner(true)
   }, [tabClicks, bannerDismissed])
 
+  // Track when the page is first visited unauthenticated
   useEffect(() => {
-    if (session && !hasRedirected.current && sessionStatus === "authenticated") {
-      hasRedirected.current = true
-      track("restaurant_authenticated", { restaurantName })
-      if (mapsUrl) {
-        fetch("/api/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: mapsUrl }),
+    if (sessionStatus === "unauthenticated") wasUnauthenticated.current = true
+  }, [sessionStatus])
+
+  // Only redirect if the user actually logged in during this visit (not already logged in)
+  useEffect(() => {
+    if (sessionStatus !== "authenticated" || !session || !wasUnauthenticated.current || hasRedirected.current) return
+    hasRedirected.current = true
+    track("restaurant_authenticated", { restaurantName })
+    if (mapsUrl) {
+      fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: mapsUrl }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.jobId) {
+            localStorage.setItem("challenge_start_time", Date.now().toString())
+            localStorage.setItem("challenge_site_id", data.jobId)
+          }
+          router.push("/food/sites")
         })
-          .then(r => r.json())
-          .then(data => {
-            if (data.jobId) {
-              localStorage.setItem("challenge_start_time", Date.now().toString())
-              localStorage.setItem("challenge_site_id", data.jobId)
-            }
-            router.push("/my-sites?from=restaurants")
-          })
-          .catch(() => router.push("/my-sites?from=restaurants"))
-      } else {
-        fetch("/api/sites/create-template", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ gymName: restaurantName }),
-        })
-          .then(() => router.push("/my-sites?from=restaurants"))
-          .catch(() => router.push("/my-sites?from=restaurants"))
-      }
+        .catch(() => router.push("/food/sites"))
+    } else {
+      fetch("/api/sites/create-template", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gymName: restaurantName }),
+      })
+        .then(() => router.push("/food/sites"))
+        .catch(() => router.push("/food/sites"))
     }
   }, [session, sessionStatus, restaurantName, mapsUrl, router])
 

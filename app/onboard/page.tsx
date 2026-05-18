@@ -125,7 +125,7 @@ function OnboardStep1() {
           const data = await res.json()
           if (data.error) { setApiError(data.error); setIsNavigating(false); return }
         }
-        router.push("/my-sites")
+        router.push("/gym/sites")
       } catch {
         setApiError("Something went wrong. Please try again.")
         setIsNavigating(false)

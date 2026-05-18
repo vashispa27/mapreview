@@ -133,8 +133,8 @@ function TryPageInner() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: gymUrl }),
     })
-      .then(() => router.push("/my-sites"))
-      .catch(() => router.push("/my-sites"))
+      .then(() => router.push("/gym/sites"))
+      .catch(() => router.push("/gym/sites"))
   }, [session, status, gymUrl, router])
 
   // Generating state after login
