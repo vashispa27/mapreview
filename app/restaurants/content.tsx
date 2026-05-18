@@ -42,8 +42,8 @@ function RestaurantNav() {
   const links = [
     { label: "Home", href: "#" },
     { label: "Features", href: "#features" },
-    { label: "Pricing", href: "#pricing" },
     { label: "Examples", href: "#examples" },
+    { label: "Pricing", href: "#pricing" },
     { label: "Blog", href: "/blog" },
   ]
 

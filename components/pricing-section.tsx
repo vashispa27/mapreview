@@ -67,7 +67,6 @@ export function PricingSection() {
       priceSuffix: "/month",
       badge: null,
       features: [
-        "Up to 10 websites",
         "Full website from Google Maps in 60 seconds",
         "Ecommerce — cart, products & services",
         "Automatic sync of reviews & photos",

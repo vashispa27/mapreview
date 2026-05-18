@@ -66,6 +66,7 @@ function RestaurantNav() {
           {/* Desktop right */}
           <div className="hidden md:flex items-center gap-3">
             <a href="#examples" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">Examples</a>
+            <a href="#pricing" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
             {status === "loading" ? (
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
             ) : session ? (
@@ -131,6 +132,7 @@ function RestaurantNav() {
               className="md:hidden border-t border-border bg-background/95 backdrop-blur-lg px-4 py-4 flex flex-col gap-3"
             >
               <a href="#examples" className="text-sm font-semibold py-2 border-b border-border" onClick={() => setMobileOpen(false)}>Examples</a>
+              <a href="#pricing" className="text-sm font-semibold py-2 border-b border-border" onClick={() => setMobileOpen(false)}>Pricing</a>
               {session ? (
                 <>
                   <div className="flex items-center gap-3 pb-3 border-b border-border">
@@ -1309,7 +1311,7 @@ export function RestaurantLanding() {
       <WhatYouGet />
       <LoyaltySpotlight />
       <HowItWorks />
-      {/* <RestaurantPricing /> */}
+      <RestaurantPricing />
       <FAQ />
       <FinalCTA />
       <Footer />

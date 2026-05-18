@@ -98,7 +98,6 @@ export function PurchaseModal({ open, onClose, isFood = false }: PurchaseModalPr
       popular: true,
       features: [
         "Everything in Base",
-        "Up to 10 websites",
         "Gym member management console",
         "Diet & workout planner",
         "GST billing & invoices",

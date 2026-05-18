@@ -703,9 +703,9 @@ export function GymLanding() {
       <ConsoleWidget />
       <ExampleSites />
       <WhatYouGet />
-      {/* <div id="pricing">
+      <div id="pricing">
         <PricingSection />
-      </div> */}
+      </div>
       <Urgency />
       <FAQ />
       <FinalCTA />
