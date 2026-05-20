@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+/* Override both base vars AND Tailwind's --color-* token layer */
+.whoami-root {
+  /* Base variables */
+  --background: oklch(1.0000 0 0);
+  --foreground: oklch(0 0 0);
+  --card: oklch(1.0000 0 0);
+  --card-foreground: oklch(0 0 0);
+  --popover: oklch(1.0000 0 0);
+  --popover-foreground: oklch(0 0 0);
+  --primary: oklch(0.6489 0.2370 26.9728);
+  --primary-foreground: oklch(1.0000 0 0);
+  --secondary: oklch(0.9680 0.2110 109.7692);
+  --secondary-foreground: oklch(0 0 0);
+  --muted: oklch(0.9551 0 0);
+  --muted-foreground: oklch(0.3211 0 0);
+  --accent: oklch(0.5635 0.2408 260.8178);
+  --accent-foreground: oklch(1.0000 0 0);
+  --destructive: oklch(0 0 0);
+  --destructive-foreground: oklch(1.0000 0 0);
+  --border: oklch(0 0 0);
+  --input: oklch(0 0 0);
+  --ring: oklch(0.6489 0.2370 26.9728);
+  --radius: 0px;
+
+  /* Tailwind v4 --color-* token layer (overrides @theme inline on :root) */
+  --color-background: oklch(1.0000 0 0);
+  --color-foreground: oklch(0 0 0);
+  --color-card: oklch(1.0000 0 0);
+  --color-card-foreground: oklch(0 0 0);
+  --color-popover: oklch(1.0000 0 0);
+  --color-popover-foreground: oklch(0 0 0);
+  --color-primary: oklch(0.6489 0.2370 26.9728);
+  --color-primary-foreground: oklch(1.0000 0 0);
+  --color-secondary: oklch(0.9680 0.2110 109.7692);
+  --color-secondary-foreground: oklch(0 0 0);
+  --color-muted: oklch(0.9551 0 0);
+  --color-muted-foreground: oklch(0.3211 0 0);
+  --color-accent: oklch(0.5635 0.2408 260.8178);
+  --color-accent-foreground: oklch(1.0000 0 0);
+  --color-destructive: oklch(0 0 0);
+  --color-destructive-foreground: oklch(1.0000 0 0);
+  --color-border: oklch(0 0 0);
+  --color-input: oklch(0 0 0);
+  --color-ring: oklch(0.6489 0.2370 26.9728);
+
+  /* Shadow tokens */
+  --shadow-color: hsl(0 0% 0%);
+  --shadow-2xs: 4px 4px 0px 0px hsl(0 0% 0% / 0.50);
+  --shadow-xs:  4px 4px 0px 0px hsl(0 0% 0% / 0.50);
+  --shadow-sm:  4px 4px 0px 0px hsl(0 0% 0% / 1.00);
+  --shadow:     4px 4px 0px 0px hsl(0 0% 0% / 1.00);
+  --shadow-md:  4px 4px 0px 0px hsl(0 0% 0% / 1.00), 4px 2px 4px -1px hsl(0 0% 0% / 1.00);
+  --shadow-lg:  4px 4px 0px 0px hsl(0 0% 0% / 1.00), 4px 4px 6px -1px hsl(0 0% 0% / 1.00);
+  --shadow-xl:  4px 4px 0px 0px hsl(0 0% 0% / 1.00), 4px 8px 10px -1px hsl(0 0% 0% / 1.00);
+  --shadow-2xl: 4px 4px 0px 0px hsl(0 0% 0% / 2.50);
+
+  /* Direct properties */
+  background-color: oklch(1.0000 0 0);
+  color: oklch(0 0 0);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+/* Neubrutalist — zero radius everywhere */
+.whoami-root,
+.whoami-root * {
+  border-radius: 0 !important;
+}
+
+/* Mono for code-style labels */
+.whoami-root .font-mono,
+.whoami-root [data-mono] {
+  font-family: 'Space Mono', monospace;
+}
