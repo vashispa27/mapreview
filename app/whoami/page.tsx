@@ -52,7 +52,7 @@ const chapters = [
       "Joined Amazon Now — built infra that runs Amazon's delivery systems. Saw firsthand how legacy internal tooling is about to be disrupted by AI.",
       "Known across teams as the 'laziest' person — I automated everything in sight.",
     ],
-    aside: "The most profitable products are the most boring and the hardest to replace.",
+    aside: "The most boring products are the most profitable and the hardest to replace.",
     tags: ["ANSYS", "Amazon", "Chip Design", "OS", "Delivery Infra"],
   },
   {
