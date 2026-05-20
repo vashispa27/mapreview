@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation"
 import { MessageCircle } from "lucide-react"
 import { track } from "@/lib/analytics"
 
-const HIDE_ROUTES = ["/site/", "/preview/", "/console/"]
+const HIDE_ROUTES = ["/site/", "/preview/", "/console/", "/whoami"]
 
 const PHONE = "917452008033"
 const MESSAGE = "Hi, I'd like to book a demo for MapToSite and get 50% off Coupon!"
