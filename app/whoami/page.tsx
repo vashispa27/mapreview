@@ -60,7 +60,7 @@ const chapters = [
     label: "What's Next",
     year: "Now → EF",
     icon: Rocket,
-    title: "Left 3 months ago. Looking for something bigger and messier.",
+    title: "Leaving amazon. Looking for something bigger and messier.",
     bullets: [
       "Left Amazon with no project lined up. Built a SaaS, got paying customers in weeks.",
       "Built something 'boring' to prove I could sell — I can.",
@@ -282,7 +282,7 @@ export default function WhoAmIPage() {
             Let&apos;s talk.
           </h2>
           <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
-            I&apos;m applying to EF. If this resonates, reach out.
+            If this resonates, reach out.
           </p>
 
           <div className="flex justify-center">
